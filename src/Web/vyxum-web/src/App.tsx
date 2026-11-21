@@ -10,6 +10,8 @@ import { SetupGate } from './shell/SetupGate';
 import { SetupProvider } from './shell/SetupProvider';
 import { Shell } from './shell/Shell';
 import { SetupWizard } from './pages/setup/SetupWizard';
+import { AboutPage } from './pages/settings/AboutPage';
+import { DevicesPage } from './pages/settings/DevicesPage';
 
 /** Strings, module list and setup status. The router is supplied by the caller (BrowserRouter or MemoryRouter). */
 export function AppProviders({ children }: { children: ReactNode }) {
@@ -69,6 +71,8 @@ function MainScreens() {
             </RequireModule>
           }
         />
+        <Route path={routes.settingsDevices} element={<DevicesPage />} />
+        <Route path={routes.settingsAbout} element={<AboutPage />} />
         <Route path="*" element={<Navigate to={routes.weighing} replace />} />
       </Routes>
     </Shell>

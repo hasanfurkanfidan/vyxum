@@ -17,4 +17,9 @@ describe('visibleNavGroups', () => {
   it('hides every group when nothing is loaded', () => {
     expect(visibleNavGroups(() => false, groups)).toEqual([]);
   });
+
+  it('always shows entries without a module', () => {
+    const settings: NavGroup[] = [{ id: 'settings', labelKey: 'setup.Settings', items: [{ labelKey: 'devices.Title', path: '/settings/devices' }] }];
+    expect(visibleNavGroups(() => false, settings).map((g) => g.id)).toEqual(['settings']);
+  });
 });
