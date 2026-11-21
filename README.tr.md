@@ -6,7 +6,7 @@ Vyxum, seri port ya da ağ üzerinden bir bilgisayara veya sunucuya bağlanan te
 
 Bu depo Vyxum'un açık çekirdeğidir ve Apache Lisansı 2.0 ile lisanslanmıştır. Ek modüller ayrıca geliştirilmektedir.
 
-> **Durum: erken geliştirme.** Depoda şu anda F0 fazının platform iskeleti bulunur: modül yükleme ve doğrulama, outbox ve inbox ile entegrasyon olayları, veritabanı sağlayıcısı seçimi ve bir sağlık uç noktası olan sunucu. Henüz tartım özellikleri yoktur.
+> **Durum: erken geliştirme.** Depoda platform (modül yükleme ve doğrulama, outbox ve inbox ile entegrasyon olayları, veritabanı sağlayıcısı seçimi), Products ve Weighing modülleri, web arayüzü ve cihaz sürücüleri bulunur. F2 fazı sürmektedir.
 
 ## Depo yapısı
 
@@ -16,6 +16,9 @@ Bu depo Vyxum'un açık çekirdeğidir ve Apache Lisansı 2.0 ile lisanslanmış
 | `src/Platform/Vyxum.Platform` | Çalışma zamanı: modül bulma ve doğrulama, yetenek kaydı, outbox dağıtıcısı, inbox, veritabanı sağlayıcısı seçimi |
 | `src/Platform/Vyxum.Platform.Testing` | Test yardımcıları: bellek içi modül sunucusu ve SQLite ile SQL Server için veritabanı hazırlayıcıları |
 | `src/Host/Vyxum.Host` | ASP.NET Core uygulaması (`/health`, `/api/hello`) |
+| `src/Modules/Products` | Products modülü: ürün kataloğu |
+| `src/Modules/Weighing` | Weighing modülü: kayıtlar, dara, tutar, iptal, dışa aktarma |
+| `src/Web/vyxum-web` | React web arayüzü; sunucunun `wwwroot` klasörüne derlenir |
 | `tests/Vyxum.Platform.Tests` | Birim testleri |
 | `tests/Vyxum.IntegrationTests` | İki veritabanı sağlayıcısında uçtan uca testler, sunucu başlatma dahil |
 | `tests/Vyxum.ArchitectureTests` | NetArchTest.Rules ile kontrol edilen mimari kurallar |
@@ -102,6 +105,82 @@ http://localhost:5000/api/devices/{id}/live bir cihazı Server-Sent Events olara
 
 `POST /api/devices/{id}/zero` teraziden sıfırlamasını ister, her istekte bir kez. Her zaman 200 ile `{ "result": "Done" | "NotSupported" | "Rejected" | "Unavailable", "detail": "..." }` döner; `detail` günlükler için İngilizce metindir ve olmayabilir. Her cihaz desteklediği komutları `supportedCommands` içinde listeler (MT-SICS için `["Zero"]`).
 
+## Modüller
+
+Products ve Weighing modülleri sunucuya dahildir. Sunucu bunları her zaman yükler ve ikisi de birbirine bağlı değildir: yalnızca entegrasyon olaylarıyla konuşurlar. Her modül kendi tablolarını aynı veritabanında tutar.
+
+| Modül | Proje | Ne yapar |
+|---|---|---|
+| Products | `src/Modules/Products/Vyxum.Modules.Products` | Ürün kataloğu: kod, ad, birim fiyat, ambalaj darası, raf ömrü, barkod öneki, içindekiler, hedef ağırlık ile alt ve üst tolerans (kg) |
+| Weighing | `src/Modules/Weighing/Vyxum.Modules.Weighing` | Tartım kayıtları: cihazdan canlı ağırlık, yazılımsal dara, net, tutar, parti, neden belirterek iptal, liste, toplamlar ve Excel dışa aktarma |
+
+Products uç noktaları (`/api/products`):
+
+- `GET /api/products?search=&includeInactive=` ürünleri listeler; `GET /api/products/{id}` tek bir ürünü döndürür.
+- `POST /api/products` ürün ekler; `PUT /api/products/{id}` günceller.
+- `POST /api/products/{id}/deactivate` ve `POST /api/products/{id}/activate` ürünün tartımda kullanılıp kullanılamayacağını belirler.
+
+Weighing uç noktaları (`/api/weighing`):
+
+- `GET /settings` ekranın kullandığı kuralları döndürür; `GET /products` ekran için ürün arar.
+- `GET /records` kayıtları `from`, `to`, `productId`, `lot` ve `includeCancelled` ile süzerek, `skip` ve `take` ile sayfalayarak listeler. `GET /records/recent` son kayıtları, `GET /records/{id}` tek bir kaydı döndürür.
+- `GET /records/export` süzülmüş kayıtları Excel (.xlsx) dosyası olarak indirir.
+- `POST /records` bir tartım kaydeder. Her istek bir `requestId` taşır; aynı kimlikle yapılan yeniden deneme ikinci kez kayıt oluşturmaz.
+- `POST /records/{id}/cancel` bir kaydı iptal eder. `RequireCancelReason` true iken neden zorunludur.
+
+Olaylar (sürüm 1):
+
+- `products.product-saved`: bir ürün kaydedildiğinde yayınlanır. Weighing ürünün kendi kopyasını tutar; bu yüzden Products'ı hiç çağırmaz.
+- `weighing.recorded`: bir kayıt kaydedildiğinde yayınlanır.
+- `weighing.cancelled`: bir kayıt iptal edildiğinde yayınlanır.
+
+Tartım kuralları yapılandırmanın `Vyxum:Weighing` bölümünden okunur:
+
+| Anahtar | Varsayılan | Anlamı |
+|---|---|---|
+| `Vyxum:Weighing:RequireStable` | `true` | Yalnızca kararlı ağırlık kaydedilebilir |
+| `Vyxum:Weighing:MinimumNet` | `0` | Kaydedilebilecek en küçük net ağırlık (kg). Net her zaman 0'dan büyük olmalıdır; 0'dan büyük bir değer ayrıca alt sınır koyar. |
+| `Vyxum:Weighing:RequireCancelReason` | `true` | İptal için neden gerekir |
+| `Vyxum:Weighing:Currency` | `TRY` | Tutarların para birimi; her kayıtta saklanır |
+| `Vyxum:Weighing:AmountDecimals` | `2` | Tutarların yuvarlanacağı ondalık basamak sayısı (0 ile 4 arası) |
+| `Vyxum:Weighing:AmountRounding` | `AwayFromZero` | Yuvarlama yöntemi; .NET `MidpointRounding` adıyla |
+
+## Web arayüzü
+
+Ekranlar `src/Web/vyxum-web` klasöründeki React, TypeScript ve Vite uygulamasıdır. Vite bunu `src/Host/Vyxum.Host/wwwroot` klasörüne derler ve sunucu bu dosyaları sunar. Müşterinin başka bir şey kurması gerekmez: Node.js yalnızca geliştiricinin bilgisayarında gereklidir.
+
+- **Derleme:** `wwwroot` yoksa `dotnet build` arayüzü de derler. Bunun için Node.js 22 gerekir. Atlamak için `-p:SkipUiBuild=true` verin; bu durumda sunucu arayüzü yalnızca `wwwroot` daha önce derlenmişse sunar, aksi halde kök adres 404 döner.
+- **Geliştirme:** bir kez `npm ci`, ardından `src/Web/vyxum-web` klasöründe `npm run dev` çalıştırın. Vite arayüzü canlı yenileme ile sunar (genellikle http://localhost:5173) ve `/api` ile `/hubs` isteklerini http://localhost:5000 adresine iletir; bu yüzden sunucuyu önce 5000 portunda başlatın.
+- **Metinler:** arayüzde düz metin yoktur. Bütün metinler `Strings.resx` ve `Strings.tr.resx` dosyalarındadır ve `/api/ui/strings` üzerinden arayüze gelir. Arayüz Türkçe ve İngilizce kullanılabilir.
+- **Çevrimdışı:** yazı tipleri `@fontsource` ile uygulamayla birlikte gelir. Arayüz internetten hiçbir şey yüklemez.
+
+## Gerçek bir terazi ile deneme
+
+Bu deneme, seri porta bağlı bir METTLER TOLEDO IND231 ile yapılır:
+
+1. Sunucuyu başlatın:
+
+   ```bash
+   dotnet run --project src/Host/Vyxum.Host --urls http://localhost:5000
+   ```
+
+2. İkinci bir terminalde agent'ı IND231 örnek ayarlarıyla başlatın:
+
+   ```bash
+   dotnet run --project src/Agent/Vyxum.Agent -- --settings appsettings.Ind231.example.json
+   ```
+
+   Örnek ayar `COM3` portunu, 9600 8N1 biçimini ve MT-SICS okuma komutu `SI` kullanır. Terazi başka bir portta ise `PortName` değerini değiştirin. `--settings` yolu, `dotnet run --project`'in başladığı agent proje klasörüne göredir.
+
+3. Tarayıcıda http://localhost:5000 adresini açın.
+
+Ekranın terazi ile çalışma biçimi:
+
+- Dara Vyxum tarafından yazılımsal olarak tutulur. **Dara al** o anki brüt ağırlığı dara olarak kaydeder. Teraziye kendi dara komutu asla gönderilmez.
+- **Sıfırla** düğmesi her basışta teraziye bir kez `Z` gönderir. Başka hiçbir komut gönderilmez.
+
+Veritabanı şeması ilk açılışta oluşturulur. Varsayılan SQLite dosyası veri klasöründeki `vyxum.db` dosyasıdır: çalışma klasöründeki `data/` (yukarıdaki komutlarla başlatırsanız `src/Host/Vyxum.Host/data/`) ya da Windows'ta `%ProgramData%\Vyxum`. Henüz şema geçişi (migration) yoktur. Geliştirme sırasında modelde bir değişiklik yaptıktan sonra sunucuyu durdurup bu dosyayı silin; varsa `vyxum.db-shm` ve `vyxum.db-wal` dosyalarını da silin. Bu işlem bütün kayıtları siler, yalnızca test verisinde kullanın.
+
 ## Yapılandırma
 
 Anahtarlar `appsettings.json`, ortam değişkenleri (örneğin `Vyxum__Database__Provider`) ya da komut satırı argümanlarından okunur.
@@ -124,8 +203,12 @@ Süre değerleri .NET `TimeSpan` biçimindedir (`hh:mm:ss` ya da `d.hh:mm:ss`).
 Mimari testlerin kontrol edebildiği kurallar bu testlerle denetlenir.
 
 - Modüller birbirini çağırmaz. Yalnızca outbox ve inbox üzerinden iletilen entegrasyon olaylarıyla konuşurlar.
-- Modüller, Vyxum derlemeleri arasından yalnızca `Vyxum.Platform.Abstractions` derlemesine başvurur. Modüller birbirine ya da sunucuya başvurmaz.
-- Platform hiçbir modülü tanımaz. Platform ve Abstractions hiçbir modül derlemesine başvurmaz.
+- Bir modül, Vyxum derlemeleri arasından yalnızca `Vyxum.Platform.Abstractions` derlemesine başvurur. Başka bir modüle, sunucuya, platform çalışma zamanına, cihazlara ya da agent'a başvurmaz.
+- Her modül tam olarak bir `ModuleDbContext` sahiplenir ve tablo adları kendi önekiyle başlar.
+- Platform hiçbir modülü tanımaz. Platform ve `Vyxum.Platform.Abstractions` hiçbir modül derlemesine başvurmaz ve hiçbir modül ad alanını kullanmaz. Abstractions başka hiçbir Vyxum derlemesine başvurmaz.
+- Platform ve sunucu hiçbir cihaz derlemesine ve agent'a başvurmaz. Sunucu örnek modüllere başvurmaz.
+- `Vyxum.Devices` hiçbir Vyxum derlemesine başvurmaz. Protokoller, taşımalar ve simülatör yalnızca `Vyxum.Devices` derlemesine başvurur.
+- `Vyxum.Agent` hiçbir platform derlemesine ve sunucuya başvurmaz.
 - Hiçbir modül zorunlu değildir. İsteğe bağlı bir yetenek yoksa modül çalışmaya devam eder; yalnızca yeteneğin kullanılamadığını bildirir.
 - Kodda sağlayıcıya özel SQL bulunmaz. Veri erişimi hem SQLite hem SQL Server üzerinde testten geçmelidir.
 

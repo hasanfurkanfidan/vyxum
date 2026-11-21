@@ -6,7 +6,7 @@ Vyxum is modular weighing software for scales connected to a PC or server throug
 
 This repository is the open core of Vyxum, licensed under the Apache License 2.0. Additional modules are developed separately.
 
-> **Status: early development.** The repository currently contains the phase F0 platform skeleton: module loading and validation, integration events with an outbox and inbox, database provider selection, and a host with a health endpoint. There are no weighing features yet.
+> **Status: early development.** The repository contains the platform (module loading and validation, integration events with an outbox and inbox, database provider selection), the Products and Weighing modules, the web UI and the device drivers. Phase F2 is in progress.
 
 ## Repository layout
 
@@ -16,6 +16,9 @@ This repository is the open core of Vyxum, licensed under the Apache License 2.0
 | `src/Platform/Vyxum.Platform` | Runtime: module discovery and validation, capability registry, outbox dispatcher, inbox, database provider selection |
 | `src/Platform/Vyxum.Platform.Testing` | Test helpers: in-memory module host and database fixtures for SQLite and SQL Server |
 | `src/Host/Vyxum.Host` | ASP.NET Core application (`/health`, `/api/hello`) |
+| `src/Modules/Products` | Products module: product catalog |
+| `src/Modules/Weighing` | Weighing module: records, tare, amounts, cancel, export |
+| `src/Web/vyxum-web` | React web UI, built into the host's `wwwroot` |
 | `tests/Vyxum.Platform.Tests` | Unit tests |
 | `tests/Vyxum.IntegrationTests` | End-to-end tests on both database providers, including host startup |
 | `tests/Vyxum.ArchitectureTests` | Architecture rules, checked with NetArchTest.Rules |
@@ -100,6 +103,82 @@ http://localhost:5000/api/devices/{id}/live streams one device as Server-Sent Ev
 
 `POST /api/devices/{id}/zero` asks the scale to zero, once per request. It always answers 200 with `{ "result": "Done" | "NotSupported" | "Rejected" | "Unavailable", "detail": "..." }`; `detail` is English text for logs and may be missing. Each device lists the commands it supports in `supportedCommands` (`["Zero"]` for MT-SICS).
 
+## Modules
+
+Products and Weighing are built into the host. The host always loads them, and neither depends on the other: they talk only through integration events. Each module keeps its own tables in the same database.
+
+| Module | Project | What it does |
+|---|---|---|
+| Products | `src/Modules/Products/Vyxum.Modules.Products` | Product catalog: code, name, unit price, package tare, shelf life, barcode prefix, ingredients, and target weight with lower and upper tolerance (kg) |
+| Weighing | `src/Modules/Weighing/Vyxum.Modules.Weighing` | Weighing records: live weight from a device, software tare, net, amount, lot, cancel with a reason, list, totals and Excel export |
+
+Products endpoints (`/api/products`):
+
+- `GET /api/products?search=&includeInactive=` lists products; `GET /api/products/{id}` returns one.
+- `POST /api/products` creates a product; `PUT /api/products/{id}` updates it.
+- `POST /api/products/{id}/deactivate` and `POST /api/products/{id}/activate` decide whether a product can be used for weighing.
+
+Weighing endpoints (`/api/weighing`):
+
+- `GET /settings` returns the rules the screen uses; `GET /products` searches products for the screen.
+- `GET /records` lists records, filtered by `from`, `to`, `productId`, `lot` and `includeCancelled`, with `skip` and `take`. `GET /records/recent` and `GET /records/{id}` return recent and single records.
+- `GET /records/export` downloads the filtered records as an Excel (.xlsx) file.
+- `POST /records` records a weighing. Every request carries a `requestId`, so a retry with the same id does not record a second time.
+- `POST /records/{id}/cancel` cancels a record. A reason is required while `RequireCancelReason` is true.
+
+Integration events (version 1):
+
+- `products.product-saved` is published when a product is saved. Weighing keeps its own copy of the product, so it never calls Products.
+- `weighing.recorded` is published when a record is saved.
+- `weighing.cancelled` is published when a record is cancelled.
+
+Weighing rules are read from the `Vyxum:Weighing` section of the configuration:
+
+| Key | Default | Meaning |
+|---|---|---|
+| `Vyxum:Weighing:RequireStable` | `true` | Only a stable weight can be recorded |
+| `Vyxum:Weighing:MinimumNet` | `0` | Smallest net weight in kg that can be recorded. The net must always be greater than 0; a positive value also sets a lower limit. |
+| `Vyxum:Weighing:RequireCancelReason` | `true` | A cancel needs a reason |
+| `Vyxum:Weighing:Currency` | `TRY` | Currency of amounts, stored with every record |
+| `Vyxum:Weighing:AmountDecimals` | `2` | Decimals amounts are rounded to (0 to 4) |
+| `Vyxum:Weighing:AmountRounding` | `AwayFromZero` | Rounding mode, by its .NET `MidpointRounding` name |
+
+## Web UI
+
+The screens are a React, TypeScript and Vite application in `src/Web/vyxum-web`. Vite builds it into `src/Host/Vyxum.Host/wwwroot`, and the host serves those files. Customers install nothing else: Node.js is needed only on the developer's computer.
+
+- **Build:** `dotnet build` builds the UI when `wwwroot` is missing. This needs Node.js 22. Pass `-p:SkipUiBuild=true` to skip it; the host then serves the UI only if `wwwroot` was built earlier, and the root path returns 404 otherwise.
+- **Development:** run `npm ci` once, then `npm run dev` in `src/Web/vyxum-web`. Vite serves the UI with live reload (usually at http://localhost:5173) and forwards `/api` and `/hubs` to http://localhost:5000, so start the host on port 5000 first.
+- **Text:** the UI contains no literal text. Every string lives in a `Strings.resx` and `Strings.tr.resx` file, and reaches the UI through `/api/ui/strings`. The UI is available in Turkish and English.
+- **Offline:** the fonts are bundled with the app through `@fontsource`. The UI loads nothing from the internet.
+
+## Try it with a real scale
+
+This uses a METTLER TOLEDO IND231 connected to a serial port:
+
+1. Start the host:
+
+   ```bash
+   dotnet run --project src/Host/Vyxum.Host --urls http://localhost:5000
+   ```
+
+2. In a second terminal, start the agent with the IND231 example settings:
+
+   ```bash
+   dotnet run --project src/Agent/Vyxum.Agent -- --settings appsettings.Ind231.example.json
+   ```
+
+   The example reads `COM3` at 9600 8N1 with the MT-SICS command `SI`. Change `PortName` if the scale is on another port. The `--settings` path is relative to the agent's project folder, where `dotnet run --project` starts.
+
+3. Open http://localhost:5000 in a browser.
+
+How the screen works with the scale:
+
+- Tare is kept in software by Vyxum. **Take tare** stores the current gross weight as the tare. The scale's own tare command is never sent.
+- The **Zero** button sends `Z` to the scale, once per press. Nothing else is sent.
+
+The database schema is created on the first start. The default SQLite file is `vyxum.db` in the data directory: `data/` under the working directory (`src/Host/Vyxum.Host/data/` when you start the host with the commands above), or `%ProgramData%\Vyxum` on Windows. There are no migrations yet. After a model change during development, stop the host and delete that file, together with `vyxum.db-shm` and `vyxum.db-wal` if they exist. This deletes all records, so use it only on test data.
+
 ## Configuration
 
 Keys are read from `appsettings.json`, environment variables (for example `Vyxum__Database__Provider`) or command-line arguments.
@@ -122,8 +201,12 @@ Time values use the .NET `TimeSpan` format (`hh:mm:ss` or `d.hh:mm:ss`).
 These rules are enforced by the architecture tests where they can be checked mechanically.
 
 - Modules do not call each other. They communicate only through integration events, delivered via the outbox and inbox.
-- Modules reference only `Vyxum.Platform.Abstractions` among Vyxum assemblies. Modules do not reference each other or the host.
-- The platform knows no module. Platform and Abstractions do not reference any module assembly.
+- A module references only `Vyxum.Platform.Abstractions` among Vyxum assemblies. It does not reference another module, the host, the platform runtime, the devices or the agent.
+- Each module owns exactly one `ModuleDbContext`, and its table names start with its prefix.
+- The platform knows no module. The platform and `Vyxum.Platform.Abstractions` reference no module assembly and use no module namespace. Abstractions references no other Vyxum assembly.
+- The platform and the host reference no device assembly and not the agent. The host does not reference sample modules.
+- `Vyxum.Devices` references no Vyxum assembly. Protocols, transports and the simulator reference only `Vyxum.Devices`.
+- `Vyxum.Agent` references no platform assembly and not the host.
 - No module is mandatory. A missing optional capability leaves the module working; it only reports that the capability is unavailable.
 - Code does not use provider-specific SQL. Data access must pass tests on both SQLite and SQL Server.
 

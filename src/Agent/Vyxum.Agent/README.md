@@ -17,7 +17,7 @@ dotnet run --project src/Agent/Vyxum.Agent
 To use another settings file instead of `appsettings.json`, pass `--settings`:
 
 ```
-dotnet run --project src/Agent/Vyxum.Agent -- --settings src/Agent/Vyxum.Agent/appsettings.Ind231.example.json
+dotnet run --project src/Agent/Vyxum.Agent -- --settings appsettings.Ind231.example.json
 ```
 
 Any setting can also be given on the command line, for example `--Vyxum:Agent:ServerUrl http://localhost:8080`.

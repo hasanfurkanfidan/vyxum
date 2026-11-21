@@ -17,7 +17,7 @@ dotnet run --project src/Agent/Vyxum.Agent
 `appsettings.json` yerine başka bir ayar dosyası kullanmak için `--settings` verilir:
 
 ```
-dotnet run --project src/Agent/Vyxum.Agent -- --settings src/Agent/Vyxum.Agent/appsettings.Ind231.example.json
+dotnet run --project src/Agent/Vyxum.Agent -- --settings appsettings.Ind231.example.json
 ```
 
 Her ayar komut satırından da verilebilir, örneğin `--Vyxum:Agent:ServerUrl http://localhost:8080`.
