@@ -276,8 +276,8 @@ public sealed class LicenseApiTests : IDisposable
         var waiting = await SingleOutboxMessageAsync(app);
         waiting.ProcessedAt.ShouldBeNull();
         waiting.Attempts.ShouldBe(0);
-        waiting.LastError.ShouldBe(OutboxDispatcher.LicenseWaitPrefix + PaidModule.Id);
-        waiting.NextAttemptAt.ShouldNotBeNull().ShouldBeGreaterThan(app.Clock.GetUtcNow().UtcDateTime);
+        waiting.LastError.ShouldBe(OutboxDispatcher.HoldError([PaidModule.Id]));
+        waiting.NextAttemptAt.ShouldBe(OutboxDispatcher.HeldUntil);
 
         // Not retried in a loop while it waits.
         (await app.DispatchAsync()).ShouldBe(0);

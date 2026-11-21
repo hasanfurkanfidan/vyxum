@@ -22,12 +22,19 @@ namespace Vyxum.Platform;
 /// <para>
 /// License gate: the handlers of a module that requires a license run only while the module is licensed or in its
 /// grace period. When the module is locked, and also when it is read-only (no new data is created after the grace
-/// period; incoming events are kept, not dropped), the handler is not called: the message stays pending with
-/// <see cref="OutboxMessage.LastError"/> starting with <see cref="LicenseWaitPrefix"/> and is tried again after
-/// <see cref="OutboxOptions.LicenseWaitDelay"/>, without counting an attempt. Waiting messages are released at once when
-/// <see cref="LicenseManager.Version"/> changes (a license uploaded or removed in this process, or a new evaluation
-/// result), so they are handled as soon as the module is licensed. Other handlers of the same message run as usual;
-/// the inbox keeps them from running twice.
+/// period; incoming events are kept, not dropped), that handler is held: the message's other handlers run as usual
+/// (the inbox records each), and the message is parked with <see cref="OutboxMessage.NextAttemptAt"/> =
+/// <see cref="HeldUntil"/> and <see cref="OutboxMessage.LastError"/> naming the waiting modules (<see cref="HoldError"/>),
+/// without counting an attempt. A held message is never polled, so held work costs nothing while the license does not
+/// change and does not delay other messages. When a module becomes able to run (a license is uploaded or renewed, in
+/// this process or seen through another instance), its held messages are released with one set-based update per
+/// outbox (no provider-specific SQL) and delivered again; handlers that already ran are skipped through the inbox, a
+/// module that is still waiting holds the message again.
+/// </para>
+/// <para>
+/// Held events are replayed in full on renewal, not dropped: data completeness matters more (for example stock that
+/// must count every weighing). Every event carries its own time (<see cref="IntegrationEventContext.OccurredAt"/>), so
+/// how to treat an old event (book it, or only record it) is the paid module's decision, not the platform's.
 /// </para>
 /// </remarks>
 public sealed partial class OutboxDispatcher
@@ -40,11 +47,14 @@ public sealed partial class OutboxDispatcher
     private readonly Dictionary<(string Name, int Version), List<(EventHandlerRegistration Handler, Type DbContextType)>> _handlers;
     private readonly SemaphoreSlim _gate = new(1, 1);
     private readonly LicenseManager _licenses;
-    private readonly bool _hasLicensedHandlers;
-    private long? _releasedLicenseVersion;
+    private readonly string[] _licensedHandlerModules;
+    private HashSet<string>? _runnableModules;
 
     /// <summary>The start of <see cref="OutboxMessage.LastError"/> of a message that waits for a module's license.</summary>
     public const string LicenseWaitPrefix = "Waiting for a license: ";
+
+    /// <summary>The <see cref="OutboxMessage.NextAttemptAt"/> of a held message: never due by time, only released.</summary>
+    public static readonly DateTime HeldUntil = new(9999, 12, 31, 0, 0, 0, DateTimeKind.Utc);
 
     /// <summary>Creates the dispatcher.</summary>
     public OutboxDispatcher(
@@ -65,7 +75,7 @@ public sealed partial class OutboxDispatcher
         _time = time;
         _licenses = licenses;
         _logger = logger;
-        _hasLicensedHandlers = catalog.Modules.Any(m => m.Manifest.RequiresLicense && m.EventHandlers.Count > 0);
+        _licensedHandlerModules = [.. catalog.Modules.Where(m => m.Manifest.RequiresLicense && m.EventHandlers.Count > 0).Select(m => m.Manifest.Id)];
 
         // The catalog is validated: every handled event has an attribute and every handler module a DbContext.
         _handlers = catalog.Modules
@@ -88,15 +98,19 @@ public sealed partial class OutboxDispatcher
         try
         {
             LicenseSnapshot? licenses = null;
-            if (_hasLicensedHandlers)
+            if (_licensedHandlerModules.Length > 0)
             {
                 licenses = _licenses.GetSnapshot();
-                var version = _licenses.Version;
-                if (version != _releasedLicenseVersion)
+                var runnable = _licensedHandlerModules.Where(id => MayHandle(licenses, id)).ToHashSet(StringComparer.Ordinal);
+
+                // After a start every runnable module is released once: a license may have arrived while stopped.
+                var released = runnable.Where(id => _runnableModules?.Contains(id) != true).ToList();
+                if (released.Count > 0)
                 {
-                    await ReleaseLicenseWaitsAsync(cancellationToken);
-                    _releasedLicenseVersion = version;
+                    await ReleaseHeldAsync(released, cancellationToken);
                 }
+
+                _runnableModules = runnable;
             }
 
             var attempted = 0;
@@ -113,16 +127,29 @@ public sealed partial class OutboxDispatcher
         }
     }
 
-    /// <summary>Makes every message that waits for a license due now, in every module's outbox.</summary>
-    private async Task ReleaseLicenseWaitsAsync(CancellationToken cancellationToken)
+    /// <summary>The <see cref="OutboxMessage.LastError"/> of a message held for <paramref name="moduleIds"/>.</summary>
+    /// <remarks>Each id is enclosed in <c>|</c>, so that a release can match one id exactly (module ids never contain it).</remarks>
+    internal static string HoldError(IEnumerable<string> moduleIds) =>
+        LicenseWaitPrefix + "|" + string.Join("|", moduleIds.Distinct(StringComparer.Ordinal).Order(StringComparer.Ordinal)) + "|";
+
+    /// <summary>Makes the messages held for any of <paramref name="moduleIds"/> due now, in every module's outbox.</summary>
+    private async Task ReleaseHeldAsync(IReadOnlyList<string> moduleIds, CancellationToken cancellationToken)
     {
         foreach (var module in _catalog.Modules.Where(m => m.DbContextType is not null))
         {
             await using var scope = _scopeFactory.CreateAsyncScope();
             var db = (ModuleDbContext)scope.ServiceProvider.GetRequiredService(module.DbContextType!);
-            await db.OutboxMessages
-                .Where(m => m.ProcessedAt == null && m.NextAttemptAt != null && m.LastError != null && m.LastError.StartsWith(LicenseWaitPrefix))
-                .ExecuteUpdateAsync(setters => setters.SetProperty(m => m.NextAttemptAt, (DateTime?)null), cancellationToken);
+            foreach (var moduleId in moduleIds)
+            {
+                var marker = "|" + moduleId + "|";
+                var released = await db.OutboxMessages
+                    .Where(m => m.ProcessedAt == null && m.NextAttemptAt == HeldUntil && m.LastError != null && m.LastError.Contains(marker))
+                    .ExecuteUpdateAsync(setters => setters.SetProperty(m => m.NextAttemptAt, (DateTime?)null), cancellationToken);
+                if (released > 0)
+                {
+                    LogReleased(_logger, released, moduleId);
+                }
+            }
         }
     }
 
@@ -169,9 +196,9 @@ public sealed partial class OutboxDispatcher
 
             if (errors.Count == 0 && waiting.Count > 0)
             {
-                // Not an attempt: nothing failed, the module is only waiting for its license.
-                message.LastError = Truncate(LicenseWaitPrefix + string.Join(", ", waiting.Distinct(StringComparer.Ordinal)));
-                message.NextAttemptAt = UtcNow() + _options.LicenseWaitDelay;
+                // Not an attempt: nothing failed, the waiting modules only need a license. Parked until released.
+                message.LastError = Truncate(HoldError(waiting));
+                message.NextAttemptAt = HeldUntil;
                 await db.SaveChangesAsync(cancellationToken);
                 continue;
             }
@@ -229,6 +256,9 @@ public sealed partial class OutboxDispatcher
 
     [LoggerMessage(Level = LogLevel.Warning, Message = "Handler {HandlerName} failed for event {EventName} v{EventVersion}, message {MessageId}; it will be retried.")]
     private static partial void LogHandlerFailed(ILogger logger, Exception exception, string handlerName, string eventName, int eventVersion, Guid messageId);
+
+    [LoggerMessage(Level = LogLevel.Information, Message = "Released {Count} held messages for module {ModuleId}, which may run now.")]
+    private static partial void LogReleased(ILogger logger, int count, string moduleId);
 
     [LoggerMessage(Level = LogLevel.Debug, Message = "Handler {HandlerName} already processed message {MessageId}; skipped.")]
     private static partial void LogAlreadyHandled(ILogger logger, string handlerName, Guid messageId);
