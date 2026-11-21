@@ -20,7 +20,7 @@ public class BackgroundDispatchTests
         var ct = TestContext.Current.CancellationToken;
         await using var database = Databases.CreateOrSkip(provider);
 
-        var builder = Host.CreateEmptyApplicationBuilder(new HostApplicationBuilderSettings());
+        var builder = Microsoft.Extensions.Hosting.Host.CreateEmptyApplicationBuilder(new HostApplicationBuilderSettings());
         builder.Configuration.AddInMemoryCollection(database.Settings);
         builder.Configuration[OutboxOptions.SectionName + ":PollingInterval"] = "00:00:00.050";
         builder.Services.AddVyxumPlatform(builder.Configuration, [typeof(OrdersModule).Assembly, typeof(NotificationsModule).Assembly]);
