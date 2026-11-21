@@ -3,6 +3,7 @@
   <Folder Name="/src/Devices/">
     <Project Path="src/Devices/Vyxum.Devices/Vyxum.Devices.csproj" />
     <Project Path="src/Devices/Vyxum.Devices.MtSics/Vyxum.Devices.MtSics.csproj" />
+    <Project Path="src/Devices/Vyxum.Devices.ToledoContinuous/Vyxum.Devices.ToledoContinuous.csproj" />
     <Project Path="src/Devices/Vyxum.Devices.Transports/Vyxum.Devices.Transports.csproj" />
   </Folder>
   <Folder Name="/src/Host/">
