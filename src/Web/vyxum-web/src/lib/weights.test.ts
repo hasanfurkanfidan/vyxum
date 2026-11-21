@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { parseLiveJson, type LiveDevice } from './weighing';
-import { amountOf, convert, decimalToString, parseDecimal, subtract, tareFromKilograms, withScale, type Decimal } from './weights';
+import { amountOf, compare, convert, decimalToString, parseDecimal, subtract, tareFromKilograms, withScale, type Decimal } from './weights';
 
 function d(text: string): Decimal {
   const value = parseDecimal(text);
@@ -23,6 +23,12 @@ describe('decimal helpers', () => {
     expect(decimalToString(subtract(d('1.26'), d('0.012')))).toBe('1.248');
     expect(decimalToString(withScale(d('0.0125'), 3))).toBe('0.013');
     expect(decimalToString(withScale(d('-0.0125'), 3))).toBe('-0.013');
+  });
+
+  it('compares across scales', () => {
+    expect(compare(d('1.20'), d('1.2'))).toBe(0);
+    expect(compare(d('0.999'), d('1'))).toBe(-1);
+    expect(compare(d('-0.001'), d('-0.0011'))).toBe(1);
   });
 
   it('converts between units', () => {
