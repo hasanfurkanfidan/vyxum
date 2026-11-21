@@ -24,6 +24,7 @@ public sealed class ProductsModule : IModule
     {
         context.AddDbContext<ProductsDbContext>();
         services.AddScoped<ProductService>();
+        services.AddUiStrings(ProductsStrings.KeyPrefix, ProductsStrings.ResourceManager);
     }
 
     /// <inheritdoc />
