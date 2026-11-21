@@ -10,8 +10,16 @@ public class RepositoryHygieneTests
     private static readonly string[] ForbiddenExtensions = [".pem", ".key", ".pfx", ".p12", ".vxlic"];
     private static readonly string[] RequiredIgnorePatterns = ["*.pem", "*.key", "*.pfx", "*.p12"];
 
-    // Built from parts so this file does not contain the marker itself.
+    // Built from parts so this file does not contain the markers themselves.
     private static readonly string PrivateKeyMarker = "PRIVATE KEY" + "-----";
+
+    // The base64 (DER) start of an unencrypted EC private key without PEM armour: PKCS#8 of a P-256 key
+    // (SEQUENCE, version 0, id-ecPublicKey, prime256v1, OCTET STRING) and SEC1 (SEQUENCE, version 1, OCTET STRING).
+    private static readonly string[] Base64PrivateKeyMarkers =
+    [
+        "MIGHAgEAMBMGByqGSM49" + "AgEGCCqGSM49AwEHBG0w",
+        "MHcCAQEE" + "I",
+    ];
 
     private static string RepositoryRoot()
     {
@@ -71,7 +79,7 @@ public class RepositoryHygieneTests
 
             try
             {
-                if (File.ReadAllText(file).Contains(PrivateKeyMarker, StringComparison.Ordinal))
+                if (ContainsPrivateKey(File.ReadAllText(file)))
                 {
                     found.Add(Path.GetRelativePath(root, file));
                 }
@@ -84,6 +92,23 @@ public class RepositoryHygieneTests
 
         found.ShouldBeEmpty();
     }
+
+    [Fact]
+    public void The_scan_detects_pem_and_base64_ec_private_keys()
+    {
+        using var key = System.Security.Cryptography.ECDsa.Create(System.Security.Cryptography.ECCurve.NamedCurves.nistP256);
+
+        ContainsPrivateKey(key.ExportPkcs8PrivateKeyPem()).ShouldBeTrue();
+        ContainsPrivateKey(key.ExportECPrivateKeyPem()).ShouldBeTrue();
+        ContainsPrivateKey("\"key\": \"" + Convert.ToBase64String(key.ExportPkcs8PrivateKey()) + "\"").ShouldBeTrue();
+        ContainsPrivateKey("key=" + Convert.ToBase64String(key.ExportECPrivateKey())).ShouldBeTrue();
+        ContainsPrivateKey(Convert.ToBase64String(key.ExportSubjectPublicKeyInfo())).ShouldBeFalse();
+        ContainsPrivateKey(key.ExportSubjectPublicKeyInfoPem()).ShouldBeFalse();
+    }
+
+    private static bool ContainsPrivateKey(string text) =>
+        text.Contains(PrivateKeyMarker, StringComparison.Ordinal)
+        || Base64PrivateKeyMarkers.Any(marker => text.Contains(marker, StringComparison.Ordinal));
 
     [Fact]
     public void Gitignore_excludes_key_files()
