@@ -83,6 +83,7 @@ A scale is read in two parts. A **transport** moves bytes over a serial port or 
 | `src/Devices/Vyxum.Devices.ToledoContinuous` | Toledo continuous output protocol |
 | `src/Devices/Vyxum.Devices.GenericAscii` | Rule-based protocol for other ASCII output |
 | `src/Devices/Vyxum.Devices.Simulator` | Simulated scales over memory or TCP, and replay of recorded lines |
+| `src/Devices/Vyxum.Devices.Discovery` | Read-only search for scales on serial ports or at one network address |
 
 Supported transports are serial and TCP. Supported protocols are MT-SICS, Toledo Continuous and generic ASCII.
 
@@ -104,6 +105,8 @@ Devices are configured in the web application (Settings → Devices) and stored 
 http://localhost:5000/api/devices/{id}/live streams one device as Server-Sent Events: its current state at once, then a new event whenever its state or weight changes. A device id the agent has not reported yet is not an error; the stream starts in the `Disconnected` state and continues once the agent connects.
 
 `POST /api/devices/{id}/zero` asks the scale to zero, once per request. It always answers 200 with `{ "result": "Done" | "NotSupported" | "Rejected" | "Unavailable", "detail": "..." }`; `detail` is English text for logs and may be missing. Each device lists the commands it supports in `supportedCommands` (`["Zero"]` for MT-SICS).
+
+`POST /api/devices/discover` asks the agent to search for scales (body optional: `{ "agentName"?: "...", "tcp"?: { "host": "...", "port": 4001 } }`). It answers 202 with `{ "id" }`, 409 with `{ "code": "devices.DiscoveryRunning" }` while the agent already searches, and 503 with `{ "code": "devices.NoAgent" }` without a connected agent. `GET /api/devices/discover/{id}` returns the job: `status` (`Running`, `Completed`, `Failed` with `code` `devices.AgentTimeout` or `devices.DiscoveryFailed`), the `ports` with their state (`Pending`, `Scanning`, `Found`, `NotFound`, `InUse`, `Error`) and the `candidates`, whose `transport` and `protocol` objects can be posted to `/api/devices/config` unchanged. Jobs are kept in memory for 10 minutes. Discovery sends only the MT-SICS commands `SI` and `I4`; see [Device discovery](src/Agent/Vyxum.Agent/README.md#device-discovery).
 
 ## Modules
 

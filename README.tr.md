@@ -85,6 +85,7 @@ Bir terazi iki parçada okunur. **Taşıma** (transport) baytları seri port ya 
 | `src/Devices/Vyxum.Devices.ToledoContinuous` | Toledo sürekli çıkış protokolü |
 | `src/Devices/Vyxum.Devices.GenericAscii` | Diğer ASCII çıkışlar için kurala dayalı protokol |
 | `src/Devices/Vyxum.Devices.Simulator` | Bellek ya da TCP üzerinden simüle edilmiş teraziler ve kayıtlı satırların yeniden oynatılması |
+| `src/Devices/Vyxum.Devices.Discovery` | Seri portlarda ya da tek bir ağ adresinde teraziyi yalnızca okuyarak arama |
 
 Desteklenen taşımalar seri port ve TCP'dir. Desteklenen protokoller MT-SICS, Toledo Continuous ve genel ASCII'dir.
 
@@ -106,6 +107,8 @@ Cihazlar web uygulamasında (Ayarlar → Cihazlar) ayarlanır ve `plt_Devices` t
 http://localhost:5000/api/devices/{id}/live bir cihazı Server-Sent Events olarak yayınlar: önce o anki durumu, ardından durumu ya da ağırlığı her değiştiğinde yeni bir olay. Agent'ın henüz bildirmediği bir cihaz kimliği hata değildir; yayın `Disconnected` durumunda başlar ve agent bağlanınca sürer.
 
 `POST /api/devices/{id}/zero` teraziden sıfırlamasını ister, her istekte bir kez. Her zaman 200 ile `{ "result": "Done" | "NotSupported" | "Rejected" | "Unavailable", "detail": "..." }` döner; `detail` günlükler için İngilizce metindir ve olmayabilir. Her cihaz desteklediği komutları `supportedCommands` içinde listeler (MT-SICS için `["Zero"]`).
+
+`POST /api/devices/discover` Agent'tan terazi aramasını ister (gövde isteğe bağlı: `{ "agentName"?: "...", "tcp"?: { "host": "...", "port": 4001 } }`). 202 ile `{ "id" }` döner; Agent zaten arıyorsa 409 ile `{ "code": "devices.DiscoveryRunning" }`, bağlı Agent yoksa 503 ile `{ "code": "devices.NoAgent" }` döner. `GET /api/devices/discover/{id}` işi döndürür: `status` (`Running`, `Completed`, ya da `code` `devices.AgentTimeout` veya `devices.DiscoveryFailed` ile `Failed`), durumlarıyla `ports` (`Pending`, `Scanning`, `Found`, `NotFound`, `InUse`, `Error`) ve `candidates`; adayların `transport` ve `protocol` nesneleri değiştirilmeden `/api/devices/config`'e gönderilebilir. İşler 10 dakika bellekte tutulur. Arama yalnızca MT-SICS `SI` ve `I4` komutlarını gönderir; bkz. [Cihaz arama](src/Agent/Vyxum.Agent/README.tr.md#cihaz-arama).
 
 ## Modüller
 

@@ -97,3 +97,30 @@ cihazların sıfırlamayı desteklediğini bildirir. Toledo Continuous yalnızca
 `generic-ascii` de desteklemez.
 `generic-ascii` içinde `RequestCommand` serbest metindir, çünkü her marka kendi komutunu kullanır: buraya yalnızca
 ağırlığı okuyan ya da yazdıran bir komut yazılır; dara alan, sıfırlayan ya da cihazı değiştiren bir komut asla yazılmaz.
+
+## Cihaz arama
+
+Web uygulaması Agent'tan bağlı terazileri bulmasını isteyebilir (Kurulum sihirbazı → Terazi, Ayarlar → Cihazlar → Ara).
+Agent, çalışan cihazlarından hiçbirinin kullanmadığı her seri portu tarar; çalışan bir cihazın kullandığı port o cihazın
+kimliğiyle `InUse` (kullanımda) olarak bildirilir ve hiç açılmaz. Portlar aynı anda taranır; sıradan bir bilgisayarda
+arama birkaç saniyede biter, her port en fazla yaklaşık 25 saniye sürer.
+
+Her portta şu ayarlar sırayla denenir, ilk eşleşmede o port biter: 9600, 19200, 4800, 2400, 38400 ve 115200 baud, her
+biri 8N1, 7E1 ve 7O1 ile. Port her ayar için açılır ve yeniden kapatılır. Her ayarda:
+
+1. Agent hiçbir şey göndermeden yaklaşık 0,7 saniye dinler. Toledo Continuous çerçeveleri ya da tekrar eden düz ASCII
+   ağırlık satırları (bir sayı ve isteğe bağlı birim) burada tanınır. 7E1 ve 7O1 ile yalnızca aynı baud hızında 8N1
+   bir şey aldıysa dinler.
+2. MT-SICS `SI` komutunu (ağırlığı bir kez oku) gönderir. Yanıt `ES`, `ET`, meşgul ya da bozuk olursa (8N1 ile 0,5 saniye
+   içinde yanıt gelmezse de) `SI`'yi bir kez daha gönderir. Geçerli bir ağırlık yanıtından sonra `I4` (seri numarası)
+   gönderir.
+
+**Arama sırasında yalnızca bu iki komut gönderilir: `SI` ve `I4`, ikisi de CR LF ile.** Her yazma, başka her şeyi daha
+porta tek bayt ulaşmadan reddeden bir izin listesinden geçer; bunu bir test denetler. Dara (`T`), sıfırlama (`Z`),
+açılış durumuna dönüş (`@`) ve ayar komutları asla gönderilmez (V-28 ve V-40 kararları).
+
+Ağdaki bir terazi için IP adresi ve port girilir: Agent yalnızca o adresi aynı yolla dener (dinle, sonra `SI` ve `I4`).
+Ağ taraması yapılmaz.
+
+Bulunan cihaz, yukarıdaki cihaz ayarlarıyla aynı biçimde taşıma ve protokol ayarları, örnek bir okuma ve seri numarasıyla
+döner; olduğu gibi kaydedilebilir.

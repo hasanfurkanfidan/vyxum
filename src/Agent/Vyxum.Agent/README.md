@@ -97,3 +97,29 @@ within `ZeroTimeout`, it is not resent, because the scale may have zeroed. The a
 when it registers. Toledo Continuous is listen-only and does not support zero; neither does `generic-ascii`.
 With `generic-ascii`, `RequestCommand` is free text because every brand uses its own: only ever configure a command
 that reads or prints the weight, never one that tares, zeroes or changes the device.
+
+## Device discovery
+
+The web application can ask the agent to find the scales connected to it (Setup wizard → Scale, Settings → Devices →
+Search). The agent scans every serial port that none of its running devices uses; a port used by a running device is
+reported as `InUse` with that device's id and is never opened. Ports are scanned in parallel; a typical PC finishes in a
+few seconds, and every port is bounded to about 25 seconds.
+
+On each port these settings are tried in order, and the first match ends the port: 9600, 19200, 4800, 2400, 38400 and
+115200 baud, each with 8N1, 7E1 and 7O1. The port is opened and closed again for every setting. For each setting:
+
+1. The agent listens for about 0.7 seconds without sending anything. Toledo Continuous frames or repeated plain ASCII
+   weight lines (a number with an optional unit) are recognised here. With 7E1 and 7O1 it listens only when 8N1 at the
+   same baud rate received something.
+2. It sends the MT-SICS command `SI` (read the weight once). When the answer is `ES`, `ET`, busy or noise (or, with 8N1,
+   no answer within 0.5 seconds) it sends `SI` once more. After a valid weight answer it sends `I4` (serial number).
+
+**Exactly these two commands are ever sent during discovery: `SI` and `I4`, each followed by CR LF.** Every write goes
+through a whitelist that rejects anything else before a byte reaches the port, and a test checks it. Tare (`T`), zero
+(`Z`), reset (`@`) and settings commands are never sent (decisions V-28 and V-40).
+
+For a network scale, enter its IP address and port: the agent probes only that address the same way (listen, then `SI`
+and `I4`). There is no network sweep.
+
+A found device is returned with transport and protocol settings in the same shape as the device settings above, a sample
+reading and the serial number, so it can be saved as it is.
