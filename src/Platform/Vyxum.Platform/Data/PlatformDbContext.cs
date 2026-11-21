@@ -1,11 +1,21 @@
 using Microsoft.EntityFrameworkCore;
+using Vyxum.Platform.Abstractions;
 
 namespace Vyxum.Platform;
 
-/// <summary>Platform-owned tables. In F0 only the record of which module tables have been created.</summary>
+/// <summary>
+/// Platform-owned tables. Migrations are generated per provider into <c>Migrations/Sqlite</c> and
+/// <c>Migrations/SqlServer</c> and recorded in <see cref="MigrationsHistoryTable"/>.
+/// </summary>
 internal sealed class PlatformDbContext(DbContextOptions<PlatformDbContext> options) : DbContext(options)
 {
+    /// <summary>The platform's migrations history table.</summary>
+    public const string MigrationsHistoryTable = "__plt_migrations";
+
     public DbSet<InstalledModule> InstalledModules => Set<InstalledModule>();
+
+    protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder) =>
+        ProviderMigrations.Configure(optionsBuilder, MigrationsHistoryTable);
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

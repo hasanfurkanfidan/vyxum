@@ -52,6 +52,13 @@ public static class PlatformServiceCollectionExtensions
         services.AddSingleton(databaseSettings);
         services.AddDbContext<PlatformDbContext>((provider, options) =>
             provider.GetRequiredService<DatabaseSettings>().Configure(options));
+        var backupsDirectory = Path.Combine(DatabaseSettings.GetDataDirectory(configuration), "backups");
+        services.AddSingleton(provider => new DatabaseBackups(
+            provider.GetRequiredService<DatabaseSettings>(),
+            backupsDirectory,
+            provider.GetRequiredService<TimeProvider>(),
+            provider.GetRequiredService<Microsoft.Extensions.Logging.ILogger<DatabaseBackups>>()));
+        services.AddSingleton<IDatabaseBackups>(provider => provider.GetRequiredService<DatabaseBackups>());
         services.AddSingleton<IModuleDatabaseInitializer, ModuleDatabaseInitializer>();
         services.AddHostedService<ModuleDatabaseInitializerService>();
 

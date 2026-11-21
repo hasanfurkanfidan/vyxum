@@ -77,8 +77,11 @@ public class ModuleDbContextTests
         }
 
         // Each prefix needs its own cached model.
-        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder) =>
+        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+        {
+            base.OnConfiguring(optionsBuilder);
             optionsBuilder.ReplaceService<Microsoft.EntityFrameworkCore.Infrastructure.IModelCacheKeyFactory, PrefixCacheKeyFactory>();
+        }
     }
 
     private sealed class PrefixCacheKeyFactory : Microsoft.EntityFrameworkCore.Infrastructure.IModelCacheKeyFactory
