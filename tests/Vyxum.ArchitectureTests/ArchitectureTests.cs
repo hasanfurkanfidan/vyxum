@@ -11,6 +11,7 @@ using Vyxum.Devices.MtSics;
 using Vyxum.Devices.Simulator;
 using Vyxum.Devices.ToledoContinuous;
 using Vyxum.Devices.Transports;
+using Vyxum.Licensing;
 using Vyxum.Modules.Products;
 using Vyxum.Modules.Weighing;
 using Vyxum.Platform;
@@ -43,6 +44,7 @@ public class ArchitectureTests
     private static readonly Assembly DevicesGenericAscii = typeof(GenericAsciiProtocol).Assembly;
     private static readonly Assembly DevicesDiscovery = typeof(PortScanner).Assembly;
     private static readonly Assembly AgentAssembly = typeof(DeviceFleet).Assembly;
+    private static readonly Assembly LicensingAssembly = typeof(LicenseReader).Assembly;
 
     private static readonly Assembly[] ProtocolAssemblies = [DevicesMtSics, DevicesToledoContinuous, DevicesGenericAscii];
 
@@ -253,6 +255,23 @@ public class ArchitectureTests
         foreach (var assembly in new[] { Platform, Abstractions, Host })
         {
             VyxumReferences(assembly).ShouldNotContain(DevicesDiscovery.GetName().Name!);
+        }
+    }
+
+    [Fact]
+    public void Licensing_references_no_other_vyxum_assembly()
+    {
+        // Licensing is shared with the license tool, so it stays free of the platform, modules, devices and the agent.
+        LicensingAssembly.GetExportedTypes().ShouldNotBeEmpty();
+        VyxumReferences(LicensingAssembly).ShouldBeEmpty();
+    }
+
+    [Fact]
+    public void Abstractions_and_modules_do_not_reference_licensing()
+    {
+        foreach (var assembly in ModuleAssemblies.Append(Abstractions))
+        {
+            VyxumReferences(assembly).ShouldNotContain(LicensingAssembly.GetName().Name!, $"{assembly.GetName().Name} must not reference Vyxum.Licensing");
         }
     }
 
