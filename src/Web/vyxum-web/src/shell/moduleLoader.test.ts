@@ -95,4 +95,21 @@ describe('moduleLoader', () => {
     expect(isSdkCompatible(SDK_VERSION)).toBe(true);
     expect(isSdkCompatible(0)).toBe(false);
   });
+
+  it('rejects a module whose entry exports a newer sdkVersion than its manifest says', async () => {
+    vi.spyOn(console, 'error').mockImplementation(() => {});
+    const importer = vi.fn<ModuleImporter>(async () => ({ ...entry(), sdkVersion: SDK_VERSION + 1 }));
+
+    const [result] = await loadModuleUis([module('sneaky', 'licensed')], importer);
+
+    expect(result?.status).toBe('incompatible');
+  });
+
+  it('accepts an entry whose exported sdkVersion is supported', async () => {
+    const importer = vi.fn<ModuleImporter>(async () => ({ ...entry(), sdkVersion: SDK_VERSION }));
+
+    const [result] = await loadModuleUis([module('fine', 'licensed')], importer);
+
+    expect(result?.status).toBe('loaded');
+  });
 });

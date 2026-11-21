@@ -113,6 +113,13 @@ export async function loadModuleUi(module: UiModule, importer: ModuleImporter = 
   try {
     const entry = await importer(ui.entry);
     if (!isEntry(entry)) throw new Error('The entry does not export a register(host) function.');
+    // The entry may state the SDK version it was really built against; it must agree with what the manifest said.
+    const exported = (entry as { sdkVersion?: unknown }).sdkVersion;
+    if (exported !== undefined && !isSdkCompatible(exported as number)) {
+      const error = `Module '${module.id}' was built for SDK version ${String(exported)}; this application offers ${MIN_SDK_VERSION} to ${SDK_VERSION}.`;
+      console.error(error);
+      return { id: module.id, status: 'incompatible', error };
+    }
     const basePath = modulePath(module.id);
     const host: ModuleHost = {
       sdkVersion: SDK_VERSION,

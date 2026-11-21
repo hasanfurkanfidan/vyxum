@@ -25,13 +25,24 @@ export interface SharedModule {
   specifiers: readonly string[];
   /** npm package to read the export names from at build time; the SDK lists its own names instead. */
   packageName?: string;
+  /** Export names to write into the shim when there is no package to read them from. */
+  names?: readonly string[];
 }
 
 /** What a module may import as a bare specifier. Everything else must be bundled into the module. */
 export const SHARED_MODULES: readonly SharedModule[] = [
   { key: 'react', file: 'react.js', specifiers: ['react'], packageName: 'react' },
   { key: 'react/jsx-runtime', file: 'react-jsx-runtime.js', specifiers: ['react/jsx-runtime'], packageName: 'react/jsx-runtime' },
+  // Modules built in development mode import `jsxDEV`; the application's production runtime has none, so the
+  // host exposes the production functions under the development names.
+  {
+    key: 'react/jsx-dev-runtime',
+    file: 'react-jsx-dev-runtime.js',
+    specifiers: ['react/jsx-dev-runtime'],
+    names: ['Fragment', 'jsx', 'jsxs', 'jsxDEV'],
+  },
   { key: 'react-dom', file: 'react-dom.js', specifiers: ['react-dom'], packageName: 'react-dom' },
+  { key: 'react-dom/client', file: 'react-dom-client.js', specifiers: ['react-dom/client'], packageName: 'react-dom/client' },
   {
     key: 'react-router-dom',
     file: 'react-router-dom.js',

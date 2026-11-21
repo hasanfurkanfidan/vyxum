@@ -18,7 +18,7 @@ async function exportNames(packageName: string): Promise<string[]> {
 async function shimFiles(): Promise<Map<string, string>> {
   const files = new Map<string, string>();
   for (const shared of SHARED_MODULES) {
-    const names = shared.packageName ? await exportNames(shared.packageName) : [...SDK_EXPORTS];
+    const names = shared.names ? [...shared.names] : shared.packageName ? await exportNames(shared.packageName) : [...SDK_EXPORTS];
     files.set(shared.file, shimSource(shared.key, names));
   }
   return files;
