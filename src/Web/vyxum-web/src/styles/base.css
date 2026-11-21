@@ -1,0 +1,246 @@
+/* Base elements and shared building blocks for all screens. */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  background: var(--color-bg);
+  color: var(--color-ink);
+  font-family: var(--font-ui);
+  font-size: var(--text-body);
+  line-height: 1.4;
+  -webkit-font-smoothing: antialiased;
+}
+
+h1,
+h2,
+h3,
+p {
+  margin: 0;
+}
+
+a {
+  color: var(--color-ink);
+}
+
+a:hover {
+  color: var(--color-accent);
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
+  color: inherit;
+}
+
+button {
+  cursor: pointer;
+}
+
+button:disabled {
+  cursor: default;
+}
+
+:focus-visible {
+  outline: var(--focus-ring);
+  outline-offset: 2px;
+}
+
+.mono {
+  font-family: var(--font-mono);
+}
+
+.muted {
+  color: var(--color-ink-muted);
+}
+
+/* Page */
+.page {
+  display: flex;
+  flex-direction: column;
+  gap: var(--gap-page);
+}
+
+.page-header {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: 12px 24px;
+}
+
+.page-header__text {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.page-header__eyebrow {
+  font-family: var(--font-mono);
+  font-size: var(--text-eyebrow);
+  color: var(--color-ink-muted);
+}
+
+.page-header__title {
+  font-size: var(--text-page-title);
+  font-weight: 500;
+  letter-spacing: var(--tracking-title);
+  line-height: 1.15;
+}
+
+.page-header__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+/* Sections: a 1px ink rule on top, no box. */
+.section {
+  border-top: var(--rule-section);
+  padding-top: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  min-width: 0;
+}
+
+.section__label {
+  font-size: var(--text-label);
+  color: var(--color-ink-muted);
+}
+
+/* Rows: a 1px light line between them. */
+.row {
+  border-top: var(--rule-row);
+}
+
+/* Buttons */
+.button {
+  min-height: var(--control-height);
+  padding: 0 16px;
+  border: 1px solid var(--color-ink);
+  border-radius: var(--radius);
+  background: var(--color-surface);
+  color: var(--color-ink);
+  font-size: var(--text-body);
+  line-height: 1.2;
+}
+
+.button--primary {
+  border-color: var(--color-accent);
+  background: var(--color-accent);
+  color: var(--color-on-accent);
+  font-weight: 500;
+}
+
+.button--quiet {
+  border-color: var(--color-line);
+}
+
+.button--warning {
+  border-color: var(--color-warning);
+  color: var(--color-warning-text);
+}
+
+.button--operator {
+  min-height: var(--control-height-operator);
+  padding: 0 18px;
+  font-size: 17px;
+}
+
+.button:disabled {
+  border-color: var(--color-line);
+  background: var(--color-surface);
+  color: var(--color-ink-muted);
+}
+
+/* Form fields */
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.field__label {
+  font-size: var(--text-label);
+  color: var(--color-ink-muted);
+}
+
+.input {
+  height: var(--control-height);
+  padding: 0 10px;
+  border: 1px solid var(--color-ink);
+  border-radius: var(--radius);
+  background: var(--color-surface);
+  color: var(--color-ink);
+  font-size: var(--text-body);
+}
+
+.input--mono {
+  font-family: var(--font-mono);
+}
+
+/* Tables */
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--text-small);
+}
+
+.table th {
+  padding: 10px 8px;
+  font-family: var(--font-mono);
+  font-size: var(--text-caption);
+  font-weight: 400;
+  letter-spacing: var(--tracking-caption);
+  text-transform: uppercase;
+  color: var(--color-ink-muted);
+  text-align: left;
+}
+
+.table td {
+  padding: 12px 8px;
+  border-top: var(--rule-row);
+}
+
+.table .numeric {
+  text-align: right;
+  font-family: var(--font-mono);
+}
+
+.table tr[aria-selected='true'] td {
+  background: var(--color-accent-bg);
+}
+
+/* State shown with color and a word */
+.state--positive {
+  color: var(--color-positive);
+}
+
+.state--warning {
+  color: var(--color-warning-text);
+}
+
+/* Loading and error messages inside the main area */
+.status {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 14px;
+  border-top: var(--rule-section);
+  padding-top: 16px;
+}
+
+.status[role='status']:empty {
+  border-top: 0;
+}
+
+.status__text {
+  color: var(--color-ink-muted);
+}
