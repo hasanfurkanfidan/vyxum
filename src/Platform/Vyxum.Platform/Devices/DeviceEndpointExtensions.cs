@@ -25,6 +25,9 @@ public static class DeviceEndpointExtensions
     /// <summary>Path of the device settings list; <c>/api/devices/config/{id}</c> addresses one device.</summary>
     public const string ConfigPath = "/api/devices/config";
 
+    /// <summary>Path of the device discovery endpoint; <c>/api/devices/discover/{id}</c> addresses one job.</summary>
+    public const string DiscoverPath = "/api/devices/discover";
+
     /// <summary>JSON settings of the device endpoints and the agent hub: web defaults, enums as strings.</summary>
     public static JsonSerializerOptions JsonOptions { get; } = CreateJsonOptions();
 
@@ -64,6 +67,7 @@ public static class DeviceEndpointExtensions
         endpoints.MapPost(ZeroPath, async (string id, IDeviceCommands commands, CancellationToken cancellationToken) =>
             Results.Json(await commands.ZeroAsync(id, cancellationToken), JsonOptions));
         MapConfig(endpoints);
+        MapDiscover(endpoints);
         return endpoints;
     }
 
@@ -96,6 +100,53 @@ public static class DeviceEndpointExtensions
             ToHttp(await devices.UpdateAsync(id, input, ct)));
         group.MapDelete("/{id}", async (string id, DeviceConfigService devices, CancellationToken ct) =>
             await devices.DeleteAsync(id, ct) ? Results.NoContent() : Results.NotFound());
+    }
+
+    /// <summary>
+    /// Maps device discovery (decision V-40). <c>POST</c> with <c>{ "agentName"?: string, "tcp"?: { "host", "port" } }</c>
+    /// (body optional) starts a job and answers 202 with <c>{ "id" }</c>; 409 <c>{ "code": "devices.DiscoveryRunning" }</c>
+    /// when the agent already scans; 503 <c>{ "code": "devices.NoAgent" }</c> when no agent is connected; 400 for an
+    /// invalid network address (<c>tcp.host</c>, <c>tcp.port</c>). <c>GET {id}</c> returns the job
+    /// (<see cref="DiscoveryJobView"/>) or 404. Open to every caller, like the device settings (decision V-03).
+    /// </summary>
+    private static void MapDiscover(IEndpointRouteBuilder endpoints)
+    {
+        endpoints.MapPost(DiscoverPath, (DiscoveryStartInput? input, DiscoveryJobs jobs, HttpContext context) =>
+        {
+            DiscoveryTcpTarget? tcp = null;
+            if (input?.Tcp is { } target)
+            {
+                var errors = new Dictionary<string, string[]>(StringComparer.Ordinal);
+                if (string.IsNullOrWhiteSpace(target.Host))
+                {
+                    errors["tcp.host"] = [DeviceStrings.Code("HostRequired")];
+                }
+
+                if (target.Port is not (>= 1 and <= 65535))
+                {
+                    errors["tcp.port"] = [DeviceStrings.Code("PortInvalid")];
+                }
+
+                if (errors.Count > 0)
+                {
+                    return Results.ValidationProblem(errors);
+                }
+
+                tcp = new DiscoveryTcpTarget(target.Host!.Trim(), target.Port!.Value);
+            }
+
+            var started = jobs.Start(input?.AgentName, tcp);
+            if (started.Id is not { } id)
+            {
+                var status = started.Code == DeviceStrings.Code("NoAgent") ? StatusCodes.Status503ServiceUnavailable : StatusCodes.Status409Conflict;
+                return Results.Json(new { code = started.Code }, JsonOptions, statusCode: status);
+            }
+
+            context.Response.Headers.Location = DiscoverPath + "/" + id;
+            return Results.Json(new { id }, JsonOptions, statusCode: StatusCodes.Status202Accepted);
+        });
+        endpoints.MapGet(DiscoverPath + "/{id}", (string id, DiscoveryJobs jobs) =>
+            jobs.Get(id) is { } job ? Results.Json(job, JsonOptions) : Results.NotFound());
     }
 
     private static IResult ToHttp(DeviceConfigResult result) =>
@@ -139,3 +190,13 @@ public static class DeviceEndpointExtensions
         return options;
     }
 }
+
+/// <summary>The body of <c>POST /api/devices/discover</c>.</summary>
+/// <param name="AgentName">The agent that should scan; null for the default agent.</param>
+/// <param name="Tcp">A network address to probe instead of the serial ports; null to scan the serial ports.</param>
+public sealed record DiscoveryStartInput(string? AgentName, DiscoveryTcpInput? Tcp);
+
+/// <summary>A network address in <see cref="DiscoveryStartInput"/>.</summary>
+/// <param name="Host">Host name or IP address.</param>
+/// <param name="Port">TCP port, 1 to 65535.</param>
+public sealed record DiscoveryTcpInput(string? Host, int? Port);

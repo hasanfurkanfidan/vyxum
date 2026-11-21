@@ -45,9 +45,12 @@ public sealed record DiscoveredDevice(
     string Description);
 
 /// <summary>What to scan.</summary>
-/// <param name="PortsInUse">Serial ports that must not be opened (used by running devices).</param>
+/// <param name="PortsInUse">
+/// Serial ports that must not be opened (used by running devices), each with the detail reported for it, for example the
+/// id of the device that uses it. Port names are compared ignoring case.
+/// </param>
 /// <param name="Tcp">When set, only this network address is probed and no serial port is scanned.</param>
-public sealed record PortScanRequest(IReadOnlyCollection<string> PortsInUse, TcpTransportOptions? Tcp = null);
+public sealed record PortScanRequest(IReadOnlyDictionary<string, string> PortsInUse, TcpTransportOptions? Tcp = null);
 
 /// <summary>The result of a scan.</summary>
 /// <param name="Ports">Every port with its final state, in port order.</param>
@@ -109,13 +112,18 @@ public sealed class PortScanner
             return board.ToReport();
         }
 
-        var inUse = new HashSet<string>(request.PortsInUse ?? [], StringComparer.OrdinalIgnoreCase);
+        var inUse = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+        foreach (var (port, detail) in request.PortsInUse ?? new Dictionary<string, string>())
+        {
+            inUse.TryAdd(port, detail);
+        }
+
         var ports = _options.GetPortNames().Distinct(StringComparer.OrdinalIgnoreCase).ToList();
         foreach (var port in ports)
         {
-            if (inUse.Contains(port))
+            if (inUse.TryGetValue(port, out var detail))
             {
-                board.Add(port, PortScanState.InUse, "The port is used by a device of this agent.");
+                board.Add(port, PortScanState.InUse, detail);
             }
             else
             {
@@ -125,7 +133,7 @@ public sealed class PortScanner
 
         board.Publish();
         using var gate = new SemaphoreSlim(Math.Max(1, _options.MaxParallelPorts));
-        var tasks = ports.Where(p => !inUse.Contains(p)).Select(async port =>
+        var tasks = ports.Where(p => !inUse.ContainsKey(p)).Select(async port =>
         {
             await gate.WaitAsync(cancellationToken).ConfigureAwait(false);
             try

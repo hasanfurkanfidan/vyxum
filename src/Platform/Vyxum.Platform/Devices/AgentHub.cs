@@ -12,6 +12,7 @@ namespace Vyxum.Platform;
 public sealed partial class AgentHub(
     LiveWeightStore store,
     AgentDeviceAssignments assignments,
+    DiscoveryJobs discoveries,
     IServiceProvider services,
     ILogger<AgentHub> logger) : Hub
 {
@@ -74,6 +75,17 @@ public sealed partial class AgentHub(
 
         store.ReportStatus(Context.ConnectionId, deviceId, status);
         LogStatus(logger, deviceId, status.Status, status.LastError);
+    }
+
+    /// <summary>Stores the progress of a device discovery this agent runs (decision V-40).</summary>
+    public void ReportDiscoveryProgress(string discoveryId, IReadOnlyList<DiscoveryPortState> ports)
+    {
+        if (string.IsNullOrWhiteSpace(discoveryId))
+        {
+            throw new HubException("The discovery id must not be empty.");
+        }
+
+        discoveries.ReportProgress(Context.ConnectionId, discoveryId, ports ?? []);
     }
 
     /// <inheritdoc />

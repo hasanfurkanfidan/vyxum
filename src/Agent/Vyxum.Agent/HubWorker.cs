@@ -7,6 +7,7 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Vyxum.Agent.Contract;
+using Vyxum.Agent.Discovery;
 using Vyxum.Devices;
 
 namespace Vyxum.Agent;
@@ -33,6 +34,7 @@ public sealed partial class HubWorker : BackgroundService
     private static readonly TimeSpan SendTimeout = TimeSpan.FromSeconds(10);
 
     private readonly DeviceFleet _fleet;
+    private readonly DeviceDiscovery _discovery;
     private readonly AgentHubClientOptions _clientOptions;
     private readonly ILogger<HubWorker> _logger;
     private readonly TimeProvider _time;
@@ -46,11 +48,18 @@ public sealed partial class HubWorker : BackgroundService
     private bool _sendFailureLogged;
 
     /// <summary>Creates the worker.</summary>
-    public HubWorker(DeviceFleet fleet, IOptions<AgentHubClientOptions> clientOptions, ILogger<HubWorker> logger, TimeProvider timeProvider)
+    public HubWorker(
+        DeviceFleet fleet,
+        DeviceDiscovery discovery,
+        IOptions<AgentHubClientOptions> clientOptions,
+        ILogger<HubWorker> logger,
+        TimeProvider timeProvider)
     {
         ArgumentNullException.ThrowIfNull(fleet);
+        ArgumentNullException.ThrowIfNull(discovery);
         ArgumentNullException.ThrowIfNull(clientOptions);
         _fleet = fleet;
+        _discovery = discovery;
         _clientOptions = clientOptions.Value;
         _logger = logger;
         _time = timeProvider;
@@ -81,6 +90,14 @@ public sealed partial class HubWorker : BackgroundService
             connection.On<string, TimeSpan, AgentCommandResult>(
                 AgentHubContract.Zero,
                 (deviceId, timeout) => _fleet.ZeroAsync(deviceId, timeout, stoppingToken));
+
+            // Called by the web application with a result (decision V-40): look for scales with read-only commands.
+            connection.On<DiscoveryRequest, DiscoveryResult>(
+                AgentHubContract.Discover,
+                request => _discovery.DiscoverAsync(
+                    request,
+                    ports => connection.SendAsync(AgentHubContract.ReportDiscoveryProgress, request.DiscoveryId, ports, stoppingToken),
+                    stoppingToken));
 
             if (!_fleet.UsesLocalDevices)
             {

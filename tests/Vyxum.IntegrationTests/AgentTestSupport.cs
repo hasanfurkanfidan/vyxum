@@ -59,7 +59,10 @@ internal static class AgentTestSupport
     }
 
     /// <summary>Builds an agent host from in-memory settings, the way the executable does but without files.</summary>
-    public static IHost BuildAgent(IDictionary<string, string?> settings, Action<HttpConnectionOptions>? configureConnection = null)
+    public static IHost BuildAgent(
+        IDictionary<string, string?> settings,
+        Action<HttpConnectionOptions>? configureConnection = null,
+        Action<IServiceCollection>? configureServices = null)
     {
         var configuration = new ConfigurationManager();
         configuration.AddInMemoryCollection(settings);
@@ -72,6 +75,8 @@ internal static class AgentTestSupport
         {
             builder.Services.Configure<AgentHubClientOptions>(o => o.ConfigureHttpConnection = configureConnection);
         }
+
+        configureServices?.Invoke(builder.Services);
 
         return builder.Build();
     }

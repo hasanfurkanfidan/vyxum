@@ -82,6 +82,15 @@ public sealed class LiveWeightStore(TimeProvider time) : ILiveWeightSource
         }
     }
 
+    /// <summary>The registered agent connections and their names.</summary>
+    public IReadOnlyList<(string ConnectionId, string AgentName)> GetAgents()
+    {
+        lock (_lock)
+        {
+            return [.. _agentNames.Select(a => (a.Key, a.Value))];
+        }
+    }
+
     /// <summary>
     /// Replaces the details from the device settings (name, capacity, division, unit). A configured device is listed
     /// even before an agent reports it (disconnected, without agent name).

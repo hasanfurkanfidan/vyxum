@@ -53,8 +53,9 @@ public static class AgentHost
     }
 
     /// <summary>
-    /// Registers the agent: settings from <c>Vyxum:Agent</c>, the device fleet, the device worker and the hub worker.
-    /// Configure <see cref="AgentHubClientOptions"/> to change how the hub connection is made.
+    /// Registers the agent: settings from <c>Vyxum:Agent</c>, the device fleet, device discovery, the device worker and the hub worker.
+    /// Configure <see cref="AgentHubClientOptions"/> to change how the hub connection is made, and
+    /// <see cref="Vyxum.Devices.Discovery.PortScannerOptions"/> to change which ports discovery sees and how it opens them.
     /// </summary>
     public static IServiceCollection AddVyxumAgent(this IServiceCollection services, IConfiguration configuration)
     {
@@ -65,6 +66,10 @@ public static class AgentHost
         services.AddOptions<AgentHubClientOptions>();
         services.TryAddSingleton(TimeProvider.System);
         services.AddSingleton<DeviceFleet>();
+
+        // Device discovery (decision V-40). Tests replace the port list and transports through PortScannerOptions.
+        services.AddOptions<Vyxum.Devices.Discovery.PortScannerOptions>();
+        services.AddSingleton<Discovery.DeviceDiscovery>();
         services.AddHostedService<DeviceWorker>();
         services.AddHostedService<HubWorker>();
         return services;

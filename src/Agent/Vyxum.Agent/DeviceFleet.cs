@@ -129,6 +129,24 @@ public sealed partial class DeviceFleet
         [.. _state.Entries.Values.Select(e => e.PortName).OfType<string>().Distinct(StringComparer.OrdinalIgnoreCase)];
 
     /// <summary>
+    /// The serial ports of the running devices with the id of the device that uses each, for device discovery: it reports
+    /// them as in use and never opens them. When two devices name the same port, the first one is given.
+    /// </summary>
+    public IReadOnlyDictionary<string, string> GetPortUsers()
+    {
+        var users = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+        foreach (var device in _state.Devices)
+        {
+            if (device.PortName is { } port)
+            {
+                users.TryAdd(port, device.Id);
+            }
+        }
+
+        return users;
+    }
+
+    /// <summary>
     /// Sends the zero command to a device at most once and returns the outcome. A device whose protocol cannot zero
     /// answers <see cref="AgentCommandOutcome.NotSupported"/>; when <paramref name="timeout"/> passes before the command
     /// was sent, it is not sent and the result is <see cref="AgentCommandOutcome.Unavailable"/>.

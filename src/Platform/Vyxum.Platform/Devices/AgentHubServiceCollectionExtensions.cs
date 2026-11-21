@@ -24,6 +24,9 @@ public static class AgentHubServiceCollectionExtensions
 
         // Device settings (decision V-39): /api/devices/config, hub GetDevices and DevicesChanged.
         services.AddSingleton<AgentDeviceAssignments>();
+
+        // Device discovery (decision V-40): /api/devices/discover, hub Discover and ReportDiscoveryProgress.
+        services.AddSingleton<DiscoveryJobs>();
         services.AddScoped(provider => new DeviceConfigService(
             provider.GetRequiredService<PlatformDbContext>(),
             provider.GetRequiredService<LiveWeightStore>(),

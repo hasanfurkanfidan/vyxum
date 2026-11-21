@@ -17,4 +17,10 @@ public sealed class AgentOptions
     /// is <see cref="Abstractions.DeviceCommandOutcome.Unavailable"/>. Default: 5 seconds.
     /// </summary>
     public TimeSpan CommandTimeout { get; set; } = TimeSpan.FromSeconds(5);
+
+    /// <summary>
+    /// How long a device discovery may take, including the round trip to the agent. After it the job fails with
+    /// <c>devices.AgentTimeout</c>. Default: 60 seconds.
+    /// </summary>
+    public TimeSpan DiscoveryTimeout { get; set; } = TimeSpan.FromSeconds(60);
 }

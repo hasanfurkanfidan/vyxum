@@ -39,7 +39,90 @@ public static class AgentHubContract
 
     /// <summary>Client method without arguments: <c>DevicesChanged()</c>. The device settings changed; call <see cref="GetDevices"/> again.</summary>
     public const string DevicesChanged = "DevicesChanged";
+
+    /// <summary>
+    /// Client method called by the hub with a result: <c>DiscoveryResult Discover(DiscoveryRequest request)</c>. The agent
+    /// looks for scales on its free serial ports (or at one network address) with read-only commands (decision V-40) and
+    /// answers with what it found. While it scans it sends <see cref="ReportDiscoveryProgress"/>.
+    /// </summary>
+    public const string Discover = "Discover";
+
+    /// <summary>Hub method: <c>ReportDiscoveryProgress(string discoveryId, DiscoveryPortState[] ports)</c>, sent while scanning.</summary>
+    public const string ReportDiscoveryProgress = "ReportDiscoveryProgress";
 }
+
+/// <summary>What <see cref="AgentHubContract.Discover"/> should scan.</summary>
+/// <param name="DiscoveryId">The id of the discovery job in the web application; progress reports carry it.</param>
+/// <param name="Tcp">When set, only this network address is probed; otherwise every free serial port.</param>
+public sealed record DiscoveryRequest(string DiscoveryId, DiscoveryTcpTarget? Tcp = null);
+
+/// <summary>A network address to probe.</summary>
+/// <param name="Host">Host name or IP address.</param>
+/// <param name="Port">TCP port.</param>
+public sealed record DiscoveryTcpTarget(string Host, int Port);
+
+/// <summary>The state of one port during discovery.</summary>
+public enum DiscoveryPortStatus
+{
+    /// <summary>Waiting to be scanned.</summary>
+    Pending,
+
+    /// <summary>Being scanned.</summary>
+    Scanning,
+
+    /// <summary>A device was found.</summary>
+    Found,
+
+    /// <summary>No device answered.</summary>
+    NotFound,
+
+    /// <summary>Used by a running device or another program; not touched.</summary>
+    InUse,
+
+    /// <summary>The port could not be opened or failed.</summary>
+    Error,
+}
+
+/// <summary>One port and its state.</summary>
+/// <param name="PortName">The serial port name, or <c>host:port</c> for a network probe.</param>
+/// <param name="State">The state.</param>
+/// <param name="Detail">
+/// For a port used by a running device of the agent, the id of that device; for other ports in use and errors, a short
+/// English explanation; null otherwise.
+/// </param>
+public sealed record DiscoveryPortState(string PortName, DiscoveryPortStatus State, string? Detail);
+
+/// <summary>A weight read while probing.</summary>
+/// <param name="Value">The weight exactly as transmitted (for example <c>"572"</c> or <c>"1.250"</c>); null for overload and underload.</param>
+/// <param name="Unit">The unit; null when the device sent none.</param>
+/// <param name="State">Stable, motion, overload or underload.</param>
+public sealed record DiscoveryReading(string? Value, string? Unit, WeightState State);
+
+/// <summary>A device found by discovery, ready to be saved as device settings.</summary>
+/// <param name="Key">A key unique within the result, for example <c>serial:COM3</c>.</param>
+/// <param name="PortName">The serial port; null for a network device.</param>
+/// <param name="Host">The host of a network device; null for a serial port.</param>
+/// <param name="Port">The TCP port of a network device; null for a serial port.</param>
+/// <param name="Transport">The transport settings: a JSON object with the shape of <see cref="Configuration.TransportSettings"/>.</param>
+/// <param name="Protocol">The protocol settings: a JSON object with the shape of <see cref="Configuration.ProtocolSettings"/>.</param>
+/// <param name="SerialNumber">The serial number when the device reported it; otherwise null.</param>
+/// <param name="Reading">The weight read while probing; null when the device answered without one.</param>
+/// <param name="Description">A short description, for example <c>MT-SICS, 9600 8N1</c>.</param>
+public sealed record DiscoveryCandidate(
+    string Key,
+    string? PortName,
+    string? Host,
+    int? Port,
+    JsonElement Transport,
+    JsonElement Protocol,
+    string? SerialNumber,
+    DiscoveryReading? Reading,
+    string Description);
+
+/// <summary>The answer to <see cref="AgentHubContract.Discover"/>.</summary>
+/// <param name="Ports">Every port with its final state.</param>
+/// <param name="Candidates">The devices found.</param>
+public sealed record DiscoveryResult(IReadOnlyList<DiscoveryPortState> Ports, IReadOnlyList<DiscoveryCandidate> Candidates);
 
 /// <summary>One device from <see cref="AgentHubContract.GetDevices"/>.</summary>
 /// <param name="Id">The device id.</param>

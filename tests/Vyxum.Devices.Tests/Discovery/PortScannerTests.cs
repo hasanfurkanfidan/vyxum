@@ -29,8 +29,8 @@ public class PortScannerTests
         }
     }
 
-    private static Task<PortScanReport> ScanAsync(VirtualPorts ports, IReadOnlyCollection<string>? inUse = null, Action<PortScannerOptions>? configure = null) =>
-        new PortScanner(ports.Options(configure)).ScanAsync(new PortScanRequest(inUse ?? []), cancellationToken: Ct);
+    private static Task<PortScanReport> ScanAsync(VirtualPorts ports, IReadOnlyDictionary<string, string>? inUse = null, Action<PortScannerOptions>? configure = null) =>
+        new PortScanner(ports.Options(configure)).ScanAsync(new PortScanRequest(inUse ?? new Dictionary<string, string>()), cancellationToken: Ct);
 
     [Fact]
     public void The_whitelist_is_exactly_SI_and_I4()
@@ -188,11 +188,11 @@ public class PortScannerTests
         var device = Ind231();
         var ports = new VirtualPorts().Device("COM3", device).Silent("COM1");
 
-        var report = await ScanAsync(ports, inUse: ["com3"]);
+        var report = await ScanAsync(ports, inUse: new Dictionary<string, string> { ["com3"] = "scale-1" });
 
         report.Ports.ShouldBe([
             new PortScanStatus("COM1", PortScanState.NotFound),
-            new PortScanStatus("COM3", PortScanState.InUse, "The port is used by a device of this agent."),
+            new PortScanStatus("COM3", PortScanState.InUse, "scale-1"),
         ]);
         report.Devices.ShouldBeEmpty();
         ports.Opens.ShouldAllBe(o => o.PortName == "COM1");
@@ -236,7 +236,7 @@ public class PortScannerTests
         var progress = new SyncProgress();
         var watch = Stopwatch.StartNew();
 
-        var report = await new PortScanner(ports.Options()).ScanAsync(new PortScanRequest([]), progress, Ct);
+        var report = await new PortScanner(ports.Options()).ScanAsync(new PortScanRequest(new Dictionary<string, string>()), progress, Ct);
 
         watch.Stop();
         report.Ports.Select(p => (p.PortName, p.State)).ShouldBe([
@@ -262,7 +262,7 @@ public class PortScannerTests
         using var cts = CancellationTokenSource.CreateLinkedTokenSource(Ct);
         cts.CancelAfter(TimeSpan.FromMilliseconds(300));
 
-        await Should.ThrowAsync<OperationCanceledException>(() => new PortScanner(ports.Options()).ScanAsync(new PortScanRequest([]), null, cts.Token));
+        await Should.ThrowAsync<OperationCanceledException>(() => new PortScanner(ports.Options()).ScanAsync(new PortScanRequest(new Dictionary<string, string>()), null, cts.Token));
     }
 
     [Fact]
@@ -278,7 +278,7 @@ public class PortScannerTests
         };
 
         var report = await new PortScanner(options).ScanAsync(
-            new PortScanRequest([], new TcpTransportOptions { Host = "127.0.0.1", Port = server.Port }), null, Ct);
+            new PortScanRequest(new Dictionary<string, string>(), new TcpTransportOptions { Host = "127.0.0.1", Port = server.Port }), null, Ct);
 
         report.Ports.ShouldHaveSingleItem().ShouldBe(new PortScanStatus($"127.0.0.1:{server.Port}", PortScanState.Found));
         var found = report.Devices.ShouldHaveSingleItem();
@@ -297,7 +297,7 @@ public class PortScannerTests
 
         // Port 1 on this computer: nothing listens, the connection is refused.
         var report = await new PortScanner(options).ScanAsync(
-            new PortScanRequest([], new TcpTransportOptions { Host = "127.0.0.1", Port = 1 }), null, Ct);
+            new PortScanRequest(new Dictionary<string, string>(), new TcpTransportOptions { Host = "127.0.0.1", Port = 1 }), null, Ct);
 
         var port = report.Ports.ShouldHaveSingleItem();
         port.State.ShouldBe(PortScanState.Error);

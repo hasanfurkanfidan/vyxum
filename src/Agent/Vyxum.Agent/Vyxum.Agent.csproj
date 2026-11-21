@@ -23,6 +23,7 @@
     <ProjectReference Include="..\..\Devices\Vyxum.Devices.ToledoContinuous\Vyxum.Devices.ToledoContinuous.csproj" />
     <ProjectReference Include="..\..\Devices\Vyxum.Devices.GenericAscii\Vyxum.Devices.GenericAscii.csproj" />
     <ProjectReference Include="..\..\Devices\Vyxum.Devices.Simulator\Vyxum.Devices.Simulator.csproj" />
+    <ProjectReference Include="..\..\Devices\Vyxum.Devices.Discovery\Vyxum.Devices.Discovery.csproj" />
   </ItemGroup>
 
 </Project>
