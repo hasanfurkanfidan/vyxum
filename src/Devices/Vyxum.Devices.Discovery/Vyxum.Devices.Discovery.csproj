@@ -1,0 +1,11 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <ItemGroup>
+    <ProjectReference Include="..\Vyxum.Devices\Vyxum.Devices.csproj" />
+    <ProjectReference Include="..\Vyxum.Devices.Transports\Vyxum.Devices.Transports.csproj" />
+    <ProjectReference Include="..\Vyxum.Devices.MtSics\Vyxum.Devices.MtSics.csproj" />
+    <ProjectReference Include="..\Vyxum.Devices.ToledoContinuous\Vyxum.Devices.ToledoContinuous.csproj" />
+    <ProjectReference Include="..\Vyxum.Devices.GenericAscii\Vyxum.Devices.GenericAscii.csproj" />
+  </ItemGroup>
+
+</Project>

@@ -8,6 +8,7 @@
   </Folder>
   <Folder Name="/src/Devices/">
     <Project Path="src/Devices/Vyxum.Devices/Vyxum.Devices.csproj" />
+    <Project Path="src/Devices/Vyxum.Devices.Discovery/Vyxum.Devices.Discovery.csproj" />
     <Project Path="src/Devices/Vyxum.Devices.GenericAscii/Vyxum.Devices.GenericAscii.csproj" />
     <Project Path="src/Devices/Vyxum.Devices.MtSics/Vyxum.Devices.MtSics.csproj" />
     <Project Path="src/Devices/Vyxum.Devices.Simulator/Vyxum.Devices.Simulator.csproj" />

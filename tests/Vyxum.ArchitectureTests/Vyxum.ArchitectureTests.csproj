@@ -18,6 +18,7 @@
     <ProjectReference Include="..\..\src\Host\Vyxum.Host\Vyxum.Host.csproj" />
     <ProjectReference Include="..\..\src\Devices\Vyxum.Devices\Vyxum.Devices.csproj" />
     <ProjectReference Include="..\..\src\Devices\Vyxum.Devices.Transports\Vyxum.Devices.Transports.csproj" />
+    <ProjectReference Include="..\..\src\Devices\Vyxum.Devices.Discovery\Vyxum.Devices.Discovery.csproj" />
     <ProjectReference Include="..\..\src\Devices\Vyxum.Devices.Simulator\Vyxum.Devices.Simulator.csproj" />
     <ProjectReference Include="..\..\src\Devices\Vyxum.Devices.MtSics\Vyxum.Devices.MtSics.csproj" />
     <ProjectReference Include="..\..\src\Devices\Vyxum.Devices.ToledoContinuous\Vyxum.Devices.ToledoContinuous.csproj" />

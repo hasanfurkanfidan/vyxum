@@ -20,6 +20,29 @@ public static class MtSicsCommands
     public static bool IsSendable(string? command) =>
         command is not null && Sendable.Contains(command, StringComparer.Ordinal);
 
+    /// <summary>The identification command: the device answers with its serial number. Read-only.</summary>
+    public const string SerialNumber = "I4";
+
+    /// <summary>
+    /// The only commands device discovery sends (decision V-40): <c>SI</c> to read the weight once and <c>I4</c> for the
+    /// serial number. Neither changes anything on the device.
+    /// </summary>
+    public static IReadOnlyList<string> Discovery { get; } = ["SI", SerialNumber];
+
+    /// <summary>True when <paramref name="command"/> is exactly one of <see cref="Discovery"/>.</summary>
+    public static bool IsDiscoverySendable(string? command) =>
+        command is not null && Discovery.Contains(command, StringComparer.Ordinal);
+
+    /// <summary>Throws <see cref="InvalidOperationException"/> unless <paramref name="command"/> is a discovery command.</summary>
+    public static void EnsureDiscoverySendable(string? command)
+    {
+        if (!IsDiscoverySendable(command))
+        {
+            throw new InvalidOperationException(
+                $"The MT-SICS command '{command}' must never be sent during discovery. Only these are allowed: {string.Join(", ", Discovery)}.");
+        }
+    }
+
     /// <summary>Throws <see cref="InvalidOperationException"/> unless <paramref name="command"/> may be sent.</summary>
     public static void EnsureSendable(string? command)
     {

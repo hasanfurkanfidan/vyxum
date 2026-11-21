@@ -5,6 +5,7 @@ using NetArchTest.Rules;
 using Shouldly;
 using Vyxum.Agent;
 using Vyxum.Devices;
+using Vyxum.Devices.Discovery;
 using Vyxum.Devices.GenericAscii;
 using Vyxum.Devices.MtSics;
 using Vyxum.Devices.Simulator;
@@ -40,6 +41,7 @@ public class ArchitectureTests
     private static readonly Assembly DevicesMtSics = typeof(MtSicsProtocol).Assembly;
     private static readonly Assembly DevicesToledoContinuous = typeof(ToledoContinuousProtocol).Assembly;
     private static readonly Assembly DevicesGenericAscii = typeof(GenericAsciiProtocol).Assembly;
+    private static readonly Assembly DevicesDiscovery = typeof(PortScanner).Assembly;
     private static readonly Assembly AgentAssembly = typeof(DeviceFleet).Assembly;
 
     private static readonly Assembly[] ProtocolAssemblies = [DevicesMtSics, DevicesToledoContinuous, DevicesGenericAscii];
@@ -232,6 +234,26 @@ public class ArchitectureTests
         VyxumReferences(AgentAssembly)
             .Where(n => n.StartsWith("Vyxum.Platform", StringComparison.Ordinal) || n == Host.GetName().Name)
             .ShouldBeEmpty("Vyxum.Agent must not reference the platform or the host");
+    }
+
+    [Fact]
+    public void Discovery_references_only_device_assemblies()
+    {
+        // Positive check first: discovery uses the transports and the protocol probes.
+        VyxumReferences(DevicesDiscovery).ShouldContain(DevicesTransports.GetName().Name!);
+        VyxumReferences(DevicesDiscovery).ShouldContain(DevicesMtSics.GetName().Name!);
+
+        VyxumReferences(DevicesDiscovery)
+            .ShouldAllBe(n => IsDeviceAssembly(n) && n != DevicesSimulator.GetName().Name, "Vyxum.Devices.Discovery may only reference device assemblies, not the simulator");
+    }
+
+    [Fact]
+    public void Platform_and_host_do_not_reference_discovery()
+    {
+        foreach (var assembly in new[] { Platform, Abstractions, Host })
+        {
+            VyxumReferences(assembly).ShouldNotContain(DevicesDiscovery.GetName().Name!);
+        }
     }
 
     private static bool IsDeviceAssembly(string name) =>
