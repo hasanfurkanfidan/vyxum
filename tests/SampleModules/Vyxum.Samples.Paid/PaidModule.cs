@@ -69,5 +69,9 @@ public sealed class PaidModule : IModule
     public sealed record EntryInput(string Text);
 }
 
-/// <summary>An empty hub of the paid sample module.</summary>
-public sealed class PaidHub : Hub;
+/// <summary>A hub of the paid sample module.</summary>
+public sealed class PaidHub : Hub
+{
+    /// <summary>Answers "pong".</summary>
+    public string Ping() => "pong";
+}

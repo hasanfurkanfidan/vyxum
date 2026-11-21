@@ -16,12 +16,13 @@ public static class ModuleEndpointExtensions
     {
         ArgumentNullException.ThrowIfNull(endpoints);
 
+        var hubs = endpoints.ServiceProvider.GetRequiredService<LicensedHubs>();
         foreach (var module in endpoints.ServiceProvider.GetRequiredService<ModuleCatalog>().Modules)
         {
             var group = endpoints.MapGroup(string.Empty);
             if (module.Manifest.RequiresLicense)
             {
-                LicenseGate.Apply(group, module.Manifest.Id);
+                LicenseGate.Apply(group, module.Manifest.Id, hubs);
             }
 
             module.Module.MapEndpoints(group);

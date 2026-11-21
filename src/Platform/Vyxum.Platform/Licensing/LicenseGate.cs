@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Routing;
+using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.DependencyInjection;
 using Vyxum.Platform.Abstractions;
 
@@ -10,13 +11,21 @@ namespace Vyxum.Platform;
 /// Locks the endpoints of a module that requires a license (<see cref="ModuleManifest.RequiresLicense"/>).
 /// </summary>
 /// <remarks>
+/// <para>
 /// The gate wraps the request delegate of every endpoint created through the module's route group, so it covers
-/// minimal API handlers, plain <see cref="RequestDelegate"/> endpoints, nested groups and SignalR hubs alike, and runs
-/// before any endpoint filter of the module. Locked (no license, an invalid file, the module not in the license, or the
-/// license not started yet): 403 <c>license_required</c>. Read-only (grace period over): only <c>GET</c> and
-/// <c>HEAD</c> pass, everything else is 403 <c>license_read_only</c>; a hub cannot negotiate (POST) then, so a hub is
-/// effectively locked in read-only mode. Licensed or in grace: the request passes. Middleware a module might add is not
+/// minimal API handlers, plain <see cref="RequestDelegate"/> endpoints and nested groups, and runs before any endpoint
+/// filter of the module. Locked (no license, an invalid file, the module not in the license, or the license not started
+/// yet): 403 <c>license_required</c>. Read-only (grace period over): only <c>GET</c> and <c>HEAD</c> pass, everything
+/// else is 403 <c>license_read_only</c>. Licensed or in grace: the request passes. Middleware a module might add is not
 /// covered (modules only map endpoints).
+/// </para>
+/// <para>
+/// For a SignalR hub the gate only sees the HTTP requests of the connection (negotiate, the WebSocket upgrade, long
+/// polling), not the connection itself: a WebSocket opened without negotiation is a GET and passes in read-only mode,
+/// and a connection opened while licensed stays open after the license ends. Hubs are therefore also checked by
+/// <see cref="LicenseHubFilter"/> on connect and on every invocation, and their connections are aborted when the
+/// license no longer allows them (<see cref="LicensedHubs"/>); the gate registers each hub of the module there.
+/// </para>
 /// </remarks>
 internal static class LicenseGate
 {
@@ -26,9 +35,18 @@ internal static class LicenseGate
     /// <summary>Error code of a write request to a read-only module.</summary>
     public const string LicenseReadOnly = "license_read_only";
 
-    /// <summary>Applies the gate to every endpoint of <paramref name="group"/>.</summary>
-    public static void Apply(RouteGroupBuilder group, string moduleId)
+    /// <summary>Applies the gate to every endpoint of <paramref name="group"/> and registers its hubs in <paramref name="hubs"/>.</summary>
+    public static void Apply(RouteGroupBuilder group, string moduleId, LicensedHubs hubs)
     {
+        // Runs after the endpoint's own conventions, which add the hub metadata.
+        ((IEndpointConventionBuilder)group).Finally(builder =>
+        {
+            foreach (var hub in builder.Metadata.OfType<HubMetadata>())
+            {
+                hubs.Register(hub.HubType, moduleId);
+            }
+        });
+
         ((IEndpointConventionBuilder)group).Add(builder =>
         {
             var next = builder.RequestDelegate;

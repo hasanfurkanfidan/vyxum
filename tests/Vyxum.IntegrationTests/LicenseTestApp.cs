@@ -129,6 +129,8 @@ internal sealed class LicenseTestApp : IAsyncDisposable
 
     public IServiceProvider Services => _factory.Services;
 
+    public TestServer Server => _factory.Server;
+
     public static StringContent Json(string json) => new(json, Encoding.UTF8, "application/json");
 
     public Task<HttpResponseMessage> UploadAsync(string file) =>

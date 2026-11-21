@@ -1,4 +1,5 @@
 using System.Reflection;
+using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
@@ -83,6 +84,9 @@ public static class PlatformServiceCollectionExtensions
         services.AddSingleton<LicenseManager>();
         services.AddSingleton<ILicenseState>(provider => provider.GetRequiredService<LicenseManager>());
         services.AddHostedService<LicenseMaintenanceService>();
+        services.AddSingleton<LicensedHubs>();
+        services.AddSingleton<LicenseHubFilter>();
+        services.Configure<HubOptions>(options => options.AddFilter<LicenseHubFilter>());
         services.Configure<OutboxOptions>(configuration.GetSection(OutboxOptions.SectionName));
         services.AddSingleton<OutboxDispatcher>();
         services.AddHostedService<OutboxDispatcherService>();
