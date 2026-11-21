@@ -63,8 +63,8 @@ app.MapVyxumSetup();
 app.MapVyxumLicense();
 app.MapVyxumModules();
 
-// The built web UI. Client-side routes fall back to index.html; API, hub and health paths never do.
-app.MapFallbackToFile("{*path:regex(^(?!api(/|$)|hubs(/|$)|health(/|$)).*$)}", "index.html");
+// The built web UI. Client-side routes fall back to index.html; API, hub, health and module file paths never do.
+app.MapFallbackToFile("{*path:regex(^(?!api(/|$)|hubs(/|$)|health(/|$)|modules(/|$)).*$)}", "index.html");
 
 if (!File.Exists(Path.Combine(app.Environment.WebRootPath ?? "", "index.html")))
 {

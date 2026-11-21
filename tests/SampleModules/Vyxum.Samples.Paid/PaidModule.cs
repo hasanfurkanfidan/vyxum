@@ -1,3 +1,4 @@
+using System.Resources;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Routing;
@@ -10,7 +11,7 @@ namespace Vyxum.Samples.Paid;
 
 /// <summary>
 /// Sample module that requires a license (<see cref="ModuleManifest.RequiresLicense"/>). It keeps entries, adds one for
-/// every placed order (event <c>samples.order-placed</c>) and tells whether a device is a licensed station.
+/// every placed order (event <c>samples.order-placed</c>), has one screen (embedded <c>ui/index.js</c>) and tells whether a device is a licensed station.
 /// Test-only, never shipped.
 /// </summary>
 public sealed class PaidModule : IModule
@@ -25,11 +26,16 @@ public sealed class PaidModule : IModule
         Version = new Version(1, 0),
         Optional = ["samples.orders"],
         RequiresLicense = true,
+        Ui = new ModuleUi { Entry = "index.js", SdkVersion = 1 },
     };
+
+    /// <summary>Prefix of the module's UI strings (<c>Resources/Strings.resx</c>).</summary>
+    public const string StringsPrefix = "samples-paid";
 
     /// <inheritdoc />
     public void ConfigureServices(IServiceCollection services, ModuleContext context)
     {
+        services.AddUiStrings(StringsPrefix, new ResourceManager("Vyxum.Samples.Paid.Resources.Strings", typeof(PaidModule).Assembly));
         context.AddDbContext<PaidDbContext>();
         context.AddEventHandler<OrderPlaced, OrderPlacedHandler>();
     }

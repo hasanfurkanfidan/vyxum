@@ -4,4 +4,9 @@
     <ProjectReference Include="..\..\..\src\Platform\Vyxum.Platform.Abstractions\Vyxum.Platform.Abstractions.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <!-- The module's screens (ModuleUi): a hand-written ES module, embedded under the logical name prefix vyxum-ui/. -->
+    <EmbeddedResource Include="ui\**\*" LogicalName="vyxum-ui/%(RecursiveDir)%(Filename)%(Extension)" />
+  </ItemGroup>
+
 </Project>

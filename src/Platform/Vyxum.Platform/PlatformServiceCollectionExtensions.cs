@@ -50,6 +50,7 @@ public static class PlatformServiceCollectionExtensions
 
         var catalog = new ModuleCatalog(descriptors);
         services.AddSingleton(catalog);
+        services.AddSingleton(new ModuleUiFiles(catalog));
         services.AddSingleton<ICapabilityRegistry>(capabilities);
         services.AddSingleton(databaseSettings);
         services.AddDbContext<PlatformDbContext>((provider, options) =>

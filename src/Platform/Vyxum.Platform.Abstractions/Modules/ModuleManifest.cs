@@ -30,4 +30,7 @@ public sealed class ModuleManifest
     /// handlers; the module reads the details through <see cref="ILicenseState"/>.
     /// </summary>
     public bool RequiresLicense { get; init; }
+
+    /// <summary>The module's screens, embedded in its assembly, or null when the module has none.</summary>
+    public ModuleUi? Ui { get; init; }
 }

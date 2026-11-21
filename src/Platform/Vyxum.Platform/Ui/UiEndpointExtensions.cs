@@ -17,13 +17,14 @@ public static class UiEndpointExtensions
     /// <summary>
     /// Maps <c>GET /api/ui/strings</c>, which returns <c>{ culture, strings: { "prefix.Key": "text" } }</c>
     /// in the request's UI culture (set by request localization), and <c>GET /api/ui/modules</c>, which
-    /// returns <c>{ modules: [{ id, version, requiresLicense, license }], capabilities: ["..."], companyName,
+    /// returns <c>{ modules: [{ id, version, requiresLicense, license, ui }], capabilities: ["..."], companyName,
     /// license: { status, licensee, graceDaysLeft } }</c>; <c>companyName</c> is the name entered in the setup wizard, or
     /// null.
     /// </summary>
     /// <remarks>
     /// A module's <c>license</c> is <c>free</c>, <c>licensed</c>, <c>grace</c>, <c>readOnly</c> or <c>locked</c>; the shell
-    /// shows a module's screens by this field. <c>capabilities</c> still lists what every loaded module provides, locked
+    /// shows a module's screens by this field. A module's <c>ui</c> is <c>{ entry, sdkVersion }</c> (<c>entry</c> is the URL of
+    /// its embedded entry ES module) when it has screens and may load them, i.e. it is not locked; otherwise null. <c>capabilities</c> still lists what every loaded module provides, locked
     /// ones included: the module is loaded and its capabilities are fixed at startup (<see cref="Abstractions.ICapabilityRegistry"/>),
     /// so capabilities say what is installed, not what is licensed. The top-level <c>license.status</c> is <c>none</c>,
     /// <c>invalid</c>, <c>notYetValid</c>, <c>valid</c>, <c>grace</c> or <c>readOnly</c>; <c>licensee</c> is the licensee's
@@ -47,7 +48,8 @@ public static class UiEndpointExtensions
                     m.Manifest.Id,
                     m.Manifest.Version.ToString(),
                     m.Manifest.RequiresLicense,
-                    LicenseText.Of(snapshot.GetModuleStatus(m.Manifest.Id))))
+                    LicenseText.Of(snapshot.GetModuleStatus(m.Manifest.Id)),
+                    UiOf(m.Manifest, snapshot.GetModuleStatus(m.Manifest.Id))))
                 .ToList();
             var capabilities = catalog.Modules
                 .SelectMany(m => m.Manifest.Provides)
@@ -66,9 +68,17 @@ public static class UiEndpointExtensions
         return endpoints;
     }
 
+    // The screens of a locked module are not offered: the shell does not try to load them.
+    private static UiModuleScreens? UiOf(Abstractions.ModuleManifest manifest, Abstractions.ModuleLicenseState state) =>
+        manifest.Ui is { } ui && LicenseGate.Deny(state, HttpMethods.Get) is null
+            ? new UiModuleScreens(ModuleUiEndpointExtensions.UrlOf(manifest.Id, ui.Entry), ui.SdkVersion)
+            : null;
+
     internal sealed record UiStringsResponse(string Culture, IReadOnlyDictionary<string, string> Strings);
 
-    internal sealed record UiModule(string Id, string Version, bool RequiresLicense, string License);
+    internal sealed record UiModule(string Id, string Version, bool RequiresLicense, string License, UiModuleScreens? Ui);
+
+    internal sealed record UiModuleScreens(string Entry, int SdkVersion);
 
     internal sealed record UiLicense(string Status, string? Licensee, int? GraceDaysLeft);
 

@@ -172,4 +172,21 @@ public class ModuleValidatorTests
 
     [IntegrationEvent("Bad Name", 0)]
     private sealed record EventWithBadName : IIntegrationEvent;
+
+    [Fact]
+    public void Ui_entry_must_be_an_embedded_resource_and_sdk_version_positive()
+    {
+        var module = new TestModule(new ModuleManifest
+        {
+            Id = "samples.screens",
+            Version = new Version(1, 0),
+            Ui = new ModuleUi { Entry = "index.js", SdkVersion = 0 },
+        });
+
+        Problems(module).ShouldBe(
+        [
+            "Module 'samples.screens' declares UI SDK version 0; use 1 or more.",
+            "Module 'samples.screens' declares the UI entry 'index.js', but its assembly has no embedded resource 'vyxum-ui/index.js'.",
+        ]);
+    }
 }
