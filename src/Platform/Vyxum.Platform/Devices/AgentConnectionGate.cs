@@ -80,16 +80,13 @@ public sealed partial class AgentConnectionGate(IOptionsMonitor<AgentOptions> op
         return IPAddress.IsLoopback(address);
     }
 
+    /// <summary>
+    /// Reads the key from the header only. A query-string key is not accepted: query strings end up in request logs.
+    /// </summary>
     private static string? ReadKey(HttpRequest request)
     {
         var header = request.Headers[AgentHubContract.KeyHeader].ToString();
-        if (header.Length > 0)
-        {
-            return header;
-        }
-
-        var query = request.Query[AgentHubContract.KeyQueryParameter].ToString();
-        return query.Length > 0 ? query : null;
+        return header.Length > 0 ? header : null;
     }
 
     private static bool KeysMatch(string? supplied, string expected)

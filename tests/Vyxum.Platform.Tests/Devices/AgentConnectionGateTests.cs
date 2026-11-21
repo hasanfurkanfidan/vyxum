@@ -23,7 +23,7 @@ public class AgentConnectionGateTests
 
         if (query is not null)
         {
-            context.Request.QueryString = QueryString.Create(AgentHubContract.KeyQueryParameter, query);
+            context.Request.QueryString = QueryString.Create("access_token", query);
         }
 
         return context;
@@ -47,14 +47,14 @@ public class AgentConnectionGateTests
 
     [Theory]
     [InlineData("secret", null, AgentConnectionDecision.Allowed)]
-    [InlineData(null, "secret", AgentConnectionDecision.Allowed)]
     [InlineData("secret", "wrong", AgentConnectionDecision.Allowed)]
+    [InlineData(null, "secret", AgentConnectionDecision.InvalidKey)]
     [InlineData(null, null, AgentConnectionDecision.InvalidKey)]
     [InlineData("wrong", null, AgentConnectionDecision.InvalidKey)]
     [InlineData("secre", null, AgentConnectionDecision.InvalidKey)]
     [InlineData("SECRET", null, AgentConnectionDecision.InvalidKey)]
     [InlineData(null, "wrong", AgentConnectionDecision.InvalidKey)]
-    public void With_key_the_header_or_query_must_match(string? header, string? query, AgentConnectionDecision expected)
+    public void With_key_the_header_must_match_and_the_query_is_ignored(string? header, string? query, AgentConnectionDecision expected)
     {
         Gate("secret").Check(Request("192.168.1.50", header, query)).ShouldBe(expected);
     }

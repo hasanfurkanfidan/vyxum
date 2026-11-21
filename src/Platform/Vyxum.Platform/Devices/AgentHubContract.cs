@@ -10,11 +10,8 @@ public static class AgentHubContract
     /// <summary>The hub path.</summary>
     public const string Path = "/hubs/agent";
 
-    /// <summary>Header that carries the agent key.</summary>
+    /// <summary>Header that carries the agent key. It is the only place the key is accepted.</summary>
     public const string KeyHeader = "X-Vyxum-Agent-Key";
-
-    /// <summary>Query parameter that carries the agent key for clients that cannot send headers.</summary>
-    public const string KeyQueryParameter = "access_token";
 
     /// <summary>Hub method: <c>Register(AgentRegistration)</c>.</summary>
     public const string Register = "Register";

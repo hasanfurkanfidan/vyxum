@@ -59,7 +59,7 @@ public sealed class AgentHubTests : IDisposable
         var path = AgentHubContract.Path.TrimStart('/');
         if (queryKey is not null)
         {
-            path += $"?{AgentHubContract.KeyQueryParameter}={Uri.EscapeDataString(queryKey)}";
+            path += $"?access_token={Uri.EscapeDataString(queryKey)}";
         }
 
         return new HubConnectionBuilder()
@@ -186,22 +186,32 @@ public sealed class AgentHubTests : IDisposable
     }
 
     [Theory]
-    [InlineData(HttpTransportType.LongPolling, false)]
-    [InlineData(HttpTransportType.LongPolling, true)]
-    [InlineData(HttpTransportType.WebSockets, false)]
-    public async Task Configured_key_accepts_correct_key_from_remote_address(HttpTransportType transport, bool inQuery)
+    [InlineData(HttpTransportType.LongPolling)]
+    [InlineData(HttpTransportType.WebSockets)]
+    public async Task Configured_key_accepts_correct_key_from_remote_address(HttpTransportType transport)
     {
         var ct = TestContext.Current.CancellationToken;
         await using var factory = CreateFactory(key: "test-agent-key", remoteAddress: RemoteAddress);
         using var client = factory.CreateClient();
-        await using var connection = inQuery
-            ? CreateConnection(factory.Server, transport, queryKey: "test-agent-key")
-            : CreateConnection(factory.Server, transport, headerKey: "test-agent-key");
+        await using var connection = CreateConnection(factory.Server, transport, headerKey: "test-agent-key");
 
         await connection.StartAsync(ct);
         await RegisterAndReportAsync(connection, ct);
 
         (await GetDeviceAsync(client, ct)).GetProperty("state").GetString().ShouldBe("Connected");
+    }
+
+    [Fact]
+    public async Task Configured_key_in_query_string_is_rejected()
+    {
+        // Query strings end up in request logs, so the key is accepted only in the header.
+        var ct = TestContext.Current.CancellationToken;
+        await using var factory = CreateFactory(key: "test-agent-key");
+        await using var connection = CreateConnection(factory.Server, queryKey: "test-agent-key");
+
+        var exception = await Should.ThrowAsync<HttpRequestException>(() => connection.StartAsync(ct));
+
+        exception.StatusCode.ShouldBe(HttpStatusCode.Unauthorized);
     }
 
     [Fact]
