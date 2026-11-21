@@ -70,6 +70,34 @@ curl -H "Accept-Language: en" http://127.0.0.1:5199/api/hello
 
 Sunucu `tr` (varsayılan) ve `en` dillerini destekler.
 
+## Cihazlar
+
+Bir terazi iki parçada okunur. **Taşıma** (transport) baytları seri port ya da TCP üzerinden taşır. **Protokol** ise terazinin gönderdiği baytları yorumlar. Her taşıma her protokolle çalışır.
+
+| Proje | İçerik |
+|---|---|
+| `src/Devices/Vyxum.Devices` | Sözleşmeler (`ITransport`, `IScaleProtocol`), çerçeve okuyucu ve cihaz çalıştırıcı |
+| `src/Devices/Vyxum.Devices.Transports` | Seri port ve TCP taşımaları |
+| `src/Devices/Vyxum.Devices.MtSics` | MT-SICS protokolü |
+| `src/Devices/Vyxum.Devices.ToledoContinuous` | Toledo sürekli çıkış protokolü |
+| `src/Devices/Vyxum.Devices.GenericAscii` | Diğer ASCII çıkışlar için kurala dayalı protokol |
+| `src/Devices/Vyxum.Devices.Simulator` | Bellek ya da TCP üzerinden simüle edilmiş teraziler ve kayıtlı satırların yeniden oynatılması |
+
+Desteklenen taşımalar seri port ve TCP'dir. Desteklenen protokoller MT-SICS, Toledo Continuous ve genel ASCII'dir.
+
+Sürücüler yalnızca ağırlığı okur. MT-SICS sürücüsü yalnızca `S`, `SI` ve `SIR` gönderir. Toledo Continuous yalnızca dinler. Genel ASCII, yalnızca sizin yapılandırdığınız istek komutunu gönderir; bu komutun yalnızca ağırlığı okuyan bir komut olması gerekir.
+
+[Vyxum Agent](src/Agent/Vyxum.Agent/README.tr.md), terazinin bağlı olduğu bilgisayarda çalışır. Cihazları okur ve canlı ağırlığı web uygulamasına gönderir.
+
+Sunucuyu ve bir agent'ı simülatörle aynı bilgisayarda çalıştırmak için iki terminal kullanın:
+
+```bash
+dotnet run --project src/Host/Vyxum.Host --urls http://localhost:5000
+dotnet run --project src/Agent/Vyxum.Agent
+```
+
+Ardından http://localhost:5000/api/devices adresini açın. Agent'ın hazır ayarları simüle edilmiş bir MT-SICS terazisi (572 g) kullanır; donanım gerekmez.
+
 ## Yapılandırma
 
 Anahtarlar `appsettings.json`, ortam değişkenleri (örneğin `Vyxum__Database__Provider`) ya da komut satırı argümanlarından okunur.
