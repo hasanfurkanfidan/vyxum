@@ -8,6 +8,10 @@ Bu depo Vyxum'un açık çekirdeğidir ve Apache Lisansı 2.0 ile lisanslanmış
 
 > **Durum: erken geliştirme.** Depoda platform (modül yükleme ve doğrulama, outbox ve inbox ile entegrasyon olayları, veritabanı sağlayıcısı seçimi), Products ve Weighing modülleri, web arayüzü ve cihaz sürücüleri bulunur. F2 fazı sürmektedir.
 
+## Kurulum / Installation
+
+Windows 10 ya da 11 (64 bit). İnternet bağlantısı, veritabanı sunucusu ya da ek bir program gerekmez. `VyxumSetup-<sürüm>.exe` dosyasını çalıştırın ve adım adım kılavuzu izleyin: [Kurulum kılavuzu](docs/KURULUM.md) (English: [docs/INSTALL.md](docs/INSTALL.md)).
+
 ## Depo yapısı
 
 | Yol | İçerik |

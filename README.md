@@ -8,6 +8,10 @@ This repository is the open core of Vyxum, licensed under the Apache License 2.0
 
 > **Status: early development.** The repository contains the platform (module loading and validation, integration events with an outbox and inbox, database provider selection), the Products and Weighing modules, the web UI and the device drivers. Phase F2 is in progress.
 
+## Kurulum / Installation
+
+Windows 10 or 11 (64-bit). No internet connection, database server or extra program is needed. Run `VyxumSetup-<version>.exe` and follow the step-by-step guide: [Installation guide](docs/INSTALL.md) (Türkçe: [docs/KURULUM.md](docs/KURULUM.md)).
+
 ## Repository layout
 
 | Path | Contents |
