@@ -77,4 +77,7 @@
   <data name="CancelReason" xml:space="preserve"><value>Reason for cancellation</value></data>
   <data name="CancelConfirm" xml:space="preserve"><value>Cancel record {0}? It stays in the list but is not included in totals.</value></data>
   <data name="Empty" xml:space="preserve"><value>No records found.</value></data>
+  <data name="LiveWeight" xml:space="preserve"><value>Live weight</value></data>
+  <data name="ProductSelection" xml:space="preserve"><value>Product selection</value></data>
+  <data name="NoRecent" xml:space="preserve"><value>No weighings yet.</value></data>
 </root>

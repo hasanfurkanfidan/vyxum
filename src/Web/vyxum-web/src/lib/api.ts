@@ -154,6 +154,12 @@ export function apiDelete<T>(path: string, options?: RequestOptions): Promise<T>
   return request<T>('DELETE', path, undefined, options);
 }
 
+/** GET that returns the raw body text, for JSON the caller parses itself (for example to keep decimals). */
+export async function apiText(path: string, options: RequestOptions = {}): Promise<string> {
+  const response = await send('GET', path, undefined, options);
+  return response.text();
+}
+
 /** GET that returns the raw body as a Blob, for file downloads such as the Excel export. */
 export async function apiBlob(path: string, options: RequestOptions = {}): Promise<Blob> {
   const response = await send('GET', path, undefined, { ...options, headers: { Accept: '*/*', ...options.headers } });

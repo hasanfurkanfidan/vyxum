@@ -77,4 +77,7 @@
   <data name="CancelReason" xml:space="preserve"><value>İptal nedeni</value></data>
   <data name="CancelConfirm" xml:space="preserve"><value>{0} numaralı kayıt iptal edilsin mi? Listede kalır ama toplama girmez.</value></data>
   <data name="Empty" xml:space="preserve"><value>Kayıt bulunamadı.</value></data>
+  <data name="LiveWeight" xml:space="preserve"><value>Canlı ağırlık</value></data>
+  <data name="ProductSelection" xml:space="preserve"><value>Ürün seçimi</value></data>
+  <data name="NoRecent" xml:space="preserve"><value>Henüz tartım yok.</value></data>
 </root>
