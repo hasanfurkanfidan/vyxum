@@ -84,13 +84,11 @@ internal sealed class TestLicenseIssuer : IDisposable
 internal sealed class LicenseTestApp : IAsyncDisposable
 {
     private readonly WebApplicationFactory<Program> _factory;
-    private readonly string? _ownDataDirectory;
 
     public LicenseTestApp(TestDatabase database, TestLicenseIssuer issuer, TestClock? clock = null)
     {
         Clock = clock ?? new TestClock();
-        _ownDataDirectory = database.DataDirectory is null ? Path.Combine(Path.GetTempPath(), "vyxum-license-" + Guid.NewGuid().ToString("N")) : null;
-        var dataDirectory = database.DataDirectory ?? _ownDataDirectory!;
+        var dataDirectory = database.DataDirectory;
         _factory = new WebApplicationFactory<Program>().WithWebHostBuilder(builder =>
         {
             builder.UseSetting(DatabaseSettings.DataDirectoryKey, dataDirectory);
@@ -165,16 +163,5 @@ internal sealed class LicenseTestApp : IAsyncDisposable
         Client.Dispose();
         await _factory.DisposeAsync();
         SqliteConnection.ClearAllPools();
-        if (_ownDataDirectory is not null && Directory.Exists(_ownDataDirectory))
-        {
-            try
-            {
-                Directory.Delete(_ownDataDirectory, recursive: true);
-            }
-            catch (IOException)
-            {
-                // A leftover file in the temp directory is harmless.
-            }
-        }
     }
 }
