@@ -1,0 +1,179 @@
+using Shouldly;
+using Vyxum.Platform.Abstractions;
+using Vyxum.Platform.Testing;
+using Xunit;
+
+namespace Vyxum.Platform.Tests.Devices;
+
+public class LiveWeightStoreTests
+{
+    private readonly TestClock _clock = new();
+    private readonly LiveWeightStore _store;
+
+    public LiveWeightStoreTests()
+    {
+        _store = new LiveWeightStore(_clock);
+    }
+
+    private static AgentReading Reading(decimal? value, LiveWeightState state = LiveWeightState.Stable) =>
+        new(value, "kg", state, null, null, "raw", DateTimeOffset.UnixEpoch);
+
+    private static AgentDeviceStatus Status(DeviceConnectionState state, string? error = null) =>
+        new(state, error, null, DateTimeOffset.UnixEpoch);
+
+    [Fact]
+    public void Registered_devices_start_connecting_with_agent_name()
+    {
+        _store.RegisterAgent("c1", "PC-1", ["b", "a"]);
+
+        var devices = _store.GetDevices();
+
+        devices.Select(d => d.DeviceId).ShouldBe(["a", "b"]);
+        devices.ShouldAllBe(d => d.State == DeviceConnectionState.Connecting && d.AgentName == "PC-1" && d.LastWeight == null);
+    }
+
+    [Fact]
+    public void Reading_is_stored_with_receive_time_and_marks_device_connected()
+    {
+        _store.RegisterAgent("c1", "PC-1", ["s"]);
+        _store.ReportStatus("c1", "s", Status(DeviceConnectionState.Disconnected, "port closed"));
+
+        var before = _clock.GetUtcNow();
+        var weight = _store.ReportReading("c1", "s", Reading(1.250m));
+
+        weight.ShouldBe(new LiveWeight("s", 1.250m, "kg", LiveWeightState.Stable, null, null, DateTimeOffset.UnixEpoch, weight.ReceivedAt));
+        weight.ReceivedAt.ShouldBeInRange(before, _clock.GetUtcNow());
+        _store.GetLatest("s").ShouldBe(weight);
+        var device = _store.GetDevice("s").ShouldNotBeNull();
+        device.State.ShouldBe(DeviceConnectionState.Connected);
+        device.LastError.ShouldBeNull();
+        device.LastSeen.ShouldBe(weight.ReceivedAt);
+    }
+
+    [Fact]
+    public void Status_is_stored_and_keeps_last_weight()
+    {
+        _store.ReportReading("c1", "s", Reading(2m));
+
+        _store.ReportStatus("c1", "s", Status(DeviceConnectionState.Disconnected, "timeout"));
+
+        var device = _store.GetDevice("s").ShouldNotBeNull();
+        device.State.ShouldBe(DeviceConnectionState.Disconnected);
+        device.LastError.ShouldBe("timeout");
+        device.LastWeight.ShouldNotBeNull().Value.ShouldBe(2m);
+    }
+
+    [Fact]
+    public void Agent_disconnect_marks_only_its_own_devices()
+    {
+        _store.RegisterAgent("c1", "PC-1", ["a"]);
+        _store.RegisterAgent("c2", "PC-2", ["b"]);
+        _store.ReportReading("c1", "a", Reading(1m));
+        _store.ReportReading("c2", "b", Reading(1m));
+
+        _store.DisconnectAgent("c1").ShouldBe(1);
+
+        _store.GetDevice("a").ShouldNotBeNull().State.ShouldBe(DeviceConnectionState.Disconnected);
+        _store.GetDevice("b").ShouldNotBeNull().State.ShouldBe(DeviceConnectionState.Connected);
+        _store.GetLatest("a").ShouldNotBeNull();
+    }
+
+    [Fact]
+    public void Device_taken_over_by_new_connection_is_not_disconnected_by_old_one()
+    {
+        _store.RegisterAgent("old", "PC-1", ["s"]);
+        _store.RegisterAgent("new", "PC-1", ["s"]);
+        _store.ReportReading("new", "s", Reading(1m));
+
+        _store.DisconnectAgent("old").ShouldBe(0);
+
+        _store.GetDevice("s").ShouldNotBeNull().State.ShouldBe(DeviceConnectionState.Connected);
+    }
+
+    [Fact]
+    public void Reregistering_after_disconnect_returns_to_connecting()
+    {
+        _store.RegisterAgent("c1", "PC-1", ["s"]);
+        _store.DisconnectAgent("c1");
+
+        _store.RegisterAgent("c2", "PC-1", ["s"]);
+
+        _store.GetDevice("s").ShouldNotBeNull().State.ShouldBe(DeviceConnectionState.Connecting);
+    }
+
+    [Fact]
+    public void Unknown_device_has_no_snapshot()
+    {
+        _store.GetDevice("x").ShouldBeNull();
+        _store.GetLatest("x").ShouldBeNull();
+        _store.GetDevices().ShouldBeEmpty();
+    }
+
+    [Fact]
+    public async Task Watch_yields_latest_then_new_readings_and_does_not_create_a_device()
+    {
+        var ct = TestContext.Current.CancellationToken;
+        _store.ReportReading("c1", "s", Reading(1m));
+        using var cancel = CancellationTokenSource.CreateLinkedTokenSource(ct);
+        await using var watch = _store.WatchAsync("s", cancel.Token).GetAsyncEnumerator(cancel.Token);
+        await using var unknown = _store.WatchAsync("other", cancel.Token).GetAsyncEnumerator(cancel.Token);
+        var unknownMove = unknown.MoveNextAsync();
+
+        (await watch.MoveNextAsync()).ShouldBeTrue();
+        watch.Current.Value.ShouldBe(1m);
+
+        _store.ReportReading("c1", "s", Reading(2m, LiveWeightState.Motion));
+        (await watch.MoveNextAsync()).ShouldBeTrue();
+        watch.Current.Value.ShouldBe(2m);
+        watch.Current.State.ShouldBe(LiveWeightState.Motion);
+
+        _store.GetDevices().Select(d => d.DeviceId).ShouldBe(["s"]);
+
+        await cancel.CancelAsync();
+        (await watch.MoveNextAsync()).ShouldBeFalse();
+        (await unknownMove).ShouldBeFalse();
+    }
+
+    [Fact]
+    public async Task Slow_watcher_skips_old_readings_instead_of_blocking()
+    {
+        var ct = TestContext.Current.CancellationToken;
+        await using var watch = _store.WatchAsync("s", ct).GetAsyncEnumerator(ct);
+        var first = watch.MoveNextAsync();
+
+        for (var i = 0; i < 1000; i++)
+        {
+            _store.ReportReading("c1", "s", Reading(i));
+        }
+
+        (await first).ShouldBeTrue();
+        var seen = new List<decimal?> { watch.Current.Value };
+        while (seen[^1] != 999m && await watch.MoveNextAsync())
+        {
+            seen.Add(watch.Current.Value);
+        }
+
+        seen.Count.ShouldBeLessThan(1000);
+        seen[^1].ShouldBe(999m);
+    }
+
+    [Fact]
+    public async Task Concurrent_reports_are_safe()
+    {
+        var tasks = Enumerable.Range(0, 8).Select(t => Task.Run(() =>
+        {
+            for (var i = 0; i < 500; i++)
+            {
+                _store.ReportReading($"c{t}", $"s{t % 4}", Reading(i));
+                _store.ReportStatus($"c{t}", $"s{t % 4}", Status(DeviceConnectionState.Connected));
+                _ = _store.GetDevices();
+            }
+
+            _store.DisconnectAgent($"c{t}");
+        }));
+
+        await Task.WhenAll(tasks);
+
+        _store.GetDevices().Count.ShouldBe(4);
+    }
+}

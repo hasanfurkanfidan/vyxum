@@ -18,6 +18,9 @@
     <!-- Serial port access (MIT, part of .NET) -->
     <PackageVersion Include="System.IO.Ports" Version="10.0.14" />
 
+    <!-- SignalR client (MIT, part of ASP.NET Core): Agent connection to the web, integration tests -->
+    <PackageVersion Include="Microsoft.AspNetCore.SignalR.Client" Version="10.0.14" />
+
     <!-- ASP.NET Core test host (10.x line) -->
     <PackageVersion Include="Microsoft.AspNetCore.Mvc.Testing" Version="10.0.14" />
 

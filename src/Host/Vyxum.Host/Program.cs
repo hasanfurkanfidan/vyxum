@@ -7,6 +7,7 @@ using Vyxum.Platform;
 var builder = WebApplication.CreateBuilder(args);
 
 var catalog = builder.Services.AddVyxumPlatform(builder.Configuration, HostModules.Load(builder.Configuration));
+builder.Services.AddVyxumAgentHub(builder.Configuration);
 builder.Services.AddLocalization(options => options.ResourcesPath = "Resources");
 
 var app = builder.Build();
@@ -30,6 +31,7 @@ app.MapGet("/api/hello", (IStringLocalizer<Strings> strings) => Results.Ok(new
     culture = CultureInfo.CurrentUICulture.Name,
 }));
 
+app.MapVyxumDevices();
 app.MapVyxumModules();
 
 app.Run();
