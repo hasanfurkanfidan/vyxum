@@ -12,6 +12,10 @@ This repository is the open core of Vyxum, licensed under the Apache License 2.0
 
 Windows 10 or 11 (64-bit). No internet connection, database server or extra program is needed. Run `VyxumSetup-<version>.exe` and follow the step-by-step guide: [Installation guide](docs/INSTALL.md) (Türkçe: [docs/KURULUM.md](docs/KURULUM.md)).
 
+## License file / Lisans dosyası
+
+Weighing, Products and Records need no license. Paid modules are opened by a license file (`.vxlic`), which you load under Settings, Modules and license. See the [licensing guide](docs/LICENSING.md) (Türkçe: [docs/LISANS.md](docs/LISANS.md)).
+
 ## Repository layout
 
 | Path | Contents |
