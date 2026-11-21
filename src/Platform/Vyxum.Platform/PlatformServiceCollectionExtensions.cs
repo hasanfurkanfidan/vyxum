@@ -2,6 +2,7 @@ using System.Reflection;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
+using Microsoft.Extensions.Hosting;
 using Vyxum.Platform.Abstractions;
 
 namespace Vyxum.Platform;
@@ -52,6 +53,13 @@ public static class PlatformServiceCollectionExtensions
         services.AddSingleton(databaseSettings);
         services.AddDbContext<PlatformDbContext>((provider, options) =>
             provider.GetRequiredService<DatabaseSettings>().Configure(options));
+        var backupsDirectory = Path.Combine(DatabaseSettings.GetDataDirectory(configuration), "backups");
+        services.AddSingleton(provider => new DatabaseBackups(
+            provider.GetRequiredService<DatabaseSettings>(),
+            backupsDirectory,
+            provider.GetRequiredService<TimeProvider>(),
+            provider.GetRequiredService<Microsoft.Extensions.Logging.ILogger<DatabaseBackups>>()));
+        services.AddSingleton<IDatabaseBackups>(provider => provider.GetRequiredService<DatabaseBackups>());
         services.AddSingleton<IModuleDatabaseInitializer, ModuleDatabaseInitializer>();
         services.AddHostedService<ModuleDatabaseInitializerService>();
 
@@ -66,6 +74,21 @@ public static class PlatformServiceCollectionExtensions
 
         // Merges the UiStringSource registrations of the host and the modules (GET /api/ui/strings).
         services.AddSingleton<UiStringCatalog>();
+
+        // Setup wizard (GET/POST /api/setup/*): shared settings file, database settings, restart.
+        var dataDirectory = DatabaseSettings.GetDataDirectory(configuration);
+        services.AddUiStrings(SetupStrings.KeyPrefix, SetupStrings.ResourceManager);
+        services.AddScoped<IPlatformSettings, PlatformSettings>();
+        services.AddSingleton(new VyxumSettingsFile(Path.Combine(dataDirectory, VyxumSettingsFile.FileName)));
+        services.AddSingleton(provider => new SetupState(
+            dataDirectory,
+            SetupState.ReadVersion(provider.GetService<IHostEnvironment>()?.ApplicationName)));
+        services.AddOptions<HostRestartOptions>();
+        // A factory, so that hosts without IHostApplicationLifetime (test hosts) still validate.
+        services.TryAddSingleton<IHostRestarter>(provider => new ServiceRecoveryRestarter(
+            provider.GetRequiredService<IHostApplicationLifetime>(),
+            provider.GetRequiredService<Microsoft.Extensions.Options.IOptions<HostRestartOptions>>(),
+            provider.GetRequiredService<Microsoft.Extensions.Logging.ILogger<ServiceRecoveryRestarter>>()));
         return catalog;
     }
 }

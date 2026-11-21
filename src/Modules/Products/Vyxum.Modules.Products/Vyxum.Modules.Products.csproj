@@ -4,4 +4,12 @@
     <ProjectReference Include="..\..\..\Platform\Vyxum.Platform.Abstractions\Vyxum.Platform.Abstractions.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <!-- dotnet ef migrations; not shipped -->
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+  </ItemGroup>
+
 </Project>

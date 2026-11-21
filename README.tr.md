@@ -8,6 +8,10 @@ Bu depo Vyxum'un açık çekirdeğidir ve Apache Lisansı 2.0 ile lisanslanmış
 
 > **Durum: erken geliştirme.** Depoda platform (modül yükleme ve doğrulama, outbox ve inbox ile entegrasyon olayları, veritabanı sağlayıcısı seçimi), Products ve Weighing modülleri, web arayüzü ve cihaz sürücüleri bulunur. F2 fazı sürmektedir.
 
+## Kurulum / Installation
+
+Windows 10 ya da 11 (64 bit). İnternet bağlantısı, veritabanı sunucusu ya da ek bir program gerekmez. `VyxumSetup-<sürüm>.exe` dosyasını çalıştırın ve adım adım kılavuzu izleyin: [Kurulum kılavuzu](docs/KURULUM.md) (English: [docs/INSTALL.md](docs/INSTALL.md)).
+
 ## Depo yapısı
 
 | Yol | İçerik |
@@ -85,6 +89,7 @@ Bir terazi iki parçada okunur. **Taşıma** (transport) baytları seri port ya 
 | `src/Devices/Vyxum.Devices.ToledoContinuous` | Toledo sürekli çıkış protokolü |
 | `src/Devices/Vyxum.Devices.GenericAscii` | Diğer ASCII çıkışlar için kurala dayalı protokol |
 | `src/Devices/Vyxum.Devices.Simulator` | Bellek ya da TCP üzerinden simüle edilmiş teraziler ve kayıtlı satırların yeniden oynatılması |
+| `src/Devices/Vyxum.Devices.Discovery` | Seri portlarda ya da tek bir ağ adresinde teraziyi yalnızca okuyarak arama |
 
 Desteklenen taşımalar seri port ve TCP'dir. Desteklenen protokoller MT-SICS, Toledo Continuous ve genel ASCII'dir.
 
@@ -99,11 +104,15 @@ dotnet run --project src/Host/Vyxum.Host --urls http://localhost:5000
 dotnet run --project src/Agent/Vyxum.Agent
 ```
 
-Ardından http://localhost:5000/api/devices adresini açın. Agent'ın hazır ayarları simüle edilmiş bir MT-SICS terazisi (572 g) kullanır; donanım gerekmez.
+Ardından http://localhost:5000/api/devices adresini açın. `dotnet run` ile Agent Development ortamında başlar; bu ortamın `appsettings.Development.json` dosyası simüle edilmiş bir MT-SICS terazisi (572 g) ekler, donanım gerekmez.
+
+Cihazlar web uygulamasında (Ayarlar → Cihazlar) ayarlanır ve `plt_Devices` tablosunda saklanır; Agent bağlanınca onları alır ve her değişikliği yeniden başlamadan uygular. `GET`, `POST /api/devices/config` ve `GET`, `PUT`, `DELETE /api/devices/config/{id}` cihaz ayarlarını okur ve değiştirir (`transport` ve `protocol` Agent ayarlarıyla aynı alanlara sahiptir; `capacity` ve `division` ondalık metindir). Agent'ın kendi ayar dosyasındaki `Devices` listesi geliştirme içindir: boş değilse Agent web uygulamasındaki cihazları yok sayar. Bkz. [Agent README](src/Agent/Vyxum.Agent/README.tr.md). `/api/devices` içindeki her cihaz ayarlarından gelen `name`, `capacity`, `division` ve `unit` alanlarını da taşır; Agent'ın kullanamadığı ayarlara sahip bir cihazın durumu `Error` olur.
 
 http://localhost:5000/api/devices/{id}/live bir cihazı Server-Sent Events olarak yayınlar: önce o anki durumu, ardından durumu ya da ağırlığı her değiştiğinde yeni bir olay. Agent'ın henüz bildirmediği bir cihaz kimliği hata değildir; yayın `Disconnected` durumunda başlar ve agent bağlanınca sürer.
 
 `POST /api/devices/{id}/zero` teraziden sıfırlamasını ister, her istekte bir kez. Her zaman 200 ile `{ "result": "Done" | "NotSupported" | "Rejected" | "Unavailable", "detail": "..." }` döner; `detail` günlükler için İngilizce metindir ve olmayabilir. Her cihaz desteklediği komutları `supportedCommands` içinde listeler (MT-SICS için `["Zero"]`).
+
+`POST /api/devices/discover` Agent'tan terazi aramasını ister (gövde isteğe bağlı: `{ "agentName"?: "...", "tcp"?: { "host": "...", "port": 4001 } }`). 202 ile `{ "id" }` döner; Agent zaten arıyorsa 409 ile `{ "code": "devices.DiscoveryRunning" }`, bağlı Agent yoksa 503 ile `{ "code": "devices.NoAgent" }` döner. `GET /api/devices/discover/{id}` işi döndürür: `status` (`Running`, `Completed`, ya da `code` `devices.AgentTimeout` veya `devices.DiscoveryFailed` ile `Failed`), durumlarıyla `ports` (`Pending`, `Scanning`, `Found`, `NotFound`, `InUse`, `Error`) ve `candidates`; adayların `transport` ve `protocol` nesneleri değiştirilmeden `/api/devices/config`'e gönderilebilir. İşler 10 dakika bellekte tutulur. Arama yalnızca MT-SICS `SI` ve `I4` komutlarını gönderir; bkz. [Cihaz arama](src/Agent/Vyxum.Agent/README.tr.md#cihaz-arama).
 
 ## Modüller
 
@@ -179,11 +188,13 @@ Ekranın terazi ile çalışma biçimi:
 - Dara Vyxum tarafından yazılımsal olarak tutulur. **Dara al** o anki brüt ağırlığı dara olarak kaydeder. Teraziye kendi dara komutu asla gönderilmez.
 - **Sıfırla** düğmesi her basışta teraziye bir kez `Z` gönderir. Başka hiçbir komut gönderilmez.
 
-Veritabanı şeması ilk açılışta oluşturulur. Varsayılan SQLite dosyası veri klasöründeki `vyxum.db` dosyasıdır: çalışma klasöründeki `data/` (yukarıdaki komutlarla başlatırsanız `src/Host/Vyxum.Host/data/`) ya da Windows'ta `%ProgramData%\Vyxum`. Henüz şema geçişi (migration) yoktur. Geliştirme sırasında modelde bir değişiklik yaptıktan sonra sunucuyu durdurup bu dosyayı silin; varsa `vyxum.db-shm` ve `vyxum.db-wal` dosyalarını da silin. Bu işlem bütün kayıtları siler, yalnızca test verisinde kullanın.
+Veritabanı şeması ilk açılışta oluşturulur. Varsayılan SQLite dosyası veri klasöründeki `vyxum.db` dosyasıdır: çalışma klasöründeki `data/` (yukarıdaki komutlarla başlatırsanız `src/Host/Vyxum.Host/data/`) ya da Windows'ta `%ProgramData%\Vyxum`. Her açılışta platform ve her modül bekleyen EF Core şema geçişlerini (migration) uygular; böylece var olan veritabanı güncellenir ve kayıtlarını korur. Bir SQLite veritabanı değişmeden önce veri klasöründeki `backupsvyxum-<tarih>-<saat>-migration.db` dosyasına kopyalanır; en yeni 10 kopya tutulur. SQL Server veritabanı kopyalanmaz: güncellemeden önce yedeğini kendiniz alın. Geçiş eklemek için [CONTRIBUTING.md](CONTRIBUTING.md#veritabanı-geçişleri) dosyasına bakın.
 
 ## Yapılandırma
 
-Anahtarlar `appsettings.json`, ortam değişkenleri (örneğin `Vyxum__Database__Provider`) ya da komut satırı argümanlarından okunur.
+Anahtarlar sırasıyla programın yanındaki `appsettings.json`, veri klasöründeki ortak ayar dosyası `vyxum.json`, ortam değişkenleri (örneğin `Vyxum__Database__Provider`) ve komut satırı argümanlarından okunur; sonraki kaynak öncekini geçersiz kılar.
+
+`vyxum.json` dosyasını Web, Agent ve masaüstü penceresi birlikte kullanır; program klasöründeki `appsettings.json` güncellemede değişir, bu dosya değişmez. Dosyayı kurulum yazar, sihirbaz da başka bir veritabanı seçildiğinde günceller; müşteri elle düzenlemez. Yeri `Vyxum:DataDirectory` ayarını izler: veri klasörü ortam değişkeni ya da komut satırıyla verilirse dosya da oraya taşınır. Dosya açılışta bir kez okunur; veritabanı değişince Web, Windows servisi olarak çalışıyorsa kendini yeniden başlatır, değilse elle yeniden başlatılması gerektiğini yazar.
 
 | Anahtar | Varsayılan | Anlamı |
 |---|---|---|
@@ -214,8 +225,7 @@ Mimari testlerin kontrol edebildiği kurallar bu testlerle denetlenir.
 
 ## F0 sürümünün bilinen sınırları
 
-- **Henüz şema geçişi (migration) yok.** Her modülün tabloları ilk açılışta oluşturulur. Tablolar oluştuktan sonra modelde yapılan değişiklik uygulanmaz ve bir uyarı kaydedilir. Sağlayıcıya özel EF Core geçişleri F2 fazında planlanmıştır.
-- **Tablo oluşturma sırasında çökme.** Bir modülün tabloları oluşturulduktan sonra, kurulum kaydı yazılmadan süreç durursa veritabanı elle temizlenmelidir.
+- **Geçişi olmayan modüller.** Etkin sağlayıcı için geçiş içermeyen bir modülün tabloları bir kez oluşturulur; modül geçiş içerene kadar şeması güncellenemez.
 - **Tek düğümlü dağıtıcı.** Her veritabanı için tek bir sunucu örneği çalıştırın. Aynı veritabanındaki birden fazla dağıtıcı birbiriyle koordine edilmez.
 - **Outbox temizliği yok.** İletilmiş mesajlar outbox tablolarında tutulur.
 - **Eklenti klasöründen yükleme yok.** Modüller yapılandırmada listelenen derlemelerden yüklenir; eklenti klasöründen yükleme F4 fazında planlanmıştır.

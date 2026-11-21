@@ -37,6 +37,10 @@ public class AgentContractTests
         AgentSide.AgentHubContract.ReportReading.ShouldBe(PlatformSide.AgentHubContract.ReportReading);
         AgentSide.AgentHubContract.ReportStatus.ShouldBe(PlatformSide.AgentHubContract.ReportStatus);
         AgentSide.AgentHubContract.Zero.ShouldBe(PlatformSide.AgentHubContract.Zero);
+        AgentSide.AgentHubContract.GetDevices.ShouldBe(PlatformSide.AgentHubContract.GetDevices);
+        AgentSide.AgentHubContract.DevicesChanged.ShouldBe(PlatformSide.AgentHubContract.DevicesChanged);
+        AgentSide.AgentHubContract.Discover.ShouldBe(PlatformSide.AgentHubContract.Discover);
+        AgentSide.AgentHubContract.ReportDiscoveryProgress.ShouldBe(PlatformSide.AgentHubContract.ReportDiscoveryProgress);
         AgentSide.AgentDeviceCommands.Zero.ShouldBe(DeviceCommandNames.Zero);
     }
 
@@ -44,6 +48,7 @@ public class AgentContractTests
     [InlineData(PlatformSide.AgentHubContract.Register, new[] { typeof(PlatformSide.AgentRegistration) })]
     [InlineData(PlatformSide.AgentHubContract.ReportReading, new[] { typeof(string), typeof(PlatformSide.AgentReading) })]
     [InlineData(PlatformSide.AgentHubContract.ReportStatus, new[] { typeof(string), typeof(PlatformSide.AgentDeviceStatus) })]
+    [InlineData(PlatformSide.AgentHubContract.ReportDiscoveryProgress, new[] { typeof(string), typeof(IReadOnlyList<PlatformSide.DiscoveryPortState>) })]
     public void Hub_methods_exist_with_the_contract_parameters(string name, Type[] parameters)
     {
         var method = typeof(AgentHub).GetMethod(name, BindingFlags.Public | BindingFlags.Instance);
@@ -56,6 +61,12 @@ public class AgentContractTests
     [InlineData(typeof(AgentSide.AgentReading), typeof(PlatformSide.AgentReading))]
     [InlineData(typeof(AgentSide.AgentDeviceStatus), typeof(PlatformSide.AgentDeviceStatus))]
     [InlineData(typeof(AgentSide.AgentCommandResult), typeof(PlatformSide.AgentCommandResult))]
+    [InlineData(typeof(AgentSide.AgentDeviceConfig), typeof(PlatformSide.AgentDeviceConfig))]
+    [InlineData(typeof(AgentSide.DiscoveryRequest), typeof(PlatformSide.DiscoveryRequest))]
+    [InlineData(typeof(AgentSide.DiscoveryTcpTarget), typeof(PlatformSide.DiscoveryTcpTarget))]
+    [InlineData(typeof(AgentSide.DiscoveryPortState), typeof(PlatformSide.DiscoveryPortState))]
+    [InlineData(typeof(AgentSide.DiscoveryReading), typeof(PlatformSide.DiscoveryReading))]
+    [InlineData(typeof(AgentSide.DiscoveryCandidate), typeof(PlatformSide.DiscoveryCandidate))]
     public void Dtos_have_the_same_properties(Type agentType, Type platformType)
     {
         var agentProperties = Properties(agentType);
@@ -70,6 +81,16 @@ public class AgentContractTests
             {
                 platformPropertyType.IsEnum.ShouldBeTrue(agent.Name);
                 Enum.GetNames(agentPropertyType).ShouldBe(Enum.GetNames(platformPropertyType), $"enum names of {agent.Name}");
+            }
+            else if (agentPropertyType.IsGenericType && agentPropertyType.GetGenericTypeDefinition() == typeof(IReadOnlyList<>))
+            {
+                platformPropertyType.GetGenericTypeDefinition().ShouldBe(typeof(IReadOnlyList<>), agent.Name);
+                agentPropertyType.GetGenericArguments()[0].Name.ShouldBe(platformPropertyType.GetGenericArguments()[0].Name, agent.Name);
+            }
+            else if (agentPropertyType.Namespace == typeof(AgentSide.AgentHubContract).Namespace)
+            {
+                // A nested contract type: compared by its own test case.
+                agentPropertyType.Name.ShouldBe(platformPropertyType.Name, agent.Name);
             }
             else
             {
@@ -86,6 +107,7 @@ public class AgentContractTests
         Enum.GetNames<WeightState>().ShouldBe(Enum.GetNames<LiveWeightState>());
         Enum.GetNames<DeviceStatus>().ShouldBe(Enum.GetNames<DeviceConnectionState>());
         Enum.GetNames<AgentSide.AgentCommandOutcome>().ShouldBe(Enum.GetNames<DeviceCommandOutcome>());
+        Enum.GetNames<AgentSide.DiscoveryPortStatus>().ShouldBe(Enum.GetNames<PlatformSide.DiscoveryPortStatus>());
     }
 
     [Theory]
@@ -194,12 +216,113 @@ public class AgentContractTests
     }
 
     [Fact]
+    public void GetDevices_hub_method_returns_the_device_list()
+    {
+        var method = typeof(AgentHub).GetMethod(PlatformSide.AgentHubContract.GetDevices, BindingFlags.Public | BindingFlags.Instance);
+        method.ShouldNotBeNull();
+        method.GetParameters().ShouldBeEmpty();
+        method.ReturnType.ShouldBe(typeof(Task<IReadOnlyList<PlatformSide.AgentDeviceConfig>>));
+    }
+
+    [Fact]
+    public void Device_sent_by_the_platform_is_read_by_the_agent()
+    {
+        using var transport = JsonDocument.Parse("""{"type":"serial","portName":"COM3","baudRate":"19200","parity":"Even","dataBits":7}""");
+        using var protocol = JsonDocument.Parse("""{"type":"mt-sics","command":"SI","pollInterval":"00:00:00.200"}""");
+        var sent = new PlatformSide.AgentDeviceConfig("scale-1", transport.RootElement, protocol.RootElement);
+
+        var json = JsonSerializer.Serialize(new[] { sent }, Json);
+        var received = JsonSerializer.Deserialize<AgentSide.AgentDeviceConfig[]>(json, Json).ShouldNotBeNull().ShouldHaveSingleItem();
+        var errors = new List<string>();
+        var settings = Vyxum.Agent.Configuration.AgentConfiguration.ReadServerDevice(received, "Device scale-1", errors);
+
+        errors.ShouldBeEmpty();
+        settings.ShouldNotBeNull();
+        settings.Id.ShouldBe("scale-1");
+        settings.Transport!.PortName.ShouldBe("COM3");
+        settings.Transport.BaudRate.ShouldBe(19200);
+        settings.Transport.DataBits.ShouldBe(7);
+        settings.Transport.Parity.ShouldBe(Vyxum.Devices.Transports.SerialParity.Even);
+        settings.Protocol!.PollInterval.ShouldBe(TimeSpan.FromMilliseconds(200));
+        var device = Vyxum.Agent.Configuration.AgentConfiguration.CreateDevice(settings, "Device scale-1", errors);
+        errors.ShouldBeEmpty();
+        device.ShouldNotBeNull().PortName.ShouldBe("COM3");
+    }
+
+    [Fact]
+    public void Device_with_a_value_of_the_wrong_type_is_reported_not_thrown()
+    {
+        using var transport = JsonDocument.Parse("""{"type":"serial","portName":"COM3","baudRate":"fast"}""");
+        using var protocol = JsonDocument.Parse("""{"type":"mt-sics"}""");
+        var errors = new List<string>();
+
+        var settings = Vyxum.Agent.Configuration.AgentConfiguration.ReadServerDevice(
+            new AgentSide.AgentDeviceConfig("scale-1", transport.RootElement.Clone(), protocol.RootElement.Clone()), "Device scale-1", errors);
+
+        settings.ShouldBeNull();
+        errors.ShouldHaveSingleItem().ShouldStartWith("Device scale-1:");
+    }
+
+    [Fact]
     public void Zero_client_method_has_the_contract_signature_on_the_agent()
     {
         var method = typeof(DeviceFleet).GetMethod(nameof(DeviceFleet.ZeroAsync));
         method.ShouldNotBeNull();
         method.GetParameters().Select(p => p.ParameterType).ShouldBe([typeof(string), typeof(TimeSpan), typeof(CancellationToken)]);
         method.ReturnType.ShouldBe(typeof(Task<AgentSide.AgentCommandResult>));
+    }
+
+    [Fact]
+    public void Discovery_result_has_the_same_properties_on_both_sides()
+    {
+        Properties(typeof(AgentSide.DiscoveryResult)).Select(p => p.Name)
+            .ShouldBe(Properties(typeof(PlatformSide.DiscoveryResult)).Select(p => p.Name));
+    }
+
+    [Fact]
+    public void Discovery_request_written_by_the_platform_is_read_by_the_agent()
+    {
+        var json = JsonSerializer.Serialize(new PlatformSide.DiscoveryRequest("job-1", new PlatformSide.DiscoveryTcpTarget("10.0.0.5", 4001)), Json);
+        var received = JsonSerializer.Deserialize<AgentSide.DiscoveryRequest>(json, Json);
+
+        received.ShouldNotBeNull();
+        received.DiscoveryId.ShouldBe("job-1");
+        received.Tcp.ShouldBe(new AgentSide.DiscoveryTcpTarget("10.0.0.5", 4001));
+        JsonSerializer.Deserialize<AgentSide.DiscoveryRequest>("{\"discoveryId\":\"job-2\",\"tcp\":null}", Json)!.Tcp.ShouldBeNull();
+    }
+
+    [Fact]
+    public void Discovery_result_written_by_the_agent_is_read_by_the_platform()
+    {
+        using var transport = JsonDocument.Parse("""{"type":"serial","portName":"COM3","baudRate":9600}""");
+        using var protocol = JsonDocument.Parse("""{"type":"mt-sics","command":"SI"}""");
+        var sent = new AgentSide.DiscoveryResult(
+            [new AgentSide.DiscoveryPortState("COM3", AgentSide.DiscoveryPortStatus.Found, null), new AgentSide.DiscoveryPortState("COM4", AgentSide.DiscoveryPortStatus.InUse, "used")],
+            [new AgentSide.DiscoveryCandidate(
+                "serial:COM3", "COM3", null, null, transport.RootElement, protocol.RootElement, "C139673552",
+                new AgentSide.DiscoveryReading("572", "g", WeightState.Stable), "MT-SICS, 9600 8N1")]);
+
+        var json = JsonSerializer.Serialize(sent, Json);
+        var received = JsonSerializer.Deserialize<PlatformSide.DiscoveryResult>(json, Json);
+
+        received.ShouldNotBeNull();
+        received.Ports.Select(p => (p.PortName, p.State.ToString(), p.Detail)).ShouldBe([("COM3", "Found", null), ("COM4", "InUse", "used")]);
+        var candidate = received.Candidates.ShouldHaveSingleItem();
+        candidate.Key.ShouldBe("serial:COM3");
+        candidate.Transport.GetProperty("portName").GetString().ShouldBe("COM3");
+        candidate.Protocol.GetProperty("command").GetString().ShouldBe("SI");
+        candidate.SerialNumber.ShouldBe("C139673552");
+        candidate.Reading.ShouldBe(new PlatformSide.DiscoveryReading("572", "g", LiveWeightState.Stable));
+        candidate.Description.ShouldBe("MT-SICS, 9600 8N1");
+    }
+
+    [Fact]
+    public void Discover_client_method_has_the_contract_signature_on_the_agent()
+    {
+        var method = typeof(Vyxum.Agent.Discovery.DeviceDiscovery).GetMethod(nameof(Vyxum.Agent.Discovery.DeviceDiscovery.DiscoverAsync));
+        method.ShouldNotBeNull();
+        method.GetParameters()[0].ParameterType.ShouldBe(typeof(AgentSide.DiscoveryRequest));
+        method.ReturnType.ShouldBe(typeof(Task<AgentSide.DiscoveryResult>));
     }
 
     private static PropertyInfo[] Properties(Type type) =>

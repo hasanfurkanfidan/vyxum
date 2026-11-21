@@ -48,11 +48,18 @@ public sealed record DatabaseSettings(DatabaseProvider Provider, string Connecti
                     $"Configuration '{ConnectionStringKey}' is required when '{ProviderKey}' is '{provider}'.");
             }
 
-            var path = Path.Combine(GetDataDirectory(configuration), DefaultSqliteFileName);
-            connectionString = new SqliteConnectionStringBuilder { DataSource = path }.ToString();
+            return DefaultSqlite(GetDataDirectory(configuration));
         }
 
         return new DatabaseSettings(provider, connectionString);
+    }
+
+    /// <summary>The zero-configuration database: SQLite with <c>vyxum.db</c> in <paramref name="dataDirectory"/>.</summary>
+    public static DatabaseSettings DefaultSqlite(string dataDirectory)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(dataDirectory);
+        var path = Path.Combine(dataDirectory, DefaultSqliteFileName);
+        return new DatabaseSettings(DatabaseProvider.Sqlite, new SqliteConnectionStringBuilder { DataSource = path }.ToString());
     }
 
     /// <summary>

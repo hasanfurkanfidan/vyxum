@@ -1,7 +1,7 @@
 // Clients for the live device endpoints (/api/devices) and the Weighing module API (/api/weighing).
 import { apiGet, apiPost, apiText, withQuery, type RequestOptions } from './api';
 
-export type DeviceConnectionState = 'Connecting' | 'Connected' | 'Disconnected';
+export type DeviceConnectionState = 'Connecting' | 'Connected' | 'Disconnected' | 'Error';
 export type LiveWeightState = 'Stable' | 'Motion' | 'Overload' | 'Underload';
 
 export interface LiveWeight {
@@ -25,6 +25,11 @@ export interface LiveDevice {
   lastSeen: string;
   /** Commands the device accepts, for example "Zero". Absent when the host does not report them. */
   supportedCommands?: string[];
+  /** Name, capacity (Max), division (e) and unit from the device settings, when the host reports them. */
+  name?: string | null;
+  capacity?: string | null;
+  division?: string | null;
+  unit?: string | null;
 }
 
 export type ZeroResult = 'Done' | 'NotSupported' | 'Rejected' | 'Unavailable';
@@ -89,7 +94,7 @@ export interface CreateRecordInput {
 // The device endpoints write weights as JSON numbers ("value": 1.260). JSON.parse would turn them
 // into floating point and drop the trailing zero, so the numeric text of the weight fields is
 // quoted before parsing. A quote inside a JSON string is escaped, so the pattern cannot match there.
-const weightNumber = /"(value|tare)"(\s*:\s*)(-?\d+(?:\.\d+)?)(?=\s*[,}\]])/g;
+const weightNumber = /"(value|tare|capacity|division)"(\s*:\s*)(-?\d+(?:\.\d+)?)(?=\s*[,}\]])/g;
 
 /** Parses LiveDevice JSON (one object or an array) and keeps the weights as decimal strings. */
 export function parseLiveJson<T>(text: string): T {
@@ -104,9 +109,12 @@ function weightText(value: unknown): string | null {
 }
 
 export function normalizeDevice(device: LiveDevice): LiveDevice {
+  const result: LiveDevice = { ...device };
+  if (device.capacity !== undefined) result.capacity = weightText(device.capacity);
+  if (device.division !== undefined) result.division = weightText(device.division);
   const weight = device.lastWeight;
-  if (!weight) return device;
-  return { ...device, lastWeight: { ...weight, value: weightText(weight.value), tare: weightText(weight.tare) } };
+  if (weight) result.lastWeight = { ...weight, value: weightText(weight.value), tare: weightText(weight.tare) };
+  return result;
 }
 
 export async function getDevices(options?: RequestOptions): Promise<LiveDevice[]> {

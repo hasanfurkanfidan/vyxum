@@ -6,6 +6,8 @@ export interface ModulesContextValue {
   status: LoadStatus;
   modules: readonly UiModule[];
   capabilities: readonly string[];
+  /** Company name from the setup wizard, or null when none was entered. */
+  companyName: string | null;
   /** True when the module with this id is loaded in the host (for example "weighing"). */
   hasModule: (id: string) => boolean;
   /** True when a loaded module offers this capability (for example "products.catalog"). */
@@ -18,6 +20,7 @@ const ModulesContext = createContext<ModulesContextValue | null>(null);
 export function ModulesProvider({ children }: { children: ReactNode }) {
   const [modules, setModules] = useState<UiModule[]>([]);
   const [capabilities, setCapabilities] = useState<string[]>([]);
+  const [companyName, setCompanyName] = useState<string | null>(null);
   const [status, setStatus] = useState<LoadStatus>('loading');
   const latest = useRef(0);
 
@@ -29,6 +32,7 @@ export function ModulesProvider({ children }: { children: ReactNode }) {
       if (id !== latest.current) return;
       setModules(result.modules);
       setCapabilities(result.capabilities);
+      setCompanyName(result.companyName ?? null);
       setStatus('ready');
     } catch (error) {
       if (id !== latest.current) return;
@@ -48,11 +52,12 @@ export function ModulesProvider({ children }: { children: ReactNode }) {
       status,
       modules,
       capabilities,
+      companyName,
       hasModule: (moduleId) => ids.has(moduleId),
       hasCapability: (capability) => caps.has(capability),
       reload: load,
     };
-  }, [status, modules, capabilities, load]);
+  }, [status, modules, capabilities, companyName, load]);
 
   return <ModulesContext.Provider value={value}>{children}</ModulesContext.Provider>;
 }

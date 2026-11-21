@@ -6,12 +6,15 @@ import { visibleNavGroups } from './navigation';
 
 export function Sidebar() {
   const t = useT();
-  const { hasModule } = useModules();
+  const { hasModule, companyName } = useModules();
   const groups = visibleNavGroups(hasModule);
 
   return (
     <nav className="sidebar" aria-label={t('shell.AppName')}>
-      <div className="sidebar__brand">{t('shell.AppName')}</div>
+      <div className="sidebar__brand-block">
+        <div className="sidebar__brand">{t('shell.AppName')}</div>
+        {companyName ? <div className="sidebar__company">{companyName}</div> : null}
+      </div>
 
       {groups.map((group) => (
         <section key={group.id} className="sidebar__group" aria-labelledby={`nav-group-${group.id}`}>

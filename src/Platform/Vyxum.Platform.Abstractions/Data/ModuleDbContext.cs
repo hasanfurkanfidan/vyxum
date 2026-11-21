@@ -26,6 +26,13 @@ public abstract partial class ModuleDbContext : DbContext
     /// </summary>
     public abstract string TablePrefix { get; }
 
+    /// <summary>
+    /// The module's own migrations history table, <c>__{TablePrefix}_migrations</c>. Migrations are
+    /// generated per provider into <c>Migrations/Sqlite</c> and <c>Migrations/SqlServer</c>; see
+    /// <see cref="ProviderMigrations"/> and <see cref="DesignTimeDbContextFactory{TContext}"/>.
+    /// </summary>
+    public string MigrationsHistoryTable => $"__{TablePrefix}_migrations";
+
     /// <summary>Integration events this module published, waiting for or done with delivery.</summary>
     public DbSet<OutboxMessage> OutboxMessages => Set<OutboxMessage>();
 
@@ -55,6 +62,12 @@ public abstract partial class ModuleDbContext : DbContext
         ConfigureMessaging(modelBuilder);
         ApplyTablePrefix(modelBuilder.Model, TablePrefix!);
     }
+
+    /// <summary>
+    /// Sets the module's history table and the per-provider migrations lookup. An override must call the base method.
+    /// </summary>
+    protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder) =>
+        ProviderMigrations.Configure(optionsBuilder, MigrationsHistoryTable);
 
     /// <inheritdoc />
     protected override void ConfigureConventions(ModelConfigurationBuilder configurationBuilder)

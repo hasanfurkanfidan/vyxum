@@ -30,11 +30,28 @@ public sealed class TestDatabase : IAsyncDisposable
     public string ConnectionString { get; }
 
     /// <summary>Configuration entries that point the platform at this database.</summary>
-    public IReadOnlyDictionary<string, string?> Settings => new Dictionary<string, string?>
+    public IReadOnlyDictionary<string, string?> Settings
     {
-        [DatabaseSettings.ProviderKey] = Provider.ToString(),
-        [DatabaseSettings.ConnectionStringKey] = ConnectionString,
-    };
+        get
+        {
+            var settings = new Dictionary<string, string?>
+            {
+                [DatabaseSettings.ProviderKey] = Provider.ToString(),
+                [DatabaseSettings.ConnectionStringKey] = ConnectionString,
+            };
+
+            // Keeps files the platform writes next to the database (e.g. backups) inside the test's directory.
+            if (DataDirectory is not null)
+            {
+                settings[DatabaseSettings.DataDirectoryKey] = DataDirectory;
+            }
+
+            return settings;
+        }
+    }
+
+    /// <summary>The test's own data directory (SQLite only; null for SQL Server).</summary>
+    public string? DataDirectory => _directory;
 
     /// <summary>Why <paramref name="provider"/> cannot be used in this environment, or null when it can.</summary>
     public static string? GetUnavailableReason(DatabaseProvider provider) =>

@@ -219,6 +219,8 @@ export interface UiModule {
 export interface UiModules {
   modules: UiModule[];
   capabilities: string[];
+  /** Company name entered in the setup wizard, or null. Older hosts leave it out. */
+  companyName?: string | null;
 }
 
 export function getUiStrings(options?: RequestOptions): Promise<UiStrings> {

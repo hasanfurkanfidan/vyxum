@@ -20,7 +20,8 @@ public static class AgentHost
 
     /// <summary>
     /// Creates the builder used by the executable. Settings come from <c>appsettings.json</c> next to the executable
-    /// (or the file named by <c>--settings</c>), environment variables and the command line.
+    /// (or the file named by <c>--settings</c>), the shared <c>vyxum.json</c> in the data directory (see
+    /// <see cref="SharedSettingsFile"/>), environment variables and the command line, later ones winning.
     /// </summary>
     public static HostApplicationBuilder CreateBuilder(string[] args) =>
         CreateBuilder(new HostApplicationBuilderSettings
@@ -31,20 +32,30 @@ public static class AgentHost
             ContentRootPath = AppContext.BaseDirectory,
         });
 
-    /// <summary>Creates the builder from host settings, for example with defaults disabled and in-memory configuration in tests.</summary>
+    /// <summary>
+    /// Creates the builder from host settings, for example with defaults disabled and in-memory configuration in tests.
+    /// With defaults disabled the shared settings file is read only when <c>Vyxum:DataDirectory</c> is configured, so
+    /// tests never pick up the settings of an installed copy.
+    /// </summary>
     public static HostApplicationBuilder CreateBuilder(HostApplicationBuilderSettings settings)
     {
         ArgumentNullException.ThrowIfNull(settings);
         var builder = Host.CreateApplicationBuilder(settings);
         UseSettingsFile(builder.Configuration);
+        if (!settings.DisableDefaults || !string.IsNullOrWhiteSpace(builder.Configuration[SharedSettingsFile.DataDirectoryKey]))
+        {
+            SharedSettingsFile.AddTo(builder.Configuration);
+        }
+
         builder.Services.AddWindowsService(options => options.ServiceName = ServiceName);
         builder.Services.AddVyxumAgent(builder.Configuration);
         return builder;
     }
 
     /// <summary>
-    /// Registers the agent: settings from <c>Vyxum:Agent</c>, the device fleet, the device worker and the hub worker.
-    /// Configure <see cref="AgentHubClientOptions"/> to change how the hub connection is made.
+    /// Registers the agent: settings from <c>Vyxum:Agent</c>, the device fleet, device discovery, the device worker and the hub worker.
+    /// Configure <see cref="AgentHubClientOptions"/> to change how the hub connection is made, and
+    /// <see cref="Vyxum.Devices.Discovery.PortScannerOptions"/> to change which ports discovery sees and how it opens them.
     /// </summary>
     public static IServiceCollection AddVyxumAgent(this IServiceCollection services, IConfiguration configuration)
     {
@@ -55,6 +66,10 @@ public static class AgentHost
         services.AddOptions<AgentHubClientOptions>();
         services.TryAddSingleton(TimeProvider.System);
         services.AddSingleton<DeviceFleet>();
+
+        // Device discovery (decision V-40). Tests replace the port list and transports through PortScannerOptions.
+        services.AddOptions<Vyxum.Devices.Discovery.PortScannerOptions>();
+        services.AddSingleton<Discovery.DeviceDiscovery>();
         services.AddHostedService<DeviceWorker>();
         services.AddHostedService<HubWorker>();
         return services;

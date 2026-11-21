@@ -88,6 +88,7 @@ const connectionKeys: Record<DeviceConnectionState, string> = {
   Connected: 'weighing.DeviceConnected',
   Connecting: 'weighing.DeviceConnecting',
   Disconnected: 'weighing.DeviceDisconnected',
+  Error: 'devices.ScaleError',
 };
 
 const weightStateKeys: Record<LiveWeightState, string> = {
@@ -488,6 +489,7 @@ export function WeighingPage() {
     deviceLine = (
       <span className={`weighing__device ${state === 'Connected' ? 'state--positive' : 'state--warning'}`} role="status">
         {`${t(connectionKeys[state])}, ${deviceId}`}
+        {state === 'Error' && current.lastError ? ` (${current.lastError})` : null}
       </span>
     );
   }

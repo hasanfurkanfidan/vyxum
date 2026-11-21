@@ -7,6 +7,11 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <!-- The development example (a simulated scale) is not installed: an installed agent gets its devices from the web. -->
+    <Content Update="appsettings.Development.json" CopyToPublishDirectory="Never" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="Microsoft.Extensions.Hosting.WindowsServices" />
     <PackageReference Include="Microsoft.AspNetCore.SignalR.Client" />
   </ItemGroup>
@@ -18,6 +23,7 @@
     <ProjectReference Include="..\..\Devices\Vyxum.Devices.ToledoContinuous\Vyxum.Devices.ToledoContinuous.csproj" />
     <ProjectReference Include="..\..\Devices\Vyxum.Devices.GenericAscii\Vyxum.Devices.GenericAscii.csproj" />
     <ProjectReference Include="..\..\Devices\Vyxum.Devices.Simulator\Vyxum.Devices.Simulator.csproj" />
+    <ProjectReference Include="..\..\Devices\Vyxum.Devices.Discovery\Vyxum.Devices.Discovery.csproj" />
   </ItemGroup>
 
 </Project>

@@ -1,11 +1,13 @@
 using System.Reflection;
 using System.Text.Json.Serialization;
 using Microsoft.AspNetCore.Http.Connections.Client;
+using Microsoft.AspNetCore.SignalR;
 using Microsoft.AspNetCore.SignalR.Client;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Vyxum.Agent.Contract;
+using Vyxum.Agent.Discovery;
 using Vyxum.Devices;
 
 namespace Vyxum.Agent;
@@ -32,6 +34,7 @@ public sealed partial class HubWorker : BackgroundService
     private static readonly TimeSpan SendTimeout = TimeSpan.FromSeconds(10);
 
     private readonly DeviceFleet _fleet;
+    private readonly DeviceDiscovery _discovery;
     private readonly AgentHubClientOptions _clientOptions;
     private readonly ILogger<HubWorker> _logger;
     private readonly TimeProvider _time;
@@ -40,14 +43,23 @@ public sealed partial class HubWorker : BackgroundService
     private readonly Dictionary<string, SentState> _sent = new(StringComparer.Ordinal);
     private readonly string? _version;
     private int _resyncRequested;
+    private int _fetchRequested;
+    private bool _fetchUnsupportedLogged;
     private bool _sendFailureLogged;
 
     /// <summary>Creates the worker.</summary>
-    public HubWorker(DeviceFleet fleet, IOptions<AgentHubClientOptions> clientOptions, ILogger<HubWorker> logger, TimeProvider timeProvider)
+    public HubWorker(
+        DeviceFleet fleet,
+        DeviceDiscovery discovery,
+        IOptions<AgentHubClientOptions> clientOptions,
+        ILogger<HubWorker> logger,
+        TimeProvider timeProvider)
     {
         ArgumentNullException.ThrowIfNull(fleet);
+        ArgumentNullException.ThrowIfNull(discovery);
         ArgumentNullException.ThrowIfNull(clientOptions);
         _fleet = fleet;
+        _discovery = discovery;
         _clientOptions = clientOptions.Value;
         _logger = logger;
         _time = timeProvider;
@@ -79,6 +91,24 @@ public sealed partial class HubWorker : BackgroundService
                 AgentHubContract.Zero,
                 (deviceId, timeout) => _fleet.ZeroAsync(deviceId, timeout, stoppingToken));
 
+            // Called by the web application with a result (decision V-40): look for scales with read-only commands.
+            connection.On<DiscoveryRequest, DiscoveryResult>(
+                AgentHubContract.Discover,
+                request => _discovery.DiscoverAsync(
+                    request,
+                    ports => connection.SendAsync(AgentHubContract.ReportDiscoveryProgress, request.DiscoveryId, ports, stoppingToken),
+                    stoppingToken));
+
+            if (!_fleet.UsesLocalDevices)
+            {
+                // The device settings changed in the web application (decision V-39).
+                connection.On(AgentHubContract.DevicesChanged, () =>
+                {
+                    LogDevicesChanged(_logger);
+                    RequestResync(fetchDevices: true);
+                });
+            }
+
             connection.Reconnecting += error =>
             {
                 LogReconnecting(_logger, ServerUrl, error?.Message ?? "no error");
@@ -87,7 +117,7 @@ public sealed partial class HubWorker : BackgroundService
             connection.Reconnected += _ =>
             {
                 LogReconnected(_logger, ServerUrl);
-                RequestResync();
+                RequestResync(fetchDevices: true);
                 return Task.CompletedTask;
             };
             connection.Closed += error =>
@@ -102,6 +132,15 @@ public sealed partial class HubWorker : BackgroundService
             };
 
             LogStarting(_logger, ServerUrl, _fleet.Settings.EffectiveAgentName, string.IsNullOrEmpty(_fleet.Settings.Key) ? "no" : "an");
+            if (_fleet.UsesLocalDevices)
+            {
+                LogLocalDevices(_logger, _fleet.Devices.Count);
+            }
+            else
+            {
+                LogServerDevices(_logger);
+            }
+
             var sender = Task.Run(() => SendLoopAsync(connection, stoppingToken), CancellationToken.None);
             try
             {
@@ -170,7 +209,7 @@ public sealed partial class HubWorker : BackgroundService
 
             failures = 0;
             LogConnected(_logger, ServerUrl);
-            RequestResync();
+            RequestResync(fetchDevices: true);
 
             // Automatic reconnect handles short outages; this only wakes up when the connection is closed for good.
             await _closed.WaitAsync(cancellationToken).ConfigureAwait(false);
@@ -178,8 +217,13 @@ public sealed partial class HubWorker : BackgroundService
         }
     }
 
-    private void RequestResync()
+    private void RequestResync(bool fetchDevices = false)
     {
+        if (fetchDevices && !_fleet.UsesLocalDevices)
+        {
+            Volatile.Write(ref _fetchRequested, 1);
+        }
+
         Volatile.Write(ref _resyncRequested, 1);
         _fleet.Wake();
     }
@@ -257,20 +301,32 @@ public sealed partial class HubWorker : BackgroundService
     private async Task<bool> ResyncAsync(HubConnection connection, CancellationToken cancellationToken)
     {
         _sent.Clear();
-        var deviceIds = _fleet.Devices.Select(d => d.Id).ToList();
-        var commands = deviceIds.ToDictionary(id => id, _fleet.GetSupportedCommands, StringComparer.Ordinal);
-        var registration = new AgentRegistration(_fleet.Settings.EffectiveAgentName, _version, deviceIds, commands);
+        var fetch = Interlocked.Exchange(ref _fetchRequested, 0) != 0;
+        AgentRegistration registration;
         try
         {
-            using (var timeout = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken))
+            // GetDevices needs a registered connection, so register first with the devices that run now.
+            registration = await RegisterAsync(connection, cancellationToken).ConfigureAwait(false);
+            if (fetch)
             {
-                timeout.CancelAfter(SendTimeout);
-                await connection.InvokeAsync(AgentHubContract.Register, registration, timeout.Token).ConfigureAwait(false);
+                var changed = await FetchDevicesAsync(connection, cancellationToken).ConfigureAwait(false);
+                fetch = false;
+                if (changed)
+                {
+                    // The web application must know the devices that run now and the commands they support.
+                    registration = await RegisterAsync(connection, cancellationToken).ConfigureAwait(false);
+                }
             }
+
+            var deviceIds = registration.DeviceIds;
 
             foreach (var deviceId in deviceIds)
             {
-                var status = _fleet.GetStatus(deviceId);
+                if (_fleet.GetStatus(deviceId) is not { } status)
+                {
+                    continue;
+                }
+
                 await SendStatusAsync(connection, deviceId, status, cancellationToken).ConfigureAwait(false);
                 if (status.Status == DeviceStatus.Connected && _fleet.GetLatestReading(deviceId) is { } reading)
                 {
@@ -280,13 +336,59 @@ public sealed partial class HubWorker : BackgroundService
         }
         catch (Exception ex) when (!cancellationToken.IsCancellationRequested)
         {
+            if (fetch)
+            {
+                Volatile.Write(ref _fetchRequested, 1);
+            }
+
             LogSendFailed(_logger, ex.Message);
             return false;
         }
 
         _sendFailureLogged = false;
-        LogRegistered(_logger, registration.AgentName, deviceIds.Count);
+        LogRegistered(_logger, registration.AgentName, registration.DeviceIds.Count);
         return true;
+    }
+
+    /// <summary>Registers the devices that run now.</summary>
+    private async Task<AgentRegistration> RegisterAsync(HubConnection connection, CancellationToken cancellationToken)
+    {
+        var deviceIds = _fleet.DeviceIds;
+        var commands = deviceIds.ToDictionary(id => id, _fleet.GetSupportedCommands, StringComparer.Ordinal);
+        var registration = new AgentRegistration(_fleet.Settings.EffectiveAgentName, _version, deviceIds, commands);
+        using var timeout = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
+        timeout.CancelAfter(SendTimeout);
+        await connection.InvokeAsync(AgentHubContract.Register, registration, timeout.Token).ConfigureAwait(false);
+        return registration;
+    }
+
+    /// <summary>
+    /// Asks the web application for this agent's devices and applies them. Returns whether the devices changed. A web
+    /// application without device settings (an older version) answers with an error; then nothing changes.
+    /// </summary>
+    private async Task<bool> FetchDevicesAsync(HubConnection connection, CancellationToken cancellationToken)
+    {
+        AgentDeviceConfig[] devices;
+        try
+        {
+            using var timeout = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
+            timeout.CancelAfter(SendTimeout);
+            devices = await connection.InvokeAsync<AgentDeviceConfig[]>(AgentHubContract.GetDevices, timeout.Token).ConfigureAwait(false)
+                ?? [];
+        }
+        catch (HubException ex)
+        {
+            if (!_fetchUnsupportedLogged)
+            {
+                _fetchUnsupportedLogged = true;
+                LogFetchUnsupported(_logger, ex.Message);
+            }
+
+            return false;
+        }
+
+        _fetchUnsupportedLogged = false;
+        return await _fleet.ApplyServerDevicesAsync(devices, cancellationToken).ConfigureAwait(false);
     }
 
     private async Task<bool> ProcessAsync(HubConnection connection, DeviceUpdate update, CancellationToken cancellationToken)
@@ -298,6 +400,12 @@ public sealed partial class HubWorker : BackgroundService
 
         try
         {
+            if (_fleet.GetStatus(deviceId) is not { } current)
+            {
+                // The device left the fleet; the next registration tells the web application.
+                return true;
+            }
+
             if (update.Status is { } status)
             {
                 if (!SameStatus(GetSent(deviceId).Status, status))
@@ -306,7 +414,7 @@ public sealed partial class HubWorker : BackgroundService
                 }
             }
             else if (update.Reading is { } reading
-                && _fleet.GetStatus(deviceId).Status == DeviceStatus.Connected
+                && current.Status == DeviceStatus.Connected
                 && !SameReading(GetSent(deviceId).Reading, reading))
             {
                 // A reading that arrives after its device went down is stale: it would mark the device connected.
@@ -326,22 +434,26 @@ public sealed partial class HubWorker : BackgroundService
     {
         try
         {
-            foreach (var device in _fleet.Devices)
+            foreach (var deviceId in _fleet.DeviceIds)
             {
-                var sent = GetSent(device.Id);
-                var status = _fleet.GetStatus(device.Id);
+                if (_fleet.GetStatus(deviceId) is not { } status)
+                {
+                    continue;
+                }
+
+                var sent = GetSent(deviceId);
 
                 // Also repairs changes that were dropped from the queue.
                 if (!SameStatus(sent.Status, status))
                 {
-                    await SendStatusAsync(connection, device.Id, status, cancellationToken).ConfigureAwait(false);
+                    await SendStatusAsync(connection, deviceId, status, cancellationToken).ConfigureAwait(false);
                 }
 
                 if (status.Status == DeviceStatus.Connected
-                    && _fleet.GetLatestReading(device.Id) is { } reading
+                    && _fleet.GetLatestReading(deviceId) is { } reading
                     && (!SameReading(sent.Reading, reading) || _time.GetElapsedTime(sent.SentAt) >= interval * 0.9))
                 {
-                    await SendReadingAsync(connection, device.Id, reading, cancellationToken).ConfigureAwait(false);
+                    await SendReadingAsync(connection, deviceId, reading, cancellationToken).ConfigureAwait(false);
                 }
             }
 
@@ -424,6 +536,18 @@ public sealed partial class HubWorker : BackgroundService
 
     [LoggerMessage(Level = LogLevel.Warning, Message = "Connection to {ServerUrl} closed ({Error}); connecting again.")]
     private static partial void LogClosed(ILogger logger, string serverUrl, string error);
+
+    [LoggerMessage(Level = LogLevel.Information, Message = "The settings file lists {DeviceCount} device(s); they are used and the devices configured in the web application are ignored.")]
+    private static partial void LogLocalDevices(ILogger logger, int deviceCount);
+
+    [LoggerMessage(Level = LogLevel.Information, Message = "The settings file lists no devices; the devices come from the web application.")]
+    private static partial void LogServerDevices(ILogger logger);
+
+    [LoggerMessage(Level = LogLevel.Information, Message = "The device settings changed in the web application; fetching the devices again.")]
+    private static partial void LogDevicesChanged(ILogger logger);
+
+    [LoggerMessage(Level = LogLevel.Warning, Message = "The web application did not send devices: {Error} The agent runs without devices from the web application.")]
+    private static partial void LogFetchUnsupported(ILogger logger, string error);
 
     [LoggerMessage(Level = LogLevel.Information, Message = "Registered as {AgentName} with {DeviceCount} device(s).")]
     private static partial void LogRegistered(ILogger logger, string agentName, int deviceCount);

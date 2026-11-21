@@ -40,6 +40,27 @@ The architecture tests in `tests/Vyxum.ArchitectureTests` check these rules, and
 
 Products and Weighing are built into the host. `HostModules.BuiltIn` in `src/Host/Vyxum.Host/HostModules.cs` lists them, so the host always loads them. A new module needs its project, a project reference from the host, a line in `HostModules.BuiltIn`, and an entry in the module list of the architecture tests. The user-facing description is in the [README](README.md#modules).
 
+## Database migrations
+
+Schema changes are EF Core migrations, generated with `dotnet ef` (a repository-local tool: run `dotnet tool restore` once). Never write SQL by hand. The platform and every module have their own migrations, in two folders, one per provider: `Migrations/Sqlite` and `Migrations/SqlServer`. Each context records them in its own history table (`__plt_migrations` for the platform, `__<prefix>_migrations` for a module). On start the host applies what is pending, after a SQLite backup.
+
+After changing a model, add a migration for both providers with the same name. From the repository root, for the Products module:
+
+```bash
+dotnet ef migrations add AddProductOrigin --project src/Modules/Products/Vyxum.Modules.Products --output-dir Migrations/Sqlite -- --provider Sqlite
+dotnet ef migrations add AddProductOrigin --project src/Modules/Products/Vyxum.Modules.Products --output-dir Migrations/SqlServer -- --provider SqlServer
+```
+
+Use `src/Modules/Weighing/Vyxum.Modules.Weighing` for Weighing and `src/Platform/Vyxum.Platform` for the platform. To undo the last one, run `dotnet ef migrations remove` with the same `--project` and `-- --provider` arguments. Review the generated code, and run the tests: a model change without a migration for both providers fails `Every_model_change_has_a_migration`. A migration that drops or rewrites data needs a test with existing rows.
+
+A new module (including a module outside this repository) ships its migrations the same way. Its project references `Microsoft.EntityFrameworkCore.Design` with `PrivateAssets=all` and contains one line:
+
+```csharp
+internal sealed class DesignTimeFactory : DesignTimeDbContextFactory<MyDbContext>;
+```
+
+For a new context, EF names both model snapshots `<Context>ModelSnapshot`. After creating the first SQLite migration, rename that snapshot class and its file to `<Context>SqliteModelSnapshot`; after the first SQL Server migration, rename it to `<Context>SqlServerModelSnapshot`. Later migrations need nothing extra.
+
 ## Web UI
 
 The UI is in `src/Web/vyxum-web` (React, TypeScript, Vite). CI uses Node.js 22; use the same version.
@@ -106,6 +127,27 @@ Mimari testler (`tests/Vyxum.ArchitectureTests`) bu kuralları denetler; [README
 ## Modüller
 
 Products ve Weighing modülleri sunucuya dahildir. `src/Host/Vyxum.Host/HostModules.cs` içindeki `HostModules.BuiltIn` bunları listeler; sunucu bunları her zaman yükler. Yeni bir modül için projesi, sunucudan bir proje başvurusu, `HostModules.BuiltIn` içinde bir satır ve mimari testlerin modül listesinde bir kayıt gerekir. Kullanıcıya dönük açıklama [README](README.tr.md#modüller) dosyasındadır.
+
+## Veritabanı geçişleri
+
+Şema değişiklikleri `dotnet ef` ile üretilen EF Core geçişleridir (depoya yerel araç: bir kez `dotnet tool restore` çalıştırın). SQL elle yazılmaz. Platformun ve her modülün kendi geçişleri vardır; sağlayıcı başına bir klasör: `Migrations/Sqlite` ve `Migrations/SqlServer`. Her bağlam bunları kendi geçmiş tablosuna yazar (platform için `__plt_migrations`, modül için `__<önek>_migrations`). Sunucu açılışta, SQLite yedeğini aldıktan sonra bekleyen geçişleri uygular.
+
+Modeli değiştirdikten sonra iki sağlayıcı için aynı adla bir geçiş ekleyin. Depo kökünden, Products modülü için:
+
+```bash
+dotnet ef migrations add AddProductOrigin --project src/Modules/Products/Vyxum.Modules.Products --output-dir Migrations/Sqlite -- --provider Sqlite
+dotnet ef migrations add AddProductOrigin --project src/Modules/Products/Vyxum.Modules.Products --output-dir Migrations/SqlServer -- --provider SqlServer
+```
+
+Weighing için `src/Modules/Weighing/Vyxum.Modules.Weighing`, platform için `src/Platform/Vyxum.Platform` kullanın. Sonuncuyu geri almak için aynı `--project` ve `-- --provider` değerleriyle `dotnet ef migrations remove` çalıştırın. Üretilen kodu inceleyin ve testleri çalıştırın: iki sağlayıcıdan biri için geçişi olmayan model değişikliği `Every_model_change_has_a_migration` testini kırar. Veri silen ya da dönüştüren bir geçiş, içinde kayıt olan bir veritabanıyla test edilir.
+
+Yeni bir modül (bu deponun dışındaki bir modül de) geçişlerini aynı yolla taşır. Projesi `Microsoft.EntityFrameworkCore.Design` paketine `PrivateAssets=all` ile başvurur ve tek bir satır içerir:
+
+```csharp
+internal sealed class DesignTimeFactory : DesignTimeDbContextFactory<MyDbContext>;
+```
+
+Yeni bir bağlamda EF iki model anlık görüntüsüne de `<Bağlam>ModelSnapshot` adını verir. İlk SQLite geçişinden sonra bu sınıfı ve dosyasını `<Bağlam>SqliteModelSnapshot` olarak, ilk SQL Server geçişinden sonra `<Bağlam>SqlServerModelSnapshot` olarak yeniden adlandırın. Sonraki geçişler ek bir iş gerektirmez.
 
 ## Web arayüzü
 

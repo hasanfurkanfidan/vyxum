@@ -30,11 +30,27 @@ public sealed class LiveWeightStore(TimeProvider time) : ILiveWeightSource
         ArgumentException.ThrowIfNullOrWhiteSpace(agentName);
         ArgumentNullException.ThrowIfNull(deviceIds);
 
+        var ids = deviceIds as IReadOnlyCollection<string> ?? [.. deviceIds];
         var now = time.GetUtcNow();
         lock (_lock)
         {
             _agentNames[connectionId] = agentName;
-            foreach (var deviceId in deviceIds)
+
+            // A registration lists every device the agent serves now; the ones it dropped are released.
+            var listed = new HashSet<string>(ids, StringComparer.Ordinal);
+            foreach (var dropped in _devices.Values.Where(e => e.ConnectionId == connectionId && !listed.Contains(e.DeviceId)).ToList())
+            {
+                var snapshot = dropped.DeviceWatchers.Count > 0 ? dropped.ToSnapshot() : null;
+                dropped.ConnectionId = null;
+                dropped.State = DeviceConnectionState.Disconnected;
+                dropped.LastError = null;
+                dropped.LastWeight = null;
+                dropped.SupportedCommands = [];
+                dropped.Known = false;
+                PublishIfChanged(dropped, snapshot);
+            }
+
+            foreach (var deviceId in ids)
             {
                 var before = Snapshot(deviceId);
                 var entry = Claim(connectionId, deviceId, now);
@@ -51,6 +67,60 @@ public sealed class LiveWeightStore(TimeProvider time) : ILiveWeightSource
                 }
 
                 PublishIfChanged(entry, before);
+            }
+        }
+    }
+
+    /// <summary>The name an agent connection registered with, or null when it has not registered.</summary>
+    public string? GetAgentName(string connectionId)
+    {
+        ArgumentNullException.ThrowIfNull(connectionId);
+
+        lock (_lock)
+        {
+            return _agentNames.GetValueOrDefault(connectionId);
+        }
+    }
+
+    /// <summary>The registered agent connections and their names.</summary>
+    public IReadOnlyList<(string ConnectionId, string AgentName)> GetAgents()
+    {
+        lock (_lock)
+        {
+            return [.. _agentNames.Select(a => (a.Key, a.Value))];
+        }
+    }
+
+    /// <summary>
+    /// Replaces the details from the device settings (name, capacity, division, unit). A configured device is listed
+    /// even before an agent reports it (disconnected, without agent name).
+    /// </summary>
+    public void SetConfiguredDevices(IEnumerable<ConfiguredDevice> devices)
+    {
+        ArgumentNullException.ThrowIfNull(devices);
+
+        var byId = new Dictionary<string, ConfiguredDevice>(StringComparer.Ordinal);
+        foreach (var device in devices)
+        {
+            byId[device.Id] = device;
+        }
+
+        lock (_lock)
+        {
+            foreach (var entry in _devices.Values)
+            {
+                var config = byId.GetValueOrDefault(entry.DeviceId);
+                if (config != entry.Config)
+                {
+                    var before = entry.DeviceWatchers.Count > 0 ? entry.ToSnapshot() : null;
+                    entry.Config = config;
+                    PublishIfChanged(entry, before);
+                }
+            }
+
+            foreach (var config in byId.Values.Where(c => !_devices.ContainsKey(c.Id)))
+            {
+                GetOrAdd(config.Id, lastSeen: null).Config = config;
             }
         }
     }
@@ -148,7 +218,7 @@ public sealed class LiveWeightStore(TimeProvider time) : ILiveWeightSource
     {
         lock (_lock)
         {
-            return [.. _devices.Values.Where(e => e.Known).OrderBy(e => e.DeviceId, StringComparer.Ordinal).Select(e => e.ToSnapshot())];
+            return [.. _devices.Values.Where(e => e.Listed).OrderBy(e => e.DeviceId, StringComparer.Ordinal).Select(e => e.ToSnapshot())];
         }
     }
 
@@ -159,7 +229,7 @@ public sealed class LiveWeightStore(TimeProvider time) : ILiveWeightSource
 
         lock (_lock)
         {
-            return _devices.TryGetValue(deviceId, out var entry) && entry.Known ? entry.ToSnapshot() : null;
+            return _devices.TryGetValue(deviceId, out var entry) && entry.Listed ? entry.ToSnapshot() : null;
         }
     }
 
@@ -348,10 +418,25 @@ public sealed class LiveWeightStore(TimeProvider time) : ILiveWeightSource
         /// <summary>False while the entry exists only because someone watches it.</summary>
         public bool Known { get; set; }
 
+        /// <summary>The details from the device settings; null when the device has none.</summary>
+        public ConfiguredDevice? Config { get; set; }
+
+        /// <summary>Shown in the device list: reported by an agent or present in the device settings.</summary>
+        public bool Listed => Known || Config is not null;
+
         public List<Channel<LiveWeight>> Watchers { get; } = [];
 
         public List<Channel<LiveDevice>> DeviceWatchers { get; } = [];
 
-        public LiveDevice ToSnapshot() => new(DeviceId, AgentName, State, LastError, LastWeight, LastSeen, SupportedCommands);
+        public LiveDevice ToSnapshot() => new(
+            DeviceId, AgentName, State, LastError, LastWeight, LastSeen, SupportedCommands, Config?.Name, Config?.Capacity, Config?.Division, Config?.Unit);
     }
 }
+
+/// <summary>The details of a device from the device settings, shown with its live state.</summary>
+/// <param name="Id">The device id.</param>
+/// <param name="Name">The device name.</param>
+/// <param name="Capacity">Maximum load in <paramref name="Unit"/>; null when unknown.</param>
+/// <param name="Division">Scale interval in <paramref name="Unit"/>; null when unknown.</param>
+/// <param name="Unit">Unit of capacity and division; null when unknown.</param>
+public sealed record ConfiguredDevice(string Id, string Name, decimal? Capacity, decimal? Division, string? Unit);

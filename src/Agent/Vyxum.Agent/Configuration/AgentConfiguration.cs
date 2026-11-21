@@ -47,13 +47,15 @@ public sealed class AgentConfigurationException : Exception
 /// <param name="CreateTransport">Creates the transport for one connection attempt.</param>
 /// <param name="Protocol">The protocol.</param>
 /// <param name="Simulator">For a simulator transport, the transport instance (to inject faults in tests); otherwise null.</param>
+/// <param name="PortName">For a serial transport, the port name (for example <c>COM3</c>); otherwise null.</param>
 public sealed record AgentDevice(
     string Id,
     string TransportDescription,
     string ProtocolName,
     Func<ITransport> CreateTransport,
     IScaleProtocol Protocol,
-    SimulatedTransport? Simulator);
+    SimulatedTransport? Simulator,
+    string? PortName = null);
 
 /// <summary>Reads and checks the agent settings and turns them into devices.</summary>
 public static class AgentConfiguration
@@ -116,11 +118,6 @@ public static class AgentConfiguration
         RequirePositive(errors, $"{root}:ReconnectDelay", settings.ReconnectDelay);
         RequirePositive(errors, $"{root}:MaxReconnectDelay", settings.MaxReconnectDelay);
 
-        if (settings.Devices.Count == 0)
-        {
-            errors.Add($"{root}:Devices: at least one device is required.");
-        }
-
         var devices = new List<AgentDevice>();
         var ids = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
         for (var i = 0; i < settings.Devices.Count; i++)
@@ -137,11 +134,9 @@ public static class AgentConfiguration
                 errors.Add($"{path}:Id: the id '{id}' is used by more than one device.");
             }
 
-            var transport = CreateTransport(errors, $"{path}:Transport", device.Transport);
-            var protocol = CreateProtocol(errors, $"{path}:Protocol", device.Protocol, time);
-            if (!string.IsNullOrEmpty(id) && transport is { } t && protocol is { } p)
+            if (Create(errors, path, id, device, time) is { } created)
             {
-                devices.Add(new AgentDevice(id, t.Description, p.Name, t.Factory, p.Protocol, t.Simulator));
+                devices.Add(created);
             }
         }
 
@@ -153,7 +148,76 @@ public static class AgentConfiguration
         return devices;
     }
 
-    private static (string Description, Func<ITransport> Factory, SimulatedTransport? Simulator)? CreateTransport(
+    /// <summary>
+    /// Checks one device and creates it. Returns null and adds to <paramref name="errors"/> (each error starting with
+    /// <paramref name="path"/>) when its settings are invalid. Nothing is opened.
+    /// </summary>
+    public static AgentDevice? CreateDevice(DeviceSettings device, string path, List<string> errors, TimeProvider? timeProvider = null)
+    {
+        ArgumentNullException.ThrowIfNull(device);
+        ArgumentNullException.ThrowIfNull(path);
+        ArgumentNullException.ThrowIfNull(errors);
+        var id = device.Id?.Trim();
+        if (string.IsNullOrEmpty(id))
+        {
+            errors.Add($"{path}:Id: a device id is required.");
+        }
+
+        return Create(errors, path, id, device, timeProvider ?? TimeProvider.System);
+    }
+
+    /// <summary>
+    /// Reads a device sent by the web application (hub method <c>GetDevices</c>) into settings. Returns null and adds to
+    /// <paramref name="errors"/> when the JSON does not fit the settings (for example text where a number belongs).
+    /// </summary>
+    public static DeviceSettings? ReadServerDevice(Contract.AgentDeviceConfig config, string path, List<string> errors)
+    {
+        ArgumentNullException.ThrowIfNull(config);
+        ArgumentNullException.ThrowIfNull(errors);
+        try
+        {
+            return new DeviceSettings
+            {
+                Id = config.Id,
+                Transport = config.Transport.ValueKind == System.Text.Json.JsonValueKind.Object
+                    ? System.Text.Json.JsonSerializer.Deserialize<TransportSettings>(config.Transport, ServerJson)
+                    : null,
+                Protocol = config.Protocol.ValueKind == System.Text.Json.JsonValueKind.Object
+                    ? System.Text.Json.JsonSerializer.Deserialize<ProtocolSettings>(config.Protocol, ServerJson)
+                    : null,
+            };
+        }
+        catch (Exception ex) when (ex is System.Text.Json.JsonException or NotSupportedException or InvalidOperationException or FormatException)
+        {
+            errors.Add($"{path}: the settings could not be read: {ex.Message}");
+            return null;
+        }
+    }
+
+    /// <summary>
+    /// How devices from the web application are read: camel case or any case, enums as names, numbers also as text,
+    /// time spans as <c>hh:mm:ss.fff</c>.
+    /// </summary>
+    private static readonly System.Text.Json.JsonSerializerOptions ServerJson = CreateServerJson();
+
+    private static System.Text.Json.JsonSerializerOptions CreateServerJson()
+    {
+        var options = new System.Text.Json.JsonSerializerOptions(System.Text.Json.JsonSerializerDefaults.Web);
+        options.Converters.Add(new System.Text.Json.Serialization.JsonStringEnumConverter());
+        options.MakeReadOnly(populateMissingResolver: true);
+        return options;
+    }
+
+    private static AgentDevice? Create(List<string> errors, string path, string? id, DeviceSettings device, TimeProvider time)
+    {
+        var transport = CreateTransport(errors, $"{path}:Transport", device.Transport);
+        var protocol = CreateProtocol(errors, $"{path}:Protocol", device.Protocol, time);
+        return !string.IsNullOrEmpty(id) && transport is { } t && protocol is { } p
+            ? new AgentDevice(id, t.Description, p.Name, t.Factory, p.Protocol, t.Simulator, t.PortName)
+            : null;
+    }
+
+    private static (string Description, Func<ITransport> Factory, SimulatedTransport? Simulator, string? PortName)? CreateTransport(
         List<string> errors, string path, TransportSettings? settings)
     {
         var type = settings?.Type?.Trim().ToLowerInvariant();
@@ -202,7 +266,7 @@ public static class AgentConfiguration
                         RtsEnable = settings.RtsEnable,
                     };
                     var description = new SerialTransport(options).Description;
-                    return (description, () => new SerialTransport(options), null);
+                    return (description, () => new SerialTransport(options), null, options.PortName);
                 }
 
                 case "tcp":
@@ -238,7 +302,7 @@ public static class AgentConfiguration
                         options = options with { ConnectTimeout = timeout };
                     }
 
-                    return ($"{options.Host}:{options.Port}", () => new TcpTransport(options), null);
+                    return ($"{options.Host}:{options.Port}", () => new TcpTransport(options), null, null);
                 }
 
                 case "simulator":
@@ -290,7 +354,7 @@ public static class AgentConfiguration
 
                     // One instance serves every connection attempt; each open starts a new device session.
                     var transport = SimulatorFactory.CreateTransport(options);
-                    return (transport.Description, () => transport, transport);
+                    return (transport.Description, () => transport, transport, null);
                 }
 
                 default:

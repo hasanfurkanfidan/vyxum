@@ -56,6 +56,7 @@ public sealed class SerialTransport : ITransport
         {
             Handshake = ToSystem(_options.Handshake),
             DtrEnable = _options.DtrEnable,
+            WriteTimeout = (int)Math.Clamp(_options.WriteTimeout.TotalMilliseconds, 1, int.MaxValue),
             // RTS cannot be set by hand while the handshake drives it.
             RtsEnable = _options.RtsEnable && _options.Handshake is not (SerialHandshake.RequestToSend or SerialHandshake.RequestToSendXOnXOff),
         };
@@ -100,15 +101,21 @@ public sealed class SerialTransport : ITransport
     }
 
     /// <inheritdoc />
+    /// <remarks>
+    /// The write is synchronous on a pool thread, because only the synchronous write honours
+    /// <see cref="SerialTransportOptions.WriteTimeout"/>: an asynchronous write to a port that never transmits (a Bluetooth
+    /// serial port without a connected device) stays pending forever and ignores cancellation. Commands are a few bytes,
+    /// so the thread is busy for microseconds on a working port.
+    /// </remarks>
     public async ValueTask WriteAsync(ReadOnlyMemory<byte> buffer, CancellationToken cancellationToken)
     {
         var port = RequirePort();
+        var bytes = buffer.ToArray();
         try
         {
-            await port.BaseStream.WriteAsync(buffer, cancellationToken).ConfigureAwait(false);
-            await port.BaseStream.FlushAsync(cancellationToken).ConfigureAwait(false);
+            await Task.Run(() => port.Write(bytes, 0, bytes.Length), cancellationToken).ConfigureAwait(false);
         }
-        catch (Exception ex) when (ex is InvalidOperationException or UnauthorizedAccessException)
+        catch (Exception ex) when (ex is InvalidOperationException or UnauthorizedAccessException or TimeoutException or ObjectDisposedException)
         {
             throw new IOException($"The serial port {_options.PortName} failed while writing: {ex.Message}", ex);
         }

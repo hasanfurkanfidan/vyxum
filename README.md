@@ -8,6 +8,10 @@ This repository is the open core of Vyxum, licensed under the Apache License 2.0
 
 > **Status: early development.** The repository contains the platform (module loading and validation, integration events with an outbox and inbox, database provider selection), the Products and Weighing modules, the web UI and the device drivers. Phase F2 is in progress.
 
+## Kurulum / Installation
+
+Windows 10 or 11 (64-bit). No internet connection, database server or extra program is needed. Run `VyxumSetup-<version>.exe` and follow the step-by-step guide: [Installation guide](docs/INSTALL.md) (Türkçe: [docs/KURULUM.md](docs/KURULUM.md)).
+
 ## Repository layout
 
 | Path | Contents |
@@ -83,6 +87,7 @@ A scale is read in two parts. A **transport** moves bytes over a serial port or 
 | `src/Devices/Vyxum.Devices.ToledoContinuous` | Toledo continuous output protocol |
 | `src/Devices/Vyxum.Devices.GenericAscii` | Rule-based protocol for other ASCII output |
 | `src/Devices/Vyxum.Devices.Simulator` | Simulated scales over memory or TCP, and replay of recorded lines |
+| `src/Devices/Vyxum.Devices.Discovery` | Read-only search for scales on serial ports or at one network address |
 
 Supported transports are serial and TCP. Supported protocols are MT-SICS, Toledo Continuous and generic ASCII.
 
@@ -97,11 +102,15 @@ dotnet run --project src/Host/Vyxum.Host --urls http://localhost:5000
 dotnet run --project src/Agent/Vyxum.Agent
 ```
 
-Then open http://localhost:5000/api/devices. The agent's shipped settings use a simulated MT-SICS scale (572 g), so no hardware is needed.
+Then open http://localhost:5000/api/devices. Under `dotnet run` the agent starts in the Development environment, whose `appsettings.Development.json` adds a simulated MT-SICS scale (572 g), so no hardware is needed.
+
+Devices are configured in the web application (Settings → Devices) and stored in the `plt_Devices` table; the agent fetches them when it connects and applies every change without restarting. `GET`, `POST /api/devices/config` and `GET`, `PUT`, `DELETE /api/devices/config/{id}` read and change them (`transport` and `protocol` have the same fields as the agent settings; `capacity` and `division` are decimal strings). The `Devices` list in the agent's own settings file is for development: when it is not empty, the agent ignores the devices from the web application. See the [agent README](src/Agent/Vyxum.Agent/README.md). Each device in `/api/devices` also carries `name`, `capacity`, `division` and `unit` from its settings; a device whose settings the agent cannot use has the state `Error`.
 
 http://localhost:5000/api/devices/{id}/live streams one device as Server-Sent Events: its current state at once, then a new event whenever its state or weight changes. A device id the agent has not reported yet is not an error; the stream starts in the `Disconnected` state and continues once the agent connects.
 
 `POST /api/devices/{id}/zero` asks the scale to zero, once per request. It always answers 200 with `{ "result": "Done" | "NotSupported" | "Rejected" | "Unavailable", "detail": "..." }`; `detail` is English text for logs and may be missing. Each device lists the commands it supports in `supportedCommands` (`["Zero"]` for MT-SICS).
+
+`POST /api/devices/discover` asks the agent to search for scales (body optional: `{ "agentName"?: "...", "tcp"?: { "host": "...", "port": 4001 } }`). It answers 202 with `{ "id" }`, 409 with `{ "code": "devices.DiscoveryRunning" }` while the agent already searches, and 503 with `{ "code": "devices.NoAgent" }` without a connected agent. `GET /api/devices/discover/{id}` returns the job: `status` (`Running`, `Completed`, `Failed` with `code` `devices.AgentTimeout` or `devices.DiscoveryFailed`), the `ports` with their state (`Pending`, `Scanning`, `Found`, `NotFound`, `InUse`, `Error`) and the `candidates`, whose `transport` and `protocol` objects can be posted to `/api/devices/config` unchanged. Jobs are kept in memory for 10 minutes. Discovery sends only the MT-SICS commands `SI` and `I4`; see [Device discovery](src/Agent/Vyxum.Agent/README.md#device-discovery).
 
 ## Modules
 
@@ -177,11 +186,13 @@ How the screen works with the scale:
 - Tare is kept in software by Vyxum. **Take tare** stores the current gross weight as the tare. The scale's own tare command is never sent.
 - The **Zero** button sends `Z` to the scale, once per press. Nothing else is sent.
 
-The database schema is created on the first start. The default SQLite file is `vyxum.db` in the data directory: `data/` under the working directory (`src/Host/Vyxum.Host/data/` when you start the host with the commands above), or `%ProgramData%\Vyxum` on Windows. There are no migrations yet. After a model change during development, stop the host and delete that file, together with `vyxum.db-shm` and `vyxum.db-wal` if they exist. This deletes all records, so use it only on test data.
+The database schema is created on the first start. The default SQLite file is `vyxum.db` in the data directory: `data/` under the working directory (`src/Host/Vyxum.Host/data/` when you start the host with the commands above), or `%ProgramData%\Vyxum` on Windows. On every start the platform and each module apply their pending EF Core migrations, so an existing database is upgraded and keeps its records. Before a SQLite database is changed, a copy is written to `backupsvyxum-<date>-<time>-migration.db` in the data directory; the newest 10 copies are kept. A SQL Server database is not copied: back it up yourself before an upgrade. See [CONTRIBUTING.md](CONTRIBUTING.md#database-migrations) for adding a migration.
 
 ## Configuration
 
-Keys are read from `appsettings.json`, environment variables (for example `Vyxum__Database__Provider`) or command-line arguments.
+Keys are read, later sources winning, from `appsettings.json` next to the executable, the shared settings file `vyxum.json` in the data directory, environment variables (for example `Vyxum__Database__Provider`) and command-line arguments.
+
+`vyxum.json` is shared by the web host, the agent and the desktop window, and survives updates (unlike `appsettings.json` in the program folder). The installer writes it, and the setup wizard updates it when a different database is chosen; customers do not edit it by hand. Its location follows `Vyxum:DataDirectory`, so a data directory given as an environment variable or on the command line moves it too. The file is read once at start; after the database changes, the web host restarts (as a Windows service) or asks for a manual restart.
 
 | Key | Default | Meaning |
 |---|---|---|
@@ -212,8 +223,7 @@ These rules are enforced by the architecture tests where they can be checked mec
 
 ## Known limitations in F0
 
-- **No schema migrations yet.** Each module's tables are created on first start. If a module's model changes after its tables exist, the change is not applied and a warning is logged. Per-provider EF Core migrations are planned for phase F2.
-- **Crash during table creation.** If the process stops after a module's tables are created but before the installation is recorded, the database must be cleaned up by hand.
+- **Modules without migrations.** A module that ships no migrations for the active provider gets its tables created once and cannot be upgraded until it ships migrations.
 - **Single-node dispatcher.** Run one host instance per database. Several dispatchers on the same database are not coordinated.
 - **No outbox cleanup.** Delivered messages are kept in the outbox tables.
 - **No plugin folder loading.** Modules are loaded from assemblies listed in configuration; loading from a plugin folder is planned for phase F4.

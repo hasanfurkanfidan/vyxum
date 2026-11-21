@@ -6,9 +6,23 @@ Vyxum Agent, terazinin bağlı olduğu bilgisayarda çalışır. Teraziyi seri p
 SignalR ile Vyxum web uygulamasına gönderir. Web uygulamasına kendisi bağlanır; hem teraziyle hem web uygulamasıyla
 bağlantı koparsa kendiliğinden yeniden bağlanır.
 
+## Cihazlar nereden gelir
+
+Cihazlar web uygulamasında, Ayarlar → Cihazlar altında ayarlanır ve onun veritabanında saklanır. Agent bağlanınca
+cihazlarını web uygulamasından ister; orada her değişiklikte yeniden ister. Sonra kendini yeniden başlatmadan yeni
+cihazları başlatır, silinenleri durdurur, değişenleri yeniden kurar. Değişmeyen cihazlar çalışmaya devam eder. Agent'ın
+kullanamadığı ayarlara sahip bir cihaz çalışmaz; `Error` durumu ve nedeniyle gösterilir.
+
+Bilgisayar adı verilmemiş bir cihaza, cihazlarını ilk isteyen Agent bakar; tek bilgisayarlı kurulumda bu tek Agent'tır.
+Bilgisayar adı (`agentName`) verilmiş bir cihaza `AgentName` değeri o ad olan Agent bakar.
+
+Agent'ın kendi ayar dosyasındaki `Devices` listesi geliştirme ve web ayarı kullanılmayan düzenler içindir: listede
+cihaz varsa Agent onları kullanır, web uygulamasında ayarlanan cihazları yok sayar. Kurulan Agent boş listeyle gelir.
+
 ## Konsol uygulaması olarak çalıştırma
 
-Gelen `appsettings.json` ile Agent benzetilmiş bir MT-SICS terazisini (572 g) okur; donanım olmadan çalışır:
+`dotnet run` Agent'ı Development ortamında başlatır (bkz. `Properties/launchSettings.json`); bu ortamda
+`appsettings.Development.json` benzetilmiş bir MT-SICS terazisi (572 g) ekler, böylece donanım olmadan çalışır:
 
 ```
 dotnet run --project src/Agent/Vyxum.Agent
@@ -49,9 +63,10 @@ hangi ayarın hatalı olduğunu yazar.
 | `HeartbeatInterval` | Değişmese de son okuma bu aralıkla yeniden gönderilir | `00:00:01` |
 | `ReconnectDelay` | Teraziye ya da sunucuya yeniden bağlanmadan önceki ilk bekleme; her başarısızlıkta iki katına çıkar | `00:00:01` |
 | `MaxReconnectDelay` | Denemeler arasındaki en uzun bekleme | `00:00:30` |
-| `Devices` | Cihaz listesi, aşağıya bakın | |
+| `Devices` | Yerel cihaz listesi, aşağıya bakın. Boş değilse web uygulamasındaki cihazlar yok sayılır. | boş |
 
 Her cihazın bir `Id`, bir `Transport` (taşıma) ve bir `Protocol` ayarı vardır. Her taşıma her protokolle çalışır.
+Web uygulamasındaki cihaz ayarlarında aynı `transport` ve `protocol` alanları (küçük harfle başlayarak) bulunur.
 
 - `Transport.Type`:
   - `serial`: `PortName` (zorunlu, örneğin `COM3`), `BaudRate` (9600), `DataBits` (8), `Parity` (`None`, `Odd`,
@@ -82,3 +97,30 @@ cihazların sıfırlamayı desteklediğini bildirir. Toledo Continuous yalnızca
 `generic-ascii` de desteklemez.
 `generic-ascii` içinde `RequestCommand` serbest metindir, çünkü her marka kendi komutunu kullanır: buraya yalnızca
 ağırlığı okuyan ya da yazdıran bir komut yazılır; dara alan, sıfırlayan ya da cihazı değiştiren bir komut asla yazılmaz.
+
+## Cihaz arama
+
+Web uygulaması Agent'tan bağlı terazileri bulmasını isteyebilir (Kurulum sihirbazı → Terazi, Ayarlar → Cihazlar → Ara).
+Agent, çalışan cihazlarından hiçbirinin kullanmadığı her seri portu tarar; çalışan bir cihazın kullandığı port o cihazın
+kimliğiyle `InUse` (kullanımda) olarak bildirilir ve hiç açılmaz. Portlar aynı anda taranır; sıradan bir bilgisayarda
+arama birkaç saniyede biter, her port en fazla yaklaşık 25 saniye sürer.
+
+Her portta şu ayarlar sırayla denenir, ilk eşleşmede o port biter: 9600, 19200, 4800, 2400, 38400 ve 115200 baud, her
+biri 8N1, 7E1 ve 7O1 ile. Port her ayar için açılır ve yeniden kapatılır. Her ayarda:
+
+1. Agent hiçbir şey göndermeden yaklaşık 0,7 saniye dinler. Toledo Continuous çerçeveleri ya da tekrar eden düz ASCII
+   ağırlık satırları (bir sayı ve isteğe bağlı birim) burada tanınır. 7E1 ve 7O1 ile yalnızca aynı baud hızında 8N1
+   bir şey aldıysa dinler.
+2. MT-SICS `SI` komutunu (ağırlığı bir kez oku) gönderir. Yanıt `ES`, `ET`, meşgul ya da bozuk olursa (8N1 ile 0,5 saniye
+   içinde yanıt gelmezse de) `SI`'yi bir kez daha gönderir. Geçerli bir ağırlık yanıtından sonra `I4` (seri numarası)
+   gönderir.
+
+**Arama sırasında yalnızca bu iki komut gönderilir: `SI` ve `I4`, ikisi de CR LF ile.** Her yazma, başka her şeyi daha
+porta tek bayt ulaşmadan reddeden bir izin listesinden geçer; bunu bir test denetler. Dara (`T`), sıfırlama (`Z`),
+açılış durumuna dönüş (`@`) ve ayar komutları asla gönderilmez (V-28 ve V-40 kararları).
+
+Ağdaki bir terazi için IP adresi ve port girilir: Agent yalnızca o adresi aynı yolla dener (dinle, sonra `SI` ve `I4`).
+Ağ taraması yapılmaz.
+
+Bulunan cihaz, yukarıdaki cihaz ayarlarıyla aynı biçimde taşıma ve protokol ayarları, örnek bir okuma ve seri numarasıyla
+döner; olduğu gibi kaydedilebilir.

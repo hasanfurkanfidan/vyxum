@@ -1,0 +1,17 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="xunit.v3" />
+    <PackageReference Include="Shouldly" />
+  </ItemGroup>
+
+  <!-- The window project only builds for Windows; its pure logic is compiled here so the tests run on every platform. -->
+  <ItemGroup>
+    <Compile Include="..\..\src\Desktop\Vyxum.Desktop\Logic\*.cs" LinkBase="Logic" />
+  </ItemGroup>
+
+</Project>

@@ -10,4 +10,5 @@ afterEach(() => {
     if (name) document.cookie = `${name}=; path=/; max-age=0`;
   }
   document.documentElement.lang = 'tr';
+  window.sessionStorage.clear();
 });

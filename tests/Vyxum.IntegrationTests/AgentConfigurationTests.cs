@@ -54,18 +54,34 @@ public class AgentConfigurationTests
     }
 
     [Theory]
-    [InlineData("appsettings.json", "simulator-1")]
+    [InlineData("appsettings.Development.json", "simulator-1")]
     [InlineData("appsettings.Ind231.example.json", "ind231")]
     public void Shipped_settings_files_are_valid(string file, string deviceId)
     {
         var path = Path.Combine(AppContext.BaseDirectory, file);
         File.Exists(path).ShouldBeTrue($"{file} should be copied next to the agent");
-        var configuration = new ConfigurationBuilder().AddJsonFile(path).Build();
+        var configuration = new ConfigurationBuilder()
+            .AddJsonFile(Path.Combine(AppContext.BaseDirectory, "appsettings.json"))
+            .AddJsonFile(path)
+            .Build();
 
         var settings = AgentConfiguration.Bind(configuration);
         var device = AgentConfiguration.CreateDevices(settings).ShouldHaveSingleItem();
 
         device.Id.ShouldBe(deviceId);
+        settings.ServerUrl.ShouldBe(AgentSettings.DefaultServerUrl);
+    }
+
+    [Fact]
+    public void Installed_settings_file_lists_no_devices()
+    {
+        // An installed agent gets its devices from the web application (decision V-39).
+        var configuration = new ConfigurationBuilder().AddJsonFile(Path.Combine(AppContext.BaseDirectory, "appsettings.json")).Build();
+
+        var settings = AgentConfiguration.Bind(configuration);
+
+        settings.Devices.ShouldBeEmpty();
+        AgentConfiguration.CreateDevices(settings).ShouldBeEmpty();
         settings.ServerUrl.ShouldBe(AgentSettings.DefaultServerUrl);
     }
 
@@ -164,12 +180,12 @@ public class AgentConfigurationTests
     }
 
     [Fact]
-    public void Missing_devices_duplicate_ids_and_bad_server_url_are_all_reported()
+    public void No_devices_is_valid_but_duplicate_ids_and_bad_server_url_are_reported()
     {
+        Create(new Dictionary<string, string?>()).ShouldBeEmpty();
+
         var empty = new Dictionary<string, string?> { ["Vyxum:Agent:ServerUrl"] = "localhost" };
-        var errors = Invalid(empty).Errors;
-        errors.ShouldContain(e => e.StartsWith("Vyxum:Agent:ServerUrl:", StringComparison.Ordinal));
-        errors.ShouldContain(e => e.StartsWith("Vyxum:Agent:Devices:", StringComparison.Ordinal));
+        Invalid(empty).Errors.ShouldHaveSingleItem().ShouldStartWith("Vyxum:Agent:ServerUrl:");
 
         var duplicate = Valid();
         foreach (var (key, value) in Valid())

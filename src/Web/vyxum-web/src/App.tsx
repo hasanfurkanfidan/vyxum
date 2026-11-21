@@ -6,13 +6,20 @@ import { RecordsPage } from './pages/RecordsPage';
 import { WeighingPage } from './pages/WeighingPage';
 import { ModulesProvider, useModules } from './shell/ModulesProvider';
 import { routes } from './shell/navigation';
+import { SetupGate } from './shell/SetupGate';
+import { SetupProvider } from './shell/SetupProvider';
 import { Shell } from './shell/Shell';
+import { SetupWizard } from './pages/setup/SetupWizard';
+import { AboutPage } from './pages/settings/AboutPage';
+import { DevicesPage } from './pages/settings/DevicesPage';
 
-/** Strings and module list. The router is supplied by the caller (BrowserRouter or MemoryRouter). */
+/** Strings, module list and setup status. The router is supplied by the caller (BrowserRouter or MemoryRouter). */
 export function AppProviders({ children }: { children: ReactNode }) {
   return (
     <I18nProvider>
-      <ModulesProvider>{children}</ModulesProvider>
+      <ModulesProvider>
+        <SetupProvider>{children}</SetupProvider>
+      </ModulesProvider>
     </I18nProvider>
   );
 }
@@ -31,6 +38,19 @@ function RequireModule({ module, children }: { module: string; children: ReactNo
 }
 
 export function App() {
+  return (
+    <SetupGate>
+      <Routes>
+        <Route path={routes.setup} element={<SetupWizard />} />
+        <Route path={routes.setupTurkish} element={<Navigate to={routes.setup} replace />} />
+        <Route path="*" element={<MainScreens />} />
+      </Routes>
+    </SetupGate>
+  );
+}
+
+/** Screens inside the shell with the menu. */
+function MainScreens() {
   return (
     <Shell>
       <Routes>
@@ -51,6 +71,8 @@ export function App() {
             </RequireModule>
           }
         />
+        <Route path={routes.settingsDevices} element={<DevicesPage />} />
+        <Route path={routes.settingsAbout} element={<AboutPage />} />
         <Route path="*" element={<Navigate to={routes.weighing} replace />} />
       </Routes>
     </Shell>
