@@ -20,10 +20,19 @@ public enum DeviceConnectionState
 /// <param name="LastError">The last error reported for the device; null when there is none.</param>
 /// <param name="LastWeight">The latest weight; null when none has arrived yet.</param>
 /// <param name="LastSeen">When the platform last heard about the device.</param>
+/// <param name="SupportedCommands">
+/// The commands the device supports, as reported by its agent (see <see cref="DeviceCommandNames"/>); empty when none
+/// or when the agent did not report them. Null is stored as empty.
+/// </param>
 public sealed record LiveDevice(
     string DeviceId,
     string? AgentName,
     DeviceConnectionState State,
     string? LastError,
     LiveWeight? LastWeight,
-    DateTimeOffset LastSeen);
+    DateTimeOffset LastSeen,
+    IReadOnlyList<string>? SupportedCommands = null)
+{
+    /// <summary>The commands the device supports (see <see cref="DeviceCommandNames"/>); never null.</summary>
+    public IReadOnlyList<string> SupportedCommands { get; init; } = SupportedCommands ?? [];
+}

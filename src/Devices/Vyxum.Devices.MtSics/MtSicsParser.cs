@@ -24,6 +24,7 @@ public static class MtSicsParser
             "ET" when tokens.Length == 1 => new MtSicsResponse(MtSicsResponseKind.TransmissionError, raw),
             "EL" when tokens.Length == 1 => new MtSicsResponse(MtSicsResponseKind.LogicalError, raw),
             "I4" => ParseSerialNumber(raw, tokens),
+            "Z" when tokens.Length == 2 => ParseZero(raw, tokens[1]),
             _ => Unknown(raw),
         };
     }
@@ -54,6 +55,15 @@ public static class MtSicsParser
         var unit = tokens.Length == 4 ? tokens[3] : null;
         return new MtSicsResponse(MtSicsResponseKind.Weight, raw, value, unit, IsStable: tokens[1] == "S");
     }
+
+    private static MtSicsResponse ParseZero(string raw, string status) => status switch
+    {
+        "A" => new MtSicsResponse(MtSicsResponseKind.ZeroDone, raw),
+        "I" => new MtSicsResponse(MtSicsResponseKind.ZeroNotExecutable, raw),
+        "+" => new MtSicsResponse(MtSicsResponseKind.ZeroUpperLimit, raw),
+        "-" => new MtSicsResponse(MtSicsResponseKind.ZeroLowerLimit, raw),
+        _ => Unknown(raw),
+    };
 
     private static MtSicsResponse ParseSerialNumber(string raw, string[] tokens)
     {

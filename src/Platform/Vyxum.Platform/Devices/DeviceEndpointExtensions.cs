@@ -19,12 +19,16 @@ public static class DeviceEndpointExtensions
     /// <summary>Route of the live device stream; <c>{id}</c> is the device id.</summary>
     public const string LivePath = "/api/devices/{id}/live";
 
+    /// <summary>Route of the zero command; <c>{id}</c> is the device id.</summary>
+    public const string ZeroPath = "/api/devices/{id}/zero";
+
     /// <summary>JSON settings of the device endpoints and the agent hub: web defaults, enums as strings.</summary>
     public static JsonSerializerOptions JsonOptions { get; } = CreateJsonOptions();
 
     /// <summary>
     /// Maps <see cref="AgentHub"/> at <see cref="AgentHubContract.Path"/>, guarded by
-    /// <see cref="AgentConnectionGate"/>, <c>GET /api/devices</c> and <c>GET /api/devices/{id}/live</c>.
+    /// <see cref="AgentConnectionGate"/>, <c>GET /api/devices</c>, <c>GET /api/devices/{id}/live</c> and
+    /// <c>POST /api/devices/{id}/zero</c>.
     /// </summary>
     /// <remarks>
     /// The live endpoint is a Server-Sent Events stream (<c>text/event-stream</c>). Every event is an
@@ -33,6 +37,11 @@ public static class DeviceEndpointExtensions
     /// (see <see cref="ILiveWeightSource.WatchDeviceAsync"/>). An unknown device id is not an error:
     /// the stream starts with a waiting snapshot (state <c>Disconnected</c>, <c>agentName</c> null) so
     /// that a browser can open it before the agent connects, and continues once the agent reports the device.
+    /// <para>
+    /// The zero endpoint sends the zero command once per request (decision V-29) and always answers 200 with
+    /// <c>{ "result": "Done" | "NotSupported" | "Rejected" | "Unavailable", "detail"?: "..." }</c>
+    /// (<see cref="DeviceCommandResult"/>); <c>detail</c> is English text for logs and is left out when empty.
+    /// </para>
     /// </remarks>
     public static IEndpointRouteBuilder MapVyxumDevices(this IEndpointRouteBuilder endpoints)
     {
@@ -49,6 +58,8 @@ public static class DeviceEndpointExtensions
 
         endpoints.MapGet(DevicesPath, (ILiveWeightSource source) => Results.Json(source.GetDevices(), JsonOptions));
         endpoints.MapGet(LivePath, StreamLiveAsync);
+        endpoints.MapPost(ZeroPath, async (string id, IDeviceCommands commands, CancellationToken cancellationToken) =>
+            Results.Json(await commands.ZeroAsync(id, cancellationToken), JsonOptions));
         return endpoints;
     }
 

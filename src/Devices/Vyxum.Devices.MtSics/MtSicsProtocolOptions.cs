@@ -3,8 +3,11 @@ namespace Vyxum.Devices.MtSics;
 /// <summary>Settings for <see cref="MtSicsProtocol"/>.</summary>
 public sealed record MtSicsProtocolOptions
 {
-    /// <summary>The only commands the protocol may send. They read the weight and change nothing on the device.</summary>
-    public static IReadOnlyList<string> AllowedCommands { get; } = ["S", "SI", "SIR"];
+    /// <summary>
+    /// The commands allowed as <see cref="Command"/>. They read the weight and change nothing on the device.
+    /// The only other command the protocol ever sends is <c>Z</c>, on an explicit request (see <see cref="MtSicsCommands"/>).
+    /// </summary>
+    public static IReadOnlyList<string> AllowedCommands => MtSicsCommands.Read;
 
     /// <summary>
     /// The read command: <c>SI</c> (immediate value, default), <c>S</c> (stable value) or <c>SIR</c> (continuous stream,
@@ -69,6 +72,20 @@ public sealed record MtSicsProtocolOptions
             field = value;
         }
     } = 3;
+
+    /// <summary>
+    /// How long to wait for the answer to <c>Z</c>. The device may wait for a stable weight before it answers, so this is
+    /// longer than <see cref="ResponseTimeout"/>. Default: 3 seconds.
+    /// </summary>
+    public TimeSpan ZeroTimeout
+    {
+        get;
+        init
+        {
+            ArgumentOutOfRangeException.ThrowIfLessThanOrEqual(value, TimeSpan.Zero);
+            field = value;
+        }
+    } = TimeSpan.FromSeconds(3);
 
     /// <summary>The terminator of response lines. Commands are always sent with CR LF. Default: CR LF.</summary>
     public LineTerminator LineTerminator { get; init; } = LineTerminator.CrLf;

@@ -94,6 +94,14 @@ public class MtSicsParserTests
     [InlineData("ET", MtSicsResponseKind.TransmissionError)]
     [InlineData("EL", MtSicsResponseKind.LogicalError)]
     [InlineData(" EL ", MtSicsResponseKind.LogicalError)]
+    [InlineData("Z A", MtSicsResponseKind.ZeroDone)]
+    [InlineData("Z I", MtSicsResponseKind.ZeroNotExecutable)]
+    [InlineData("Z +", MtSicsResponseKind.ZeroUpperLimit)]
+    [InlineData("Z -", MtSicsResponseKind.ZeroLowerLimit)]
+    [InlineData(" Z  A ", MtSicsResponseKind.ZeroDone)]
+    [InlineData("Z", MtSicsResponseKind.Unknown)]
+    [InlineData("Z X", MtSicsResponseKind.Unknown)]
+    [InlineData("Z A 1", MtSicsResponseKind.Unknown)]
     public void Spec_status_and_error_lines(string line, MtSicsResponseKind expected)
     {
         var response = MtSicsParser.Parse(line);

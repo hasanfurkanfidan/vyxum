@@ -11,4 +11,10 @@ public sealed class AgentOptions
     /// when set, agents on any address are accepted with the right key (decision V-26).
     /// </summary>
     public string? Key { get; set; }
+
+    /// <summary>
+    /// How long a device command (such as zero) may take, including the round trip to the agent. After it the result
+    /// is <see cref="Abstractions.DeviceCommandOutcome.Unavailable"/>. Default: 5 seconds.
+    /// </summary>
+    public TimeSpan CommandTimeout { get; set; } = TimeSpan.FromSeconds(5);
 }

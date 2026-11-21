@@ -85,7 +85,7 @@ Bir terazi iki parçada okunur. **Taşıma** (transport) baytları seri port ya 
 
 Desteklenen taşımalar seri port ve TCP'dir. Desteklenen protokoller MT-SICS, Toledo Continuous ve genel ASCII'dir.
 
-Sürücüler yalnızca ağırlığı okur. MT-SICS sürücüsü yalnızca `S`, `SI` ve `SIR` gönderir. Toledo Continuous yalnızca dinler. Genel ASCII, yalnızca sizin yapılandırdığınız istek komutunu gönderir; bu komutun yalnızca ağırlığı okuyan bir komut olması gerekir.
+Sürücüler ağırlığı okur. MT-SICS sürücüsü yalnızca `S`, `SI` ve `SIR` gönderir; bir kullanıcı teraziyi sıfırlamayı açıkça istediğinde bir kez de `Z` gönderir. Dara, açılış durumuna dönüş ve ayar komutları asla gönderilmez. Toledo Continuous yalnızca dinler. Genel ASCII, yalnızca sizin yapılandırdığınız istek komutunu gönderir; bu komutun yalnızca ağırlığı okuyan bir komut olması gerekir.
 
 [Vyxum Agent](src/Agent/Vyxum.Agent/README.tr.md), terazinin bağlı olduğu bilgisayarda çalışır. Cihazları okur ve canlı ağırlığı web uygulamasına gönderir.
 
@@ -99,6 +99,8 @@ dotnet run --project src/Agent/Vyxum.Agent
 Ardından http://localhost:5000/api/devices adresini açın. Agent'ın hazır ayarları simüle edilmiş bir MT-SICS terazisi (572 g) kullanır; donanım gerekmez.
 
 http://localhost:5000/api/devices/{id}/live bir cihazı Server-Sent Events olarak yayınlar: önce o anki durumu, ardından durumu ya da ağırlığı her değiştiğinde yeni bir olay. Agent'ın henüz bildirmediği bir cihaz kimliği hata değildir; yayın `Disconnected` durumunda başlar ve agent bağlanınca sürer.
+
+`POST /api/devices/{id}/zero` teraziden sıfırlamasını ister, her istekte bir kez. Her zaman 200 ile `{ "result": "Done" | "NotSupported" | "Rejected" | "Unavailable", "detail": "..." }` döner; `detail` günlükler için İngilizce metindir ve olmayabilir. Her cihaz desteklediği komutları `supportedCommands` içinde listeler (MT-SICS için `["Zero"]`).
 
 ## Yapılandırma
 

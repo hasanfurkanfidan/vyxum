@@ -122,6 +122,19 @@ public class AgentConfigurationTests
     }
 
     [Fact]
+    public void Mt_sics_zero_timeout_must_be_positive_and_zero_support_is_per_protocol()
+    {
+        var values = Valid();
+        values[Device + "Protocol:ZeroTimeout"] = "00:00:00";
+
+        Invalid(values).Errors.ShouldHaveSingleItem().ShouldStartWith(Device + "Protocol:ZeroTimeout:");
+
+        values[Device + "Protocol:ZeroTimeout"] = "00:00:02";
+        var device = Create(values).Single();
+        device.Protocol.ShouldBeAssignableTo<Vyxum.Devices.ISupportsZero>();
+    }
+
+    [Fact]
     public void Unknown_protocol_type_is_rejected()
     {
         var values = Valid();

@@ -16,8 +16,15 @@ public sealed class LiveWeightStore(TimeProvider time) : ILiveWeightSource
     private readonly Dictionary<string, DeviceEntry> _devices = new(StringComparer.Ordinal);
     private readonly Dictionary<string, string> _agentNames = new(StringComparer.Ordinal);
 
-    /// <summary>Records an agent connection and the devices it serves; new devices start as connecting.</summary>
-    public void RegisterAgent(string connectionId, string agentName, IEnumerable<string> deviceIds)
+    /// <summary>
+    /// Records an agent connection, the devices it serves and the commands each supports; new devices start as connecting.
+    /// A device missing from <paramref name="deviceCommands"/> supports no command.
+    /// </summary>
+    public void RegisterAgent(
+        string connectionId,
+        string agentName,
+        IEnumerable<string> deviceIds,
+        IReadOnlyDictionary<string, IReadOnlyList<string>>? deviceCommands = null)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(connectionId);
         ArgumentException.ThrowIfNullOrWhiteSpace(agentName);
@@ -34,6 +41,13 @@ public sealed class LiveWeightStore(TimeProvider time) : ILiveWeightSource
                 if (entry.State == DeviceConnectionState.Disconnected)
                 {
                     entry.State = DeviceConnectionState.Connecting;
+                }
+
+                var commands = deviceCommands?.GetValueOrDefault(deviceId) ?? [];
+                if (!entry.SupportedCommands.SequenceEqual(commands, StringComparer.Ordinal))
+                {
+                    // A new list only when it changed, so that unchanged snapshots stay equal.
+                    entry.SupportedCommands = [.. commands.Where(c => !string.IsNullOrWhiteSpace(c)).Distinct(StringComparer.Ordinal)];
                 }
 
                 PublishIfChanged(entry, before);
@@ -104,6 +118,29 @@ public sealed class LiveWeightStore(TimeProvider time) : ILiveWeightSource
 
             return count;
         }
+    }
+
+    /// <summary>
+    /// Finds the agent connection that serves a device and the commands the device supports. Returns false when no
+    /// connected agent serves it.
+    /// </summary>
+    public bool TryGetAgent(string deviceId, out string connectionId, out IReadOnlyList<string> supportedCommands)
+    {
+        ArgumentNullException.ThrowIfNull(deviceId);
+
+        lock (_lock)
+        {
+            if (_devices.TryGetValue(deviceId, out var entry) && entry.ConnectionId is { } id)
+            {
+                connectionId = id;
+                supportedCommands = entry.SupportedCommands;
+                return true;
+            }
+        }
+
+        connectionId = string.Empty;
+        supportedCommands = [];
+        return false;
     }
 
     /// <inheritdoc />
@@ -306,6 +343,8 @@ public sealed class LiveWeightStore(TimeProvider time) : ILiveWeightSource
 
         public DateTimeOffset LastSeen { get; set; }
 
+        public IReadOnlyList<string> SupportedCommands { get; set; } = [];
+
         /// <summary>False while the entry exists only because someone watches it.</summary>
         public bool Known { get; set; }
 
@@ -313,6 +352,6 @@ public sealed class LiveWeightStore(TimeProvider time) : ILiveWeightSource
 
         public List<Channel<LiveDevice>> DeviceWatchers { get; } = [];
 
-        public LiveDevice ToSnapshot() => new(DeviceId, AgentName, State, LastError, LastWeight, LastSeen);
+        public LiveDevice ToSnapshot() => new(DeviceId, AgentName, State, LastError, LastWeight, LastSeen, SupportedCommands);
     }
 }
