@@ -16,6 +16,7 @@
   </Folder>
   <Folder Name="/src/Modules/">
     <Project Path="src/Modules/Products/Vyxum.Modules.Products/Vyxum.Modules.Products.csproj" />
+    <Project Path="src/Modules/Weighing/Vyxum.Modules.Weighing/Vyxum.Modules.Weighing.csproj" />
   </Folder>
   <Folder Name="/src/Platform/">
     <Project Path="src/Platform/Vyxum.Platform.Abstractions/Vyxum.Platform.Abstractions.csproj" />

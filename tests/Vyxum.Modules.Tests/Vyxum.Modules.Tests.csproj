@@ -13,6 +13,7 @@
   <ItemGroup>
     <ProjectReference Include="..\..\src\Platform\Vyxum.Platform.Testing\Vyxum.Platform.Testing.csproj" />
     <ProjectReference Include="..\..\src\Modules\Products\Vyxum.Modules.Products\Vyxum.Modules.Products.csproj" />
+    <ProjectReference Include="..\..\src\Modules\Weighing\Vyxum.Modules.Weighing\Vyxum.Modules.Weighing.csproj" />
   </ItemGroup>
 
 </Project>

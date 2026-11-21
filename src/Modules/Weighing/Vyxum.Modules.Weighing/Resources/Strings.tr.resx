@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype"><value>text/microsoft-resx</value></resheader>
+  <resheader name="version"><value>2.0</value></resheader>
+  <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+  <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+  <data name="NoReading" xml:space="preserve"><value>Teraziden henüz okuma gelmedi.</value></data>
+  <data name="DeviceNotConnected" xml:space="preserve"><value>Terazi bağlı değil.</value></data>
+  <data name="NotStable" xml:space="preserve"><value>Ağırlık sabit değil. Terazi durulunca yeniden deneyin.</value></data>
+  <data name="Overload" xml:space="preserve"><value>Aşırı yük: yük terazinin kapasitesini aşıyor.</value></data>
+  <data name="Underload" xml:space="preserve"><value>Düşük yük: yük terazinin alt sınırının altında.</value></data>
+  <data name="NetTooSmall" xml:space="preserve"><value>Net ağırlık kayıt için çok küçük.</value></data>
+  <data name="UnknownProduct" xml:space="preserve"><value>Ürün bulunamadı.</value></data>
+  <data name="InactiveProduct" xml:space="preserve"><value>Bu ürün pasif.</value></data>
+  <data name="UnknownUnit" xml:space="preserve"><value>Terazinin birimi bilinmiyor; dara ya da tutar hesaplanamıyor.</value></data>
+  <data name="AlreadyCancelled" xml:space="preserve"><value>Bu kayıt zaten iptal edilmiş.</value></data>
+  <data name="CancelReasonRequired" xml:space="preserve"><value>İptal nedeni zorunludur.</value></data>
+  <data name="CancelReasonTooLong" xml:space="preserve"><value>İptal nedeni çok uzun (en çok 500 karakter).</value></data>
+  <data name="RequestIdRequired" xml:space="preserve"><value>İstekte istek anahtarı yok.</value></data>
+  <data name="DeviceIdRequired" xml:space="preserve"><value>Bir terazi seçin.</value></data>
+  <data name="DeviceIdTooLong" xml:space="preserve"><value>Terazi kimliği çok uzun (en çok 100 karakter).</value></data>
+  <data name="InvalidNumber" xml:space="preserve"><value>Geçerli bir sayı girin, örneğin 0.012.</value></data>
+  <data name="NegativeNotAllowed" xml:space="preserve"><value>Değer negatif olamaz.</value></data>
+  <data name="LotTooLong" xml:space="preserve"><value>Parti çok uzun (en çok 64 karakter).</value></data>
+  <data name="Title" xml:space="preserve"><value>Tartım</value></data>
+  <data name="Net" xml:space="preserve"><value>Net</value></data>
+  <data name="Gross" xml:space="preserve"><value>Brüt</value></data>
+  <data name="Tare" xml:space="preserve"><value>Dara</value></data>
+  <data name="Amount" xml:space="preserve"><value>Tutar</value></data>
+  <data name="AmountWithCurrency" xml:space="preserve"><value>Tutar ({0})</value></data>
+  <data name="NetWithUnit" xml:space="preserve"><value>Net ({0})</value></data>
+  <data name="PricePerKg" xml:space="preserve"><value>{0} / kg</value></data>
+  <data name="SaveRecord" xml:space="preserve"><value>Tartımı kaydet</value></data>
+  <data name="SaveAndPrint" xml:space="preserve"><value>Kaydet ve etiket bas</value></data>
+  <data name="TakeTare" xml:space="preserve"><value>Dara al</value></data>
+  <data name="ClearTare" xml:space="preserve"><value>Darayı kaldır</value></data>
+  <data name="Zero" xml:space="preserve"><value>Sıfırla</value></data>
+  <data name="ProductSearch" xml:space="preserve"><value>Ürün, PLU ya da ad</value></data>
+  <data name="NoProduct" xml:space="preserve"><value>Ürünsüz</value></data>
+  <data name="Lot" xml:space="preserve"><value>Parti</value></data>
+  <data name="RecentRecords" xml:space="preserve"><value>Son tartımlar</value></data>
+  <data name="AllRecords" xml:space="preserve"><value>Tüm kayıtlar</value></data>
+  <data name="Saved" xml:space="preserve"><value>kaydedildi</value></data>
+  <data name="Cancelled" xml:space="preserve"><value>iptal</value></data>
+  <data name="Device" xml:space="preserve"><value>Terazi</value></data>
+  <data name="SelectDevice" xml:space="preserve"><value>Terazi seçin</value></data>
+  <data name="DeviceConnected" xml:space="preserve"><value>terazi bağlı</value></data>
+  <data name="DeviceDisconnected" xml:space="preserve"><value>terazi bağlı değil</value></data>
+  <data name="DeviceConnecting" xml:space="preserve"><value>teraziye bağlanılıyor</value></data>
+  <data name="StateStable" xml:space="preserve"><value>sabit</value></data>
+  <data name="StateMotion" xml:space="preserve"><value>hareketli</value></data>
+  <data name="StateOverload" xml:space="preserve"><value>aşırı yük</value></data>
+  <data name="StateUnderload" xml:space="preserve"><value>düşük yük</value></data>
+  <data name="Saving" xml:space="preserve"><value>Kaydediliyor…</value></data>
+  <data name="SaveFailed" xml:space="preserve"><value>Tartım kaydedilemedi.</value></data>
+  <data name="Retrying" xml:space="preserve"><value>Bağlantı koptu, yeniden deneniyor…</value></data>
+  <data name="ZeroDone" xml:space="preserve"><value>Terazi sıfırlandı.</value></data>
+  <data name="ZeroNotSupported" xml:space="preserve"><value>Bu terazi buradan sıfırlanamıyor.</value></data>
+  <data name="ZeroRejected" xml:space="preserve"><value>Terazi sıfırlamayı reddetti. Kefeyi boşaltıp ağırlık sabitlenince deneyin.</value></data>
+  <data name="ZeroUnavailable" xml:space="preserve"><value>Teraziye ulaşılamıyor, sıfırlanamadı.</value></data>
+  <data name="RecordsTitle" xml:space="preserve"><value>Tartım kayıtları</value></data>
+  <data name="RecordsBreadcrumb" xml:space="preserve"><value>Kayıtlar</value></data>
+  <data name="Date" xml:space="preserve"><value>Tarih</value></data>
+  <data name="Time" xml:space="preserve"><value>Saat</value></data>
+  <data name="RecordNo" xml:space="preserve"><value>Kayıt no</value></data>
+  <data name="Plu" xml:space="preserve"><value>PLU</value></data>
+  <data name="Product" xml:space="preserve"><value>Ürün</value></data>
+  <data name="Operator" xml:space="preserve"><value>Operatör</value></data>
+  <data name="AllOperators" xml:space="preserve"><value>Herkes</value></data>
+  <data name="Status" xml:space="preserve"><value>Durum</value></data>
+  <data name="AllProducts" xml:space="preserve"><value>Tüm ürünler</value></data>
+  <data name="ExportExcel" xml:space="preserve"><value>Excel'e aktar</value></data>
+  <data name="ValidSummary" xml:space="preserve"><value>{0} geçerli kayıt, {1} iptal</value></data>
+  <data name="CancelledNotInTotals" xml:space="preserve"><value>iptaller toplama girmez</value></data>
+  <data name="Total" xml:space="preserve"><value>Toplam</value></data>
+  <data name="CancelRecord" xml:space="preserve"><value>Kaydı iptal et</value></data>
+  <data name="CancelReason" xml:space="preserve"><value>İptal nedeni</value></data>
+  <data name="CancelConfirm" xml:space="preserve"><value>{0} numaralı kayıt iptal edilsin mi? Listede kalır ama toplama girmez.</value></data>
+  <data name="Empty" xml:space="preserve"><value>Kayıt bulunamadı.</value></data>
+</root>
