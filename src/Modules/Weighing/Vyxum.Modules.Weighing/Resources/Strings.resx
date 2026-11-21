@@ -87,4 +87,7 @@
   <data name="ExportTooLarge" xml:space="preserve"><value>Too many records to export (at most 100000). Narrow the filter.</value></data>
   <data name="Back" xml:space="preserve"><value>Back</value></data>
   <data name="LoadMore" xml:space="preserve"><value>Load more</value></data>
+  <data name="LiveWeight" xml:space="preserve"><value>Live weight</value></data>
+  <data name="ProductSelection" xml:space="preserve"><value>Product selection</value></data>
+  <data name="NoRecent" xml:space="preserve"><value>No weighings yet.</value></data>
 </root>

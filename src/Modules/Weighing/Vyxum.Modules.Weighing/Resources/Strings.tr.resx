@@ -87,4 +87,7 @@
   <data name="ExportTooLarge" xml:space="preserve"><value>Dışa aktarılacak kayıt sayısı çok fazla (en çok 100000). Filtreyi daraltın.</value></data>
   <data name="Back" xml:space="preserve"><value>Geri</value></data>
   <data name="LoadMore" xml:space="preserve"><value>Daha fazla yükle</value></data>
+  <data name="LiveWeight" xml:space="preserve"><value>Canlı ağırlık</value></data>
+  <data name="ProductSelection" xml:space="preserve"><value>Ürün seçimi</value></data>
+  <data name="NoRecent" xml:space="preserve"><value>Henüz tartım yok.</value></data>
 </root>
