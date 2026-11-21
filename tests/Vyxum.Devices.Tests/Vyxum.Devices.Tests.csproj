@@ -11,6 +11,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\src\Devices\Vyxum.Devices\Vyxum.Devices.csproj" />
+    <ProjectReference Include="..\..\src\Devices\Vyxum.Devices.MtSics\Vyxum.Devices.MtSics.csproj" />
   </ItemGroup>
 
 </Project>
