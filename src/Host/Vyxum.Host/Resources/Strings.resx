@@ -35,4 +35,8 @@
   <data name="ModuleLoadFailed" xml:space="preserve"><value>This module's screens could not be loaded.</value></data>
   <data name="ModuleIncompatible" xml:space="preserve"><value>This module needs a newer version of Vyxum.</value></data>
   <data name="ModuleScreenFailed" xml:space="preserve"><value>An error occurred on this screen.</value></data>
+  <data name="ProGroup" xml:space="preserve"><value>Vyxum Pro</value></data>
+  <data name="ProLocked" xml:space="preserve"><value>Locked</value></data>
+  <data name="PreviewRequestTrial" xml:space="preserve"><value>Request a trial license</value></data>
+  <data name="PreviewLicenseNote" xml:space="preserve"><value>Not available without a license.</value></data>
 </root>

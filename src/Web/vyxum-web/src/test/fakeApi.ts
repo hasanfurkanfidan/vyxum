@@ -1,6 +1,6 @@
 // Test double for the host API: answers fetch calls from a route table.
 import { vi } from 'vitest';
-import type { UiLicense, UiModule, UiModules } from '../lib/api';
+import type { UiContact, UiLicense, UiModule, UiModules } from '../lib/api';
 import type { LicenseState } from '../lib/license';
 import type { SetupStatus } from '../lib/setup';
 import { readCultureCookie } from '../lib/culture';
@@ -26,6 +26,25 @@ export const sampleStrings: Record<'tr' | 'en', Record<string, string>> = {
     'shell.AppName': 'vyxum',
     'shell.Core': 'Çekirdek',
     'shell.Modules': 'Modüller',
+    'shell.ProGroup': 'Vyxum Pro',
+    'shell.ProLocked': 'Kilitli',
+    'shell.PreviewRequestTrial': 'Deneme lisansı iste',
+    'shell.PreviewLicenseNote': 'Lisans olmadan kullanılamaz.',
+    'license.ClockAheadNote': 'Bilgisayar saati son görülen zamandan çok ileride; saat doğruysa bu not birkaç saat içinde kaybolur.',
+    'license.TrialTitle': 'Deneme lisansı iste',
+    'license.TrialIntro': "Bu metni Vyxum'a ya da bayinize iletin.",
+    'license.TrialHeading': 'Deneme lisansı isteği',
+    'license.TrialCompany': 'Firma',
+    'license.TrialModule': 'Modül',
+    'license.TrialVersion': 'Sürüm',
+    'license.TrialLicenseId': 'Mevcut lisans',
+    'license.TrialDate': 'Tarih',
+    'license.TrialContact': 'İletişim',
+    'license.TrialNoContact': "Vyxum'a ya da bayinize iletin.",
+    'license.TrialCopy': 'Kopyala',
+    'license.TrialCopied': 'Kopyalandı.',
+    'license.TrialClose': 'Kapat',
+    'license.TrialRequestLabel': 'İstek metni',
     'shell.System': 'Sistem',
     'shell.Weighing': 'Tartım',
     'shell.Records': 'Kayıtlar',
@@ -398,6 +417,25 @@ export const sampleStrings: Record<'tr' | 'en', Record<string, string>> = {
     'shell.AppName': 'vyxum',
     'shell.Core': 'Core',
     'shell.Modules': 'Modules',
+    'shell.ProGroup': 'Vyxum Pro',
+    'shell.ProLocked': 'Locked',
+    'shell.PreviewRequestTrial': 'Request a trial license',
+    'shell.PreviewLicenseNote': 'Not available without a license.',
+    'license.ClockAheadNote': "This computer's clock is far ahead of the last time Vyxum saw. If the clock is right, this note goes away within a few hours.",
+    'license.TrialTitle': 'Request a trial license',
+    'license.TrialIntro': 'Send this text to Vyxum or your dealer.',
+    'license.TrialHeading': 'Trial license request',
+    'license.TrialCompany': 'Company',
+    'license.TrialModule': 'Module',
+    'license.TrialVersion': 'Version',
+    'license.TrialLicenseId': 'Current license',
+    'license.TrialDate': 'Date',
+    'license.TrialContact': 'Contact',
+    'license.TrialNoContact': 'Send it to Vyxum or your dealer.',
+    'license.TrialCopy': 'Copy',
+    'license.TrialCopied': 'Copied.',
+    'license.TrialClose': 'Close',
+    'license.TrialRequestLabel': 'Request text',
     'shell.System': 'System',
     'shell.Weighing': 'Weighing',
     'shell.Records': 'Records',
@@ -771,6 +809,8 @@ export interface FakeApiOptions {
   companyName?: string | null;
   /** Overall license state returned with the module list (left out when not given, like an older host). */
   license?: UiLicense;
+  /** Contact returned with the module list. */
+  contact?: UiContact;
   routes?: Record<string, FakeHandler>;
 }
 
@@ -789,6 +829,7 @@ export function licenseState(change: Partial<LicenseState> = {}): LicenseState {
     graceEndsOn: '2027-11-30',
     graceDaysLeft: null,
     clockBehind: false,
+    clockAhead: false,
     stationLimit: 3,
     stations: ['scale-1', 'scale-2'],
     modules: [
@@ -841,6 +882,7 @@ export function installFakeApi(options: FakeApiOptions = {}) {
     capabilities: options.capabilities ?? [],
     ...(options.companyName !== undefined ? { companyName: options.companyName } : {}),
     ...(options.license ? { license: options.license } : {}),
+    ...(options.contact ? { contact: options.contact } : {}),
   };
 
   const routes: Record<string, FakeHandler> = {

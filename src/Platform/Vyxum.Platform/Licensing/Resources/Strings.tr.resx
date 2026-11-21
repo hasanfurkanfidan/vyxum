@@ -90,4 +90,19 @@
   <data name="ColProvides" xml:space="preserve"><value>Sağladığı</value></data>
   <data name="ColNeeds" xml:space="preserve"><value>İhtiyaç duyduğu</value></data>
   <data name="NeedsOptional" xml:space="preserve"><value>isteğe bağlı: {0}</value></data>
+  <data name="ClockAheadNote" xml:space="preserve"><value>Bilgisayar saati son görülen zamandan çok ileride; saat doğruysa bu not birkaç saat içinde kaybolur.</value></data>
+  <data name="TrialTitle" xml:space="preserve"><value>Deneme lisansı iste</value></data>
+  <data name="TrialIntro" xml:space="preserve"><value>Bu metni Vyxum'a ya da bayinize iletin.</value></data>
+  <data name="TrialHeading" xml:space="preserve"><value>Deneme lisansı isteği</value></data>
+  <data name="TrialCompany" xml:space="preserve"><value>Firma</value></data>
+  <data name="TrialModule" xml:space="preserve"><value>Modül</value></data>
+  <data name="TrialVersion" xml:space="preserve"><value>Sürüm</value></data>
+  <data name="TrialLicenseId" xml:space="preserve"><value>Mevcut lisans</value></data>
+  <data name="TrialDate" xml:space="preserve"><value>Tarih</value></data>
+  <data name="TrialContact" xml:space="preserve"><value>İletişim</value></data>
+  <data name="TrialNoContact" xml:space="preserve"><value>Vyxum'a ya da bayinize iletin.</value></data>
+  <data name="TrialCopy" xml:space="preserve"><value>Kopyala</value></data>
+  <data name="TrialCopied" xml:space="preserve"><value>Kopyalandı.</value></data>
+  <data name="TrialClose" xml:space="preserve"><value>Kapat</value></data>
+  <data name="TrialRequestLabel" xml:space="preserve"><value>İstek metni</value></data>
 </root>

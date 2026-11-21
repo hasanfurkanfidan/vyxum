@@ -50,3 +50,5 @@ Thumbs.db
 *.key
 *.pfx
 *.p12
+
+*.tsbuildinfo

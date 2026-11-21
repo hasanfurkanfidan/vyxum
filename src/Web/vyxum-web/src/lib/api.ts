@@ -279,6 +279,21 @@ export interface UiModule {
   license?: 'free' | 'licensed' | 'grace' | 'readOnly' | 'locked';
   /** The module's screens, when it has some and may load them (not locked); otherwise null or absent. */
   ui?: UiModuleScreens | null;
+  /** Static sample of a paid module's screen, offered locked or not; absent when the module declares none. */
+  preview?: UiModulePreview | null;
+}
+
+export interface UiModulePreview {
+  /** Two short lines (separated by a line break) saying what the module does, in the current language. */
+  description: string;
+  /** URL of the sample image, served without a license. */
+  imageUrl: string;
+}
+
+/** Where to send a trial license request; both parts are null when the installation has no contact configured. */
+export interface UiContact {
+  email: string | null;
+  url: string | null;
 }
 
 export interface UiModuleScreens {
@@ -305,6 +320,8 @@ export interface UiModules {
   license?: UiLicense;
   /** Company name entered in the setup wizard, or null. Older hosts leave it out. */
   companyName?: string | null;
+  /** Contact for license requests (configuration `Vyxum:Contact`). Older hosts leave it out. */
+  contact?: UiContact;
 }
 
 export function getUiStrings(options?: RequestOptions): Promise<UiStrings> {

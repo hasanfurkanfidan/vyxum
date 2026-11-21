@@ -26,6 +26,8 @@ export interface LicenseState {
   graceEndsOn: string | null;
   graceDaysLeft: number | null;
   clockBehind: boolean;
+  /** True for about six hours after the clock jumped far ahead; it can be a false alarm, so show it quietly. */
+  clockAhead: boolean;
   stationLimit: number;
   stations: string[];
   modules: LicenseModule[];

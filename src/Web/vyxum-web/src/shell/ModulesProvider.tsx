@@ -1,5 +1,5 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
-import { getUiModules, onLicenseDenied, type UiLicense, type UiModule } from '../lib/api';
+import { getUiModules, onLicenseDenied, type UiContact, type UiLicense, type UiModule } from '../lib/api';
 import type { LoadStatus } from '../i18n/I18nProvider';
 
 export interface ModulesContextValue {
@@ -10,6 +10,8 @@ export interface ModulesContextValue {
   companyName: string | null;
   /** Overall license state: status, licensee (when a license verifies) and grace days left. */
   license: UiLicense;
+  /** Where to send license requests; both parts null when none is configured. */
+  contact: UiContact;
   /** True when the module with this id is loaded in the host (for example "weighing"). */
   hasModule: (id: string) => boolean;
   /** True when a loaded module offers this capability (for example "products.catalog"). */
@@ -22,6 +24,7 @@ export interface ModulesContextValue {
 export const licenseRefreshMs = 5 * 60 * 1000;
 
 const noLicense: UiLicense = { status: 'none', licensee: null, graceDaysLeft: null };
+const noContact: UiContact = { email: null, url: null };
 
 const ModulesContext = createContext<ModulesContextValue | null>(null);
 
@@ -30,6 +33,7 @@ export function ModulesProvider({ children }: { children: ReactNode }) {
   const [capabilities, setCapabilities] = useState<string[]>([]);
   const [companyName, setCompanyName] = useState<string | null>(null);
   const [license, setLicense] = useState<UiLicense>(noLicense);
+  const [contact, setContact] = useState<UiContact>(noContact);
   const [status, setStatus] = useState<LoadStatus>('loading');
   const latest = useRef(0);
   const loaded = useRef(false);
@@ -45,6 +49,7 @@ export function ModulesProvider({ children }: { children: ReactNode }) {
       setCapabilities(result.capabilities);
       setCompanyName(result.companyName ?? null);
       setLicense(result.license ?? noLicense);
+      setContact(result.contact ?? noContact);
       loaded.current = true;
       setStatus('ready');
     } catch (error) {
@@ -89,11 +94,12 @@ export function ModulesProvider({ children }: { children: ReactNode }) {
       capabilities,
       companyName,
       license,
+      contact,
       hasModule: (moduleId) => ids.has(moduleId),
       hasCapability: (capability) => caps.has(capability),
       reload: load,
     };
-  }, [status, modules, capabilities, companyName, license, load]);
+  }, [status, modules, capabilities, companyName, license, contact, load]);
 
   return <ModulesContext.Provider value={value}>{children}</ModulesContext.Provider>;
 }

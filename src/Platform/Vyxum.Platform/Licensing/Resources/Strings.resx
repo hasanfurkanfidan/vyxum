@@ -90,4 +90,19 @@
   <data name="ColProvides" xml:space="preserve"><value>Provides</value></data>
   <data name="ColNeeds" xml:space="preserve"><value>Needs</value></data>
   <data name="NeedsOptional" xml:space="preserve"><value>optional: {0}</value></data>
+  <data name="ClockAheadNote" xml:space="preserve"><value>This computer's clock is far ahead of the last time Vyxum saw. If the clock is right, this note goes away within a few hours.</value></data>
+  <data name="TrialTitle" xml:space="preserve"><value>Request a trial license</value></data>
+  <data name="TrialIntro" xml:space="preserve"><value>Send this text to Vyxum or your dealer.</value></data>
+  <data name="TrialHeading" xml:space="preserve"><value>Trial license request</value></data>
+  <data name="TrialCompany" xml:space="preserve"><value>Company</value></data>
+  <data name="TrialModule" xml:space="preserve"><value>Module</value></data>
+  <data name="TrialVersion" xml:space="preserve"><value>Version</value></data>
+  <data name="TrialLicenseId" xml:space="preserve"><value>Current license</value></data>
+  <data name="TrialDate" xml:space="preserve"><value>Date</value></data>
+  <data name="TrialContact" xml:space="preserve"><value>Contact</value></data>
+  <data name="TrialNoContact" xml:space="preserve"><value>Send it to Vyxum or your dealer.</value></data>
+  <data name="TrialCopy" xml:space="preserve"><value>Copy</value></data>
+  <data name="TrialCopied" xml:space="preserve"><value>Copied.</value></data>
+  <data name="TrialClose" xml:space="preserve"><value>Close</value></data>
+  <data name="TrialRequestLabel" xml:space="preserve"><value>Request text</value></data>
 </root>

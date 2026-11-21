@@ -1,3 +1,5 @@
+import type { UiModule } from '../lib/api';
+
 // Menu entries of the shell. An entry is shown only when its module is loaded in the host.
 // Groups without visible entries are hidden.
 
@@ -70,6 +72,11 @@ export function visibleNavGroups(hasModule: (id: string) => boolean, groups: rea
   return groups
     .map((group) => ({ ...group, items: group.items.filter((item) => item.module === undefined || hasModule(item.module)) }))
     .filter((group) => group.items.length > 0);
+}
+
+/** Locked paid modules that declare a preview: the "Vyxum Pro" group at the bottom of the menu lists them. */
+export function previewModules(modules: readonly UiModule[]): UiModule[] {
+  return modules.filter((m) => m.license === 'locked' && m.preview);
 }
 
 /** A menu entry a module registered, with the group it goes in. */

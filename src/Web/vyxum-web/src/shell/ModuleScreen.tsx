@@ -1,6 +1,7 @@
 import { Component, type ErrorInfo, type ReactNode } from 'react';
 import { Link, Navigate, Route, Routes, useParams } from 'react-router-dom';
 import { useT } from '../i18n/I18nProvider';
+import { LockedPreview } from './LockedPreview';
 import { useModules } from './ModulesProvider';
 import { useModuleUi } from './ModuleUiProvider';
 import { routes } from './navigation';
@@ -60,7 +61,7 @@ export function ModuleScreen() {
   const module = modules.find((m) => m.id === moduleId);
 
   if (!module) return <Navigate to={routes.weighing} replace />;
-  if (module.license === 'locked') return <ModuleLicenseRequired />;
+  if (module.license === 'locked') return module.preview ? <LockedPreview module={module} /> : <ModuleLicenseRequired />;
   if (!module.ui) return <Navigate to={routes.weighing} replace />;
 
   const result = moduleUi.get(moduleId);

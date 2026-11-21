@@ -208,6 +208,7 @@ export function ModulesLicensePage() {
             </dl>
           ) : null}
           {license.clockBehind ? <p className="license-block__notice">{t('license.ClockBehind')}</p> : null}
+          {license.clockAhead ? <p className="license-block__text">{t('license.ClockAheadNote')}</p> : null}
           {message?.kind === 'uploaded' ? <UploadResult state={message.state} /> : null}
           {message?.kind === 'removed' ? (
             <p className="license-block__ok" role="status">

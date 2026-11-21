@@ -4,13 +4,15 @@ import { LanguageSwitch } from './LanguageSwitch';
 import { useModules } from './ModulesProvider';
 import { useModuleUi } from './ModuleUiProvider';
 import '../styles/license.css';
-import { navGroups, visibleNavGroups, withModuleNav } from './navigation';
+import { LockIcon } from '../components/LockIcon';
+import { modulePath, navGroups, previewModules, visibleNavGroups, withModuleNav } from './navigation';
 
 export function Sidebar() {
   const t = useT();
-  const { hasModule, companyName, license } = useModules();
+  const { hasModule, companyName, license, modules } = useModules();
   const { navItems } = useModuleUi();
   const groups = visibleNavGroups(hasModule, withModuleNav(navGroups, navItems));
+  const pro = previewModules(modules);
 
   return (
     <nav className="sidebar" aria-label={t('shell.AppName')}>
@@ -39,6 +41,28 @@ export function Sidebar() {
           </ul>
         </section>
       ))}
+
+      {pro.length > 0 ? (
+        <section className="sidebar__group sidebar__group--pro" aria-labelledby="nav-group-pro">
+          <h2 id="nav-group-pro" className="sidebar__heading">
+            {t('shell.ProGroup')}
+          </h2>
+          <ul className="sidebar__list">
+            {pro.map((module) => (
+              <li key={module.id}>
+                <NavLink
+                  to={modulePath(module.id)}
+                  end
+                  className={({ isActive }) => (isActive ? 'sidebar__link sidebar__link--active' : 'sidebar__link sidebar__link--locked')}
+                >
+                  <span className="sidebar__link-name">{module.name ?? module.id}</span>
+                  <LockIcon label={t('shell.ProLocked')} className="sidebar__lock" />
+                </NavLink>
+              </li>
+            ))}
+          </ul>
+        </section>
+      ) : null}
 
       {license.licensee ? (
         <div className="sidebar__licensee">
