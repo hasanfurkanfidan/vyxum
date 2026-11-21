@@ -29,6 +29,8 @@ export function ModuleUiProvider({ children, importer = browserImporter }: { chi
       if (started.current.has(key)) continue;
       started.current.add(key);
       void loadModuleUi(module, importer).then((result) => {
+        // A failed import is tried again with the next module list refresh.
+        if (result.status === 'failed') started.current.delete(key);
         setLoaded((current) => new Map(current).set(module.id, result));
       });
     }

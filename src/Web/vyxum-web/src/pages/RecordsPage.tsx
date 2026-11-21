@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState, type FormEvent } from 'react';
 import { useCulture, useT } from '../i18n/I18nProvider';
-import { RuleError, ValidationError } from '../lib/api';
+import { RuleError, ruleErrorKey, ValidationError } from '../lib/api';
 import { formatDate, formatMoney, formatRecordNumber, formatTime, formatWeight } from '../lib/format';
 import {
   cancelRecord,
@@ -89,7 +89,7 @@ function CancelDialog({ record, requireReason, columns, onDone, onConflict, onCl
         const keys = Object.values(error.errors).flat();
         setErrors(keys.length > 0 ? keys : ['shell.Error']);
       } else if (error instanceof RuleError) {
-        setErrors([error.code]);
+        setErrors([ruleErrorKey(error)]);
         if (error.status === 409) onConflict();
       } else {
         console.error('Cancelling the record failed.', error);

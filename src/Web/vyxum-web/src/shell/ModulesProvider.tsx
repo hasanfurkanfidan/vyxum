@@ -1,5 +1,5 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
-import { getUiModules, type UiLicense, type UiModule } from '../lib/api';
+import { getUiModules, onLicenseDenied, type UiLicense, type UiModule } from '../lib/api';
 import type { LoadStatus } from '../i18n/I18nProvider';
 
 export interface ModulesContextValue {
@@ -17,6 +17,9 @@ export interface ModulesContextValue {
   /** Loads the list again, for example after a license change. A list that is already shown stays on screen meanwhile. */
   reload: () => Promise<void>;
 }
+
+/** How often the module list (and with it the license state) is refreshed in the background. */
+export const licenseRefreshMs = 5 * 60 * 1000;
 
 const noLicense: UiLicense = { status: 'none', licensee: null, graceDaysLeft: null };
 
@@ -53,6 +56,28 @@ export function ModulesProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     void load();
+  }, [load]);
+
+  // The license state can change without anything on this screen: the grace period ends at midnight, or another
+  // station changes the license. Refresh quietly when the window gains focus, now and then, and when the server
+  // says the license denies a request.
+  useEffect(() => {
+    const refresh = () => {
+      if (loaded.current) void load();
+    };
+    const onVisible = () => {
+      if (document.visibilityState === 'visible') refresh();
+    };
+    const timer = window.setInterval(refresh, licenseRefreshMs);
+    window.addEventListener('focus', refresh);
+    document.addEventListener('visibilitychange', onVisible);
+    const stop = onLicenseDenied(refresh);
+    return () => {
+      window.clearInterval(timer);
+      window.removeEventListener('focus', refresh);
+      document.removeEventListener('visibilitychange', onVisible);
+      stop();
+    };
   }, [load]);
 
   const value = useMemo<ModulesContextValue>(() => {

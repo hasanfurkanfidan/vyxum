@@ -59,6 +59,38 @@ export class RuleError extends ApiError {
   }
 }
 
+/** Codes of a 403 that means the license does not allow the request (not yet valid, locked, or read-only). */
+export const licenseDeniedCodes = ['license_required', 'license_read_only'] as const;
+
+/**
+ * 403 `license_required` or `license_read_only`: the license state changed under the screen (the grace period ended,
+ * or another station changed the license). The client reloads the module list quietly; the screen shows `messageKey`.
+ */
+export class LicenseError extends RuleError {
+  /** Resource key of the translated message. */
+  readonly messageKey: string;
+
+  constructor(status: number, body: CodedError) {
+    super(status, body);
+    this.name = 'LicenseError';
+    this.messageKey = `license.Error.${body.code}`;
+  }
+}
+
+/** Resource key to show for a rejected request: the license message for a LicenseError, otherwise the error code. */
+export function ruleErrorKey(error: RuleError): string {
+  return error instanceof LicenseError ? error.messageKey : error.code;
+}
+
+type LicenseDeniedListener = (error: LicenseError) => void;
+const licenseDeniedListeners = new Set<LicenseDeniedListener>();
+
+/** Calls `listener` for every response that says the license denies the request; returns the way to stop. */
+export function onLicenseDenied(listener: LicenseDeniedListener): () => void {
+  licenseDeniedListeners.add(listener);
+  return () => licenseDeniedListeners.delete(listener);
+}
+
 export interface ValidationProblem {
   type?: string;
   title?: string;
@@ -81,7 +113,10 @@ export function isCodedError(body: unknown): body is CodedError {
   return typeof body === 'object' && body !== null && typeof (body as { code?: unknown }).code === 'string';
 }
 
-export type HttpMethod = 'GET' | 'POST' | 'PUT' | 'DELETE';
+export type HttpMethod = 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH';
+
+/** Header every state-changing request carries; the server rejects such requests without it (CSRF protection). */
+export const REQUEST_HEADER = 'X-Vyxum-Request';
 
 export interface RequestOptions {
   signal?: AbortSignal;
@@ -105,7 +140,12 @@ async function readBody(response: Response): Promise<unknown> {
   return text;
 }
 
+function isLicenseDenied(status: number, body: unknown): body is CodedError {
+  return status === 403 && isCodedError(body) && (licenseDeniedCodes as readonly string[]).includes(body.code);
+}
+
 function toError(status: number, body: unknown): ApiError {
+  if (isLicenseDenied(status, body)) return new LicenseError(status, body);
   if (isValidationProblem(body)) return new ValidationError(status, body);
   if (isCodedError(body)) return new RuleError(status, body);
   return new ApiError(`Request failed with status ${status}.`, status, body);
@@ -113,6 +153,7 @@ function toError(status: number, body: unknown): ApiError {
 
 async function send(method: HttpMethod, path: string, body: unknown, options: RequestOptions): Promise<Response> {
   const headers: Record<string, string> = { Accept: 'application/json', ...options.headers };
+  if (method !== 'GET') headers[REQUEST_HEADER] = '1';
   const init: RequestInit = { method, headers, credentials: 'same-origin' };
   if (options.signal) init.signal = options.signal;
   if (options.rawBody !== undefined) {
@@ -132,7 +173,9 @@ async function send(method: HttpMethod, path: string, body: unknown, options: Re
   }
 
   if (!response.ok) {
-    throw toError(response.status, await readBody(response));
+    const error = toError(response.status, await readBody(response));
+    if (error instanceof LicenseError) for (const listener of licenseDeniedListeners) listener(error);
+    throw error;
   }
   return response;
 }
