@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype"><value>text/microsoft-resx</value></resheader>
+  <resheader name="version"><value>2.0</value></resheader>
+  <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+  <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+  <data name="CodeRequired" xml:space="preserve"><value>PLU code is required.</value></data>
+  <data name="CodeTaken" xml:space="preserve"><value>This PLU code is already used by another product.</value></data>
+  <data name="CodeTooLong" xml:space="preserve"><value>PLU code is too long (at most 32 characters).</value></data>
+  <data name="NameRequired" xml:space="preserve"><value>Product name is required.</value></data>
+  <data name="NameTooLong" xml:space="preserve"><value>Product name is too long (at most 200 characters).</value></data>
+  <data name="InvalidNumber" xml:space="preserve"><value>Enter a valid number, for example 12.50.</value></data>
+  <data name="NegativeNotAllowed" xml:space="preserve"><value>The value cannot be negative.</value></data>
+  <data name="BarcodePrefixTooLong" xml:space="preserve"><value>Barcode prefix is too long (at most 16 characters).</value></data>
+  <data name="IngredientsTooLong" xml:space="preserve"><value>Ingredients are too long (at most 4000 characters).</value></data>
+  <data name="Title" xml:space="preserve"><value>Product cards</value></data>
+  <data name="Breadcrumb" xml:space="preserve"><value>Products</value></data>
+  <data name="CountSuffix" xml:space="preserve"><value>{0} products</value></data>
+  <data name="AddProduct" xml:space="preserve"><value>Add product</value></data>
+  <data name="Code" xml:space="preserve"><value>PLU</value></data>
+  <data name="Product" xml:space="preserve"><value>Product</value></data>
+  <data name="UnitPricePerKg" xml:space="preserve"><value>Unit price per kg</value></data>
+  <data name="PackageTare" xml:space="preserve"><value>Package tare (kg)</value></data>
+  <data name="ShelfLife" xml:space="preserve"><value>Shelf life (days)</value></data>
+  <data name="Days" xml:space="preserve"><value>{0} days</value></data>
+  <data name="BarcodePrefix" xml:space="preserve"><value>Barcode prefix</value></data>
+  <data name="Ingredients" xml:space="preserve"><value>Ingredients</value></data>
+  <data name="IngredientsHint" xml:space="preserve"><value>Mark allergens with asterisks</value></data>
+  <data name="Name" xml:space="preserve"><value>Product name</value></data>
+  <data name="Save" xml:space="preserve"><value>Save</value></data>
+  <data name="Deactivate" xml:space="preserve"><value>Deactivate product</value></data>
+  <data name="Activate" xml:space="preserve"><value>Activate product</value></data>
+  <data name="ShowInactive" xml:space="preserve"><value>Show inactive products</value></data>
+  <data name="Inactive" xml:space="preserve"><value>Inactive</value></data>
+  <data name="Saved" xml:space="preserve"><value>Saved</value></data>
+  <data name="NewProduct" xml:space="preserve"><value>New product</value></data>
+  <data name="Empty" xml:space="preserve"><value>No products yet</value></data>
+  <data name="SearchPlaceholder" xml:space="preserve"><value>PLU or name</value></data>
+</root>
