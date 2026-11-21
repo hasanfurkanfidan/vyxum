@@ -1,5 +1,59 @@
-// Client for the Weighing module API (/api/weighing). Weights and money travel as invariant decimal strings.
-import { apiFile, apiGet, apiPost, withQuery, type DownloadedFile, type RequestOptions } from './api';
+// Clients for the live device endpoints (/api/devices) and the Weighing module API (/api/weighing).
+import { apiGet, apiPost, apiText, withQuery, type RequestOptions } from './api';
+
+export type DeviceConnectionState = 'Connecting' | 'Connected' | 'Disconnected';
+export type LiveWeightState = 'Stable' | 'Motion' | 'Overload' | 'Underload';
+
+export interface LiveWeight {
+  deviceId: string;
+  /** The weight as transmitted, as an invariant decimal string (see parseLiveJson). Null for overload and underload. */
+  value: string | null;
+  unit: string | null;
+  state: LiveWeightState;
+  tare: string | null;
+  isNet: boolean | null;
+  timestamp: string;
+  receivedAt: string;
+}
+
+export interface LiveDevice {
+  deviceId: string;
+  agentName: string | null;
+  state: DeviceConnectionState;
+  lastError: string | null;
+  lastWeight: LiveWeight | null;
+  lastSeen: string;
+  /** Commands the device accepts, for example "Zero". Absent when the host does not report them. */
+  supportedCommands?: string[];
+}
+
+export type ZeroResult = 'Done' | 'NotSupported' | 'Rejected' | 'Unavailable';
+
+export interface ZeroResponse {
+  result: ZeroResult;
+  detail?: string | null;
+}
+
+export interface WeighingSettings {
+  requireStable: boolean;
+  minimumNet: string;
+  requireCancelReason: boolean;
+  currency: string;
+  amountDecimals: number;
+  canPrintLabel: boolean;
+  showOperator: boolean;
+  productsAvailable: boolean;
+}
+
+export interface WeighingProduct {
+  id: string;
+  code: string;
+  name: string;
+  unitPrice: string | null;
+  packageTare: string | null;
+  shelfLifeDays: number | null;
+  barcodePrefix: string | null;
+}
 
 export interface WeighingRecord {
   id: number;
@@ -23,89 +77,79 @@ export interface WeighingRecord {
   operator: string | null;
 }
 
-export interface NetTotal {
-  unit: string | null;
-  value: string;
+export interface CreateRecordInput {
+  requestId: string;
+  deviceId: string;
+  productId: string | null;
+  lot: string | null;
+  /** Station tare in the scale's unit, invariant decimal string. */
+  tare: string | null;
 }
 
-export interface RecordTotals {
-  validCount: number;
-  cancelledCount: number;
-  net: NetTotal[];
-  amount: string | null;
+// The device endpoints write weights as JSON numbers ("value": 1.260). JSON.parse would turn them
+// into floating point and drop the trailing zero, so the numeric text of the weight fields is
+// quoted before parsing. A quote inside a JSON string is escaped, so the pattern cannot match there.
+const weightNumber = /"(value|tare)"(\s*:\s*)(-?\d+(?:\.\d+)?)(?=\s*[,}\]])/g;
+
+/** Parses LiveDevice JSON (one object or an array) and keeps the weights as decimal strings. */
+export function parseLiveJson<T>(text: string): T {
+  return JSON.parse(text.replace(weightNumber, '"$1"$2"$3"')) as T;
 }
 
-export interface RecordList {
-  items: WeighingRecord[];
-  totals: RecordTotals;
+/** Normalizes a weight field that may still arrive as a number (for example from a newer host that sends strings anyway). */
+function weightText(value: unknown): string | null {
+  if (typeof value === 'string') return value;
+  if (typeof value === 'number' && Number.isFinite(value)) return String(value);
+  return null;
 }
 
-export interface WeighingProduct {
-  id: string;
-  code: string;
-  name: string;
+export function normalizeDevice(device: LiveDevice): LiveDevice {
+  const weight = device.lastWeight;
+  if (!weight) return device;
+  return { ...device, lastWeight: { ...weight, value: weightText(weight.value), tare: weightText(weight.tare) } };
 }
 
-export interface WeighingSettings {
-  requireCancelReason: boolean;
-  currency: string;
-  showOperator: boolean;
+export async function getDevices(options?: RequestOptions): Promise<LiveDevice[]> {
+  // Read as text so that parseLiveJson can keep the decimals.
+  const list = parseLiveJson<LiveDevice[]>(await apiText('/api/devices', options));
+  return Array.isArray(list) ? list.map(normalizeDevice) : [];
 }
 
-export interface RecordFilter {
-  /** Inclusive, UTC ISO. */
-  from: string;
-  /** Exclusive, UTC ISO. */
-  to: string;
-  productId: string;
-  lot: string;
+export function liveDevicePath(deviceId: string): string {
+  return `/api/devices/${encodeURIComponent(deviceId)}/live`;
 }
 
-/** Page size of the record list; the API allows up to 500. */
-export const recordPageSize = 100;
-export const maxRecordPageSize = 500;
-
-/** The local calendar day of a `YYYY-MM-DD` value as [local midnight, next local midnight) in UTC ISO. */
-export function dayRangeUtc(day: string): { from: string; to: string } {
-  const [year = 0, month = 1, date = 1] = day.split('-').map(Number);
-  const start = new Date(year, month - 1, date);
-  const next = new Date(year, month - 1, date + 1);
-  return { from: start.toISOString(), to: next.toISOString() };
-}
-
-/** Today in the browser's time zone as `YYYY-MM-DD`, the value of a date input. */
-export function localDateValue(date: Date = new Date()): string {
-  const pad = (n: number) => String(n).padStart(2, '0');
-  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`;
-}
-
-function filterQuery(filter: RecordFilter): Record<string, string | undefined> {
-  return { from: filter.from, to: filter.to, productId: filter.productId, lot: filter.lot.trim() };
-}
-
-export function listRecords(filter: RecordFilter, skip: number, take: number, options?: RequestOptions): Promise<RecordList> {
-  const path = withQuery('/api/weighing/records', { ...filterQuery(filter), includeCancelled: true, skip, take });
-  return apiGet<RecordList>(path, options);
-}
-
-export function cancelRecord(id: number, reason: string): Promise<WeighingRecord> {
-  return apiPost<WeighingRecord>(`/api/weighing/records/${id}/cancel`, { reason });
-}
-
-export function listWeighingProducts(options?: RequestOptions): Promise<WeighingProduct[]> {
-  return apiGet<WeighingProduct[]>('/api/weighing/products', options);
+export function zeroDevice(deviceId: string): Promise<ZeroResponse> {
+  return apiPost<ZeroResponse>(`/api/devices/${encodeURIComponent(deviceId)}/zero`);
 }
 
 export function getWeighingSettings(options?: RequestOptions): Promise<WeighingSettings> {
   return apiGet<WeighingSettings>('/api/weighing/settings', options);
 }
 
-/** The Excel export with the same filters as the list (cancelled records included, as in the list). */
-export function exportRecords(filter: RecordFilter): Promise<DownloadedFile> {
-  return apiFile(withQuery('/api/weighing/records/export', { ...filterQuery(filter), includeCancelled: true }));
+export function listWeighingProducts(search: string, options?: RequestOptions): Promise<WeighingProduct[]> {
+  return apiGet<WeighingProduct[]>(withQuery('/api/weighing/products', { search: search.trim() }), options);
 }
 
-/** Fallback name for the downloaded export, `weighing-records-YYYYMMDD.xlsx`. */
-export function exportFallbackName(day: string): string {
-  return `weighing-records-${day.replaceAll('-', '')}.xlsx`;
+export function listRecentRecords(deviceId: string, take: number, options?: RequestOptions): Promise<WeighingRecord[]> {
+  return apiGet<WeighingRecord[]>(withQuery('/api/weighing/records/recent', { deviceId, take }), options);
+}
+
+export function createRecord(input: CreateRecordInput): Promise<WeighingRecord> {
+  return apiPost<WeighingRecord>('/api/weighing/records', input);
+}
+
+/** A new request id for one save attempt; retries of the same save reuse it. */
+export function newRequestId(): string {
+  if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') return crypto.randomUUID();
+  const bytes = new Uint8Array(16);
+  if (typeof crypto !== 'undefined' && typeof crypto.getRandomValues === 'function') {
+    crypto.getRandomValues(bytes);
+  } else {
+    for (let i = 0; i < bytes.length; i++) bytes[i] = Math.floor(Math.random() * 256);
+  }
+  bytes[6] = ((bytes[6] ?? 0) & 0x0f) | 0x40;
+  bytes[8] = ((bytes[8] ?? 0) & 0x3f) | 0x80;
+  const hex = Array.from(bytes, (b) => b.toString(16).padStart(2, '0')).join('');
+  return `${hex.slice(0, 8)}-${hex.slice(8, 12)}-${hex.slice(12, 16)}-${hex.slice(16, 20)}-${hex.slice(20)}`;
 }

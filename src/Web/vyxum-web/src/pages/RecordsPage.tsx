@@ -18,7 +18,7 @@ import {
   type WeighingProduct,
   type WeighingRecord,
   type WeighingSettings,
-} from '../lib/weighing';
+} from '../lib/records';
 import { PageHeader } from '../shell/PageHeader';
 import '../styles/records.css';
 

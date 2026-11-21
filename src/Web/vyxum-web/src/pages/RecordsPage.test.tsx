@@ -12,7 +12,7 @@ import {
   type WeighingProduct,
   type WeighingRecord,
   type WeighingSettings,
-} from '../lib/weighing';
+} from '../lib/records';
 
 function record(overrides: Partial<WeighingRecord> = {}): WeighingRecord {
   return {
