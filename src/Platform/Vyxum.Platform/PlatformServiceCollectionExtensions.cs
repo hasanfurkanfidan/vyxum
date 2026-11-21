@@ -35,6 +35,7 @@ public static class PlatformServiceCollectionExtensions
             .OrderBy(d => d.Manifest.Id, StringComparer.Ordinal)
             .ToList();
         var databaseSettings = DatabaseSettings.FromConfiguration(configuration);
+        // While registering, modules see what is installed; at run time the registry follows the license.
         var capabilities = new CapabilityRegistry(descriptors.Select(d => d.Manifest));
 
         // Modules only register services here; nothing is resolved, so validating afterwards
@@ -51,7 +52,14 @@ public static class PlatformServiceCollectionExtensions
         var catalog = new ModuleCatalog(descriptors);
         services.AddSingleton(catalog);
         services.AddSingleton(new ModuleUiFiles(catalog));
-        services.AddSingleton<ICapabilityRegistry>(capabilities);
+        services.AddSingleton(provider =>
+        {
+            ILicenseState? licenses = null;
+            return new CapabilityRegistry(
+                descriptors.Select(d => d.Manifest),
+                () => licenses ??= provider.GetRequiredService<ILicenseState>());
+        });
+        services.AddSingleton<ICapabilityRegistry>(provider => provider.GetRequiredService<CapabilityRegistry>());
         services.AddSingleton(databaseSettings);
         services.AddDbContext<PlatformDbContext>((provider, options) =>
             provider.GetRequiredService<DatabaseSettings>().Configure(options));

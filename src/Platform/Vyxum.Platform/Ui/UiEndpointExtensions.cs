@@ -24,9 +24,10 @@ public static class UiEndpointExtensions
     /// <remarks>
     /// A module's <c>license</c> is <c>free</c>, <c>licensed</c>, <c>grace</c>, <c>readOnly</c> or <c>locked</c>; the shell
     /// shows a module's screens by this field. A module's <c>ui</c> is <c>{ entry, sdkVersion }</c> (<c>entry</c> is the URL of
-    /// its embedded entry ES module) when it has screens and may load them, i.e. it is not locked; otherwise null. <c>capabilities</c> still lists what every loaded module provides, locked
-    /// ones included: the module is loaded and its capabilities are fixed at startup (<see cref="Abstractions.ICapabilityRegistry"/>),
-    /// so capabilities say what is installed, not what is licensed. The top-level <c>license.status</c> is <c>none</c>,
+    /// its embedded entry ES module) when it has screens and may load them, i.e. it is not locked; otherwise null. <c>capabilities</c> lists the
+    /// capabilities that are available now, by the same rule as <see cref="Abstractions.ICapabilityRegistry"/>
+    /// (<see cref="CapabilityRegistry"/>): provided by a free module or by a licensed module that is licensed or in grace;
+    /// a locked or read-only module's capabilities are left out. A module's <c>provides</c> still lists what it declares. The top-level <c>license.status</c> is <c>none</c>,
     /// <c>invalid</c>, <c>notYetValid</c>, <c>valid</c>, <c>grace</c> or <c>readOnly</c>; <c>licensee</c> is the licensee's
     /// name of a license that verifies.
     /// </remarks>
@@ -40,7 +41,7 @@ public static class UiEndpointExtensions
             return Results.Json(new UiStringsResponse(culture.Name, catalog.GetStrings(culture)), DeviceEndpointExtensions.JsonOptions);
         });
 
-        endpoints.MapGet(ModulesPath, async (ModuleCatalog catalog, IPlatformSettings settings, LicenseManager licenses, ModuleDisplayNames names, CancellationToken cancellationToken) =>
+        endpoints.MapGet(ModulesPath, async (ModuleCatalog catalog, CapabilityRegistry registry, IPlatformSettings settings, LicenseManager licenses, ModuleDisplayNames names, CancellationToken cancellationToken) =>
         {
             var snapshot = licenses.GetSnapshot();
             var culture = CultureInfo.CurrentUICulture;
@@ -56,12 +57,7 @@ public static class UiEndpointExtensions
                     LicenseText.Of(snapshot.GetModuleStatus(m.Manifest.Id)),
                     UiOf(m.Manifest, snapshot.GetModuleStatus(m.Manifest.Id))))
                 .ToList();
-            var capabilities = catalog.Modules
-                .SelectMany(m => m.Manifest.Provides)
-                .Select(c => c.Id)
-                .Distinct(StringComparer.Ordinal)
-                .Order(StringComparer.Ordinal)
-                .ToList();
+            var capabilities = registry.Available(snapshot.GetModuleStatus);
             var companyName = await settings.GetAsync(PlatformSettingKeys.CompanyName, cancellationToken);
             var license = new UiLicense(
                 LicenseText.Of(snapshot.Status),

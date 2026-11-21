@@ -19,12 +19,16 @@ public sealed class PaidModule : IModule
     /// <summary>The module id, which is also its license key.</summary>
     public const string Id = "samples.paid";
 
+    /// <summary>A capability the module provides, available only while it is licensed or in grace.</summary>
+    public const string EntriesCapability = "samples.paid.entries";
+
     /// <inheritdoc />
     public ModuleManifest Manifest { get; } = new()
     {
         Id = Id,
         DisplayNameKey = StringsPrefix + ".ModuleName",
         Version = new Version(1, 0),
+        Provides = [EntriesCapability],
         Optional = ["samples.orders"],
         RequiresLicense = true,
         Ui = new ModuleUi { Entry = "index.js", SdkVersion = 1 },

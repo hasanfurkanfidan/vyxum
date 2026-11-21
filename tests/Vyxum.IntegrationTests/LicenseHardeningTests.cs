@@ -215,6 +215,52 @@ public sealed class LicenseHardeningTests : IDisposable
     [Theory]
     [InlineData(DatabaseProvider.Sqlite)]
     [InlineData(DatabaseProvider.SqlServer)]
+    public async Task Capabilities_of_a_paid_module_count_only_while_it_may_run(DatabaseProvider provider)
+    {
+        await using var database = Databases.CreateOrSkip(provider);
+        var clock = new TestClock();
+        await using var app = new LicenseTestApp(database, _issuer, clock, maintenance: false);
+        var registry = app.Services.GetRequiredService<ICapabilityRegistry>();
+
+        async Task<string[]> UiCapabilitiesAsync()
+        {
+            var (_, ui) = await app.SendAsync(HttpMethod.Get, UiEndpointExtensions.ModulesPath);
+            return [.. ui.GetProperty("capabilities").EnumerateArray().Select(c => c.GetString()!)];
+        }
+
+        // Locked: not available, although the module is installed and declares it.
+        registry.IsAvailable(PaidModule.EntriesCapability).ShouldBeFalse();
+        registry.IsAvailable("samples.orders").ShouldBeTrue();
+        (await UiCapabilitiesAsync()).ShouldNotContain(PaidModule.EntriesCapability);
+        (await UiCapabilitiesAsync()).ShouldContain("samples.orders");
+        var (_, modules) = await app.SendAsync(HttpMethod.Get, UiEndpointExtensions.ModulesPath);
+        modules.GetProperty("modules").EnumerateArray().Single(m => m.GetProperty("id").GetString() == PaidModule.Id)
+            .GetProperty("provides").EnumerateArray().Select(c => c.GetString()).ShouldBe([PaidModule.EntriesCapability]);
+
+        // Licensed, then in grace: available.
+        await ShouldUploadAsync(app, _issuer.Sign(TestLicenseIssuer.Payload(validUntil: TestLicenseIssuer.Today, graceDays: 1)));
+        registry.IsAvailable(PaidModule.EntriesCapability).ShouldBeTrue();
+        (await UiCapabilitiesAsync()).ShouldContain(PaidModule.EntriesCapability);
+        clock.Advance(TimeSpan.FromDays(1));
+        registry.IsAvailable(PaidModule.EntriesCapability).ShouldBeTrue();
+
+        // Read-only: not available.
+        clock.Advance(TimeSpan.FromDays(1));
+        app.Services.GetRequiredService<ILicenseState>().Status.ShouldBe(LicenseCondition.ReadOnly);
+        registry.IsAvailable(PaidModule.EntriesCapability).ShouldBeFalse();
+        (await UiCapabilitiesAsync()).ShouldNotContain(PaidModule.EntriesCapability);
+
+        // Removed: not available.
+        clock.Advance(TimeSpan.FromDays(-2));
+        await ShouldUploadAsync(app, _issuer.Sign(TestLicenseIssuer.Payload(licenseId: "lic-2")));
+        registry.IsAvailable(PaidModule.EntriesCapability).ShouldBeTrue();
+        (await app.SendAsync(HttpMethod.Delete, LicenseEndpointExtensions.LicensePath)).Status.ShouldBe(204);
+        registry.IsAvailable(PaidModule.EntriesCapability).ShouldBeFalse();
+    }
+
+    [Theory]
+    [InlineData(DatabaseProvider.Sqlite)]
+    [InlineData(DatabaseProvider.SqlServer)]
     public async Task A_database_failure_while_reading_the_license_keeps_the_module_closed(DatabaseProvider provider)
     {
         await using var database = Databases.CreateOrSkip(provider);

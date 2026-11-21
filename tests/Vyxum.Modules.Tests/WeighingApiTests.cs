@@ -1,5 +1,6 @@
 using System.Net;
 using System.Text.Json;
+using Microsoft.Extensions.DependencyInjection;
 using Shouldly;
 using Vyxum.Modules.Weighing;
 using Vyxum.Platform;
@@ -674,6 +675,41 @@ public class WeighingApiTests
         await app.DeliverAsync(Product(Cashew, code: "0203", name: "Cashew", isActive: false), t0.AddSeconds(2));
         var (_, afterDeactivate) = await app.SendAsync(HttpMethod.Get, "/api/weighing/products");
         afterDeactivate.EnumerateArray().Select(p => p.GetProperty("code").GetString()).ShouldBe(["0417"]);
+    }
+
+    [Theory]
+    [InlineData(DatabaseProvider.Sqlite, false)]
+    [InlineData(DatabaseProvider.Sqlite, true)]
+    [InlineData(DatabaseProvider.SqlServer, false)]
+    [InlineData(DatabaseProvider.SqlServer, true)]
+    public async Task Optional_capabilities_of_an_unlicensed_module_are_not_offered(DatabaseProvider provider, bool requiresLicense)
+    {
+        // Stand-ins for the label and user modules; without a license file a module that requires one is locked.
+        var labels = new CapabilityProviderModule("test.labels", requiresLicense, WeighingModule.LabelsCapability);
+        var users = new CapabilityProviderModule("test.users", requiresLicense, WeighingModule.UsersCapability);
+        await using var app = await WeighingTestApp.StartAsync(provider, otherModules: [labels, users]);
+
+        var (response, settings) = await app.SendAsync(HttpMethod.Get, "/api/weighing/settings");
+
+        response.StatusCode.ShouldBe(HttpStatusCode.OK);
+        settings.GetProperty("canPrintLabel").GetBoolean().ShouldBe(!requiresLicense);
+        settings.GetProperty("showOperator").GetBoolean().ShouldBe(!requiresLicense);
+    }
+
+    /// <summary>A module that only provides capabilities.</summary>
+    private sealed class CapabilityProviderModule(string id, bool requiresLicense, params string[] provides) : IModule
+    {
+        public ModuleManifest Manifest { get; } = new()
+        {
+            Id = id,
+            Version = new Version(1, 0),
+            RequiresLicense = requiresLicense,
+            Provides = [.. provides.Select(c => new Capability(c))],
+        };
+
+        public void ConfigureServices(IServiceCollection services, ModuleContext context)
+        {
+        }
     }
 
     [Theory]
