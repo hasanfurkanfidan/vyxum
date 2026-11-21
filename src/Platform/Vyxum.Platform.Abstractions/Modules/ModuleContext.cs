@@ -10,4 +10,11 @@ public abstract class ModuleContext
 
     /// <summary>Capabilities provided by the loaded modules; use it for optional capabilities.</summary>
     public abstract ICapabilityRegistry Capabilities { get; }
+
+    /// <summary>
+    /// Registers the module's DbContext (scoped) with the configured database provider.
+    /// A module owns at most one DbContext; the platform creates its tables at startup.
+    /// </summary>
+    public abstract void AddDbContext<TContext>()
+        where TContext : ModuleDbContext;
 }

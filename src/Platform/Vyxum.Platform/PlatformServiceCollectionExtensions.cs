@@ -31,6 +31,7 @@ public static class PlatformServiceCollectionExtensions
             .Select(m => new ModuleDescriptor(m))
             .OrderBy(d => d.Manifest.Id, StringComparer.Ordinal)
             .ToList();
+        var databaseSettings = DatabaseSettings.FromConfiguration(configuration);
         var capabilities = new CapabilityRegistry(descriptors.Select(d => d.Manifest));
 
         // Modules only register services here; nothing is resolved, so validating afterwards
@@ -47,6 +48,11 @@ public static class PlatformServiceCollectionExtensions
         var catalog = new ModuleCatalog(descriptors);
         services.AddSingleton(catalog);
         services.AddSingleton<ICapabilityRegistry>(capabilities);
+        services.AddSingleton(databaseSettings);
+        services.AddDbContext<PlatformDbContext>((provider, options) =>
+            provider.GetRequiredService<DatabaseSettings>().Configure(options));
+        services.AddSingleton<IModuleDatabaseInitializer, ModuleDatabaseInitializer>();
+        services.AddHostedService<ModuleDatabaseInitializerService>();
         return catalog;
     }
 }

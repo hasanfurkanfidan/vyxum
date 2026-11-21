@@ -18,4 +18,7 @@ public sealed class ModuleDescriptor
 
     /// <summary>The module's manifest (read once).</summary>
     public ModuleManifest Manifest { get; }
+
+    /// <summary>The module's <see cref="ModuleDbContext"/> type, or null when the module has no data.</summary>
+    public Type? DbContextType { get; internal set; }
 }

@@ -29,6 +29,7 @@ public static partial class ModuleValidator
         CheckCapabilities(modules, problems);
         CheckCycles(modules, problems);
         CheckEvents(modules, problems);
+        CheckDbContexts(modules, problems);
         return problems;
     }
 
@@ -198,6 +199,19 @@ public static partial class ModuleValidator
         }
 
         return attribute;
+    }
+
+    private static void CheckDbContexts(IReadOnlyList<ModuleDescriptor> modules, List<string> problems)
+    {
+        var shared = modules
+            .Where(m => m.DbContextType is not null)
+            .GroupBy(m => m.DbContextType!)
+            .Where(g => g.Count() > 1);
+        foreach (var group in shared)
+        {
+            problems.Add($"DbContext '{group.Key.FullName}' is registered by more than one module: " +
+                         string.Join(", ", group.Select(m => $"'{m.Manifest.Id}'")) + ".");
+        }
     }
 
     private static Dictionary<Capability, List<string>> ProvidersByCapability(IReadOnlyList<ModuleDescriptor> modules) =>

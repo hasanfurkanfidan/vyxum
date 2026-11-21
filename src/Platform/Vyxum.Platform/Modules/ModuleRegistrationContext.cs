@@ -18,4 +18,18 @@ internal sealed class ModuleRegistrationContext(
     public override IConfiguration Configuration { get; } = configuration;
 
     public override ICapabilityRegistry Capabilities { get; } = capabilities;
+
+    public override void AddDbContext<TContext>()
+    {
+        if (Descriptor.DbContextType is not null)
+        {
+            throw new InvalidOperationException(
+                $"Module '{Descriptor.Manifest.Id}' already registered {Descriptor.DbContextType.Name}; " +
+                $"a module owns exactly one DbContext, so {typeof(TContext).Name} cannot be added.");
+        }
+
+        Descriptor.DbContextType = typeof(TContext);
+        Services.AddDbContext<TContext>((provider, options) =>
+            provider.GetRequiredService<DatabaseSettings>().Configure(options));
+    }
 }
