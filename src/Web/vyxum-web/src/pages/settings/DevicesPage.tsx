@@ -231,7 +231,8 @@ export function DevicesPage() {
                           : null}
                       </td>
                       <td className="mono devices__connection">{describe(device.transport, device.protocol)}</td>
-                      <td className="devices__actions">
+                      <td>
+                        <div className="devices__actions">
                         <button type="button" className="button button--quiet" onClick={() => setMode({ kind: 'edit', device })}>
                           {t('devices.Edit')}
                         </button>
@@ -243,6 +244,7 @@ export function DevicesPage() {
                         >
                           {t('devices.Delete')}
                         </button>
+                        </div>
                       </td>
                     </tr>
                     {deleting ? (

@@ -272,6 +272,12 @@
   font-size: var(--text-eyebrow);
 }
 
+.devices__editor .input[readonly] {
+  border-color: var(--color-line);
+  background: var(--color-bg);
+  color: var(--color-ink-muted);
+}
+
 .devices__connection {
   font-size: var(--text-label);
 }
