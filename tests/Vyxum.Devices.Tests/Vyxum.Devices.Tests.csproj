@@ -13,6 +13,7 @@
     <ProjectReference Include="..\..\src\Devices\Vyxum.Devices\Vyxum.Devices.csproj" />
     <ProjectReference Include="..\..\src\Devices\Vyxum.Devices.GenericAscii\Vyxum.Devices.GenericAscii.csproj" />
     <ProjectReference Include="..\..\src\Devices\Vyxum.Devices.MtSics\Vyxum.Devices.MtSics.csproj" />
+    <ProjectReference Include="..\..\src\Devices\Vyxum.Devices.Simulator\Vyxum.Devices.Simulator.csproj" />
     <ProjectReference Include="..\..\src\Devices\Vyxum.Devices.ToledoContinuous\Vyxum.Devices.ToledoContinuous.csproj" />
     <ProjectReference Include="..\..\src\Devices\Vyxum.Devices.Transports\Vyxum.Devices.Transports.csproj" />
   </ItemGroup>
