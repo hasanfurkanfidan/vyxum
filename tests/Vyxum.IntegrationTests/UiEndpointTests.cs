@@ -88,7 +88,7 @@ public sealed class UiEndpointTests : IDisposable
         var en = (await GetStringsAsync(client, "en", null)).GetProperty("strings").EnumerateObject().ToList();
 
         tr.Select(p => p.Name).ShouldBe(en.Select(p => p.Name));
-        tr.ShouldAllBe(p => p.Name.StartsWith("shell.") && !string.IsNullOrWhiteSpace(p.Value.GetString()));
+        tr.ShouldAllBe(p => (p.Name.StartsWith("shell.") || p.Name.StartsWith("products.")) && !string.IsNullOrWhiteSpace(p.Value.GetString()));
         en.ShouldAllBe(p => !string.IsNullOrWhiteSpace(p.Value.GetString()));
     }
 
@@ -104,20 +104,23 @@ public sealed class UiEndpointTests : IDisposable
         var modules = json.RootElement.GetProperty("modules").EnumerateArray()
             .Select(m => (m.GetProperty("id").GetString(), m.GetProperty("version").GetString()))
             .ToList();
-        modules.ShouldBe([("samples.notifications", "1.0"), ("samples.orders", "1.0")]);
+        modules.ShouldBe([("products", "1.0"), ("samples.notifications", "1.0"), ("samples.orders", "1.0")]);
         json.RootElement.GetProperty("capabilities").EnumerateArray().Select(c => c.GetString())
-            .ShouldBe(["samples.orders"]);
+            .ShouldBe(["products.catalog", "samples.orders"], ignoreOrder: true);
     }
 
     [Fact]
-    public async Task Modules_endpoint_is_empty_without_modules()
+    public async Task Modules_endpoint_lists_the_built_in_products_module()
     {
         var ct = TestContext.Current.CancellationToken;
         await using var factory = CreateFactory();
         using var client = factory.CreateClient();
 
-        var body = await client.GetStringAsync(UiEndpointExtensions.ModulesPath, ct);
+        using var json = JsonDocument.Parse(await client.GetStringAsync(UiEndpointExtensions.ModulesPath, ct));
 
-        body.ShouldBe("""{"modules":[],"capabilities":[]}""");
+        json.RootElement.GetProperty("modules").EnumerateArray().Select(m => m.GetProperty("id").GetString())
+            .ShouldBe(["products"]);
+        json.RootElement.GetProperty("capabilities").EnumerateArray().Select(c => c.GetString())
+            .ShouldBe(["products.catalog"]);
     }
 }
