@@ -4,18 +4,21 @@ import { useT } from '../i18n/I18nProvider';
 import { useModules } from './ModulesProvider';
 import { useModuleUi } from './ModuleUiProvider';
 import { routes } from './navigation';
+import '../styles/license.css';
 
 /** Placeholder of a module screen whose module has no license; links to the license settings. */
 export function ModuleLicenseRequired() {
   const t = useT();
   return (
-    <div className="status" role="status">
-      <p className="status__text">{t('shell.ModuleLicenseRequired')}</p>
-      <p className="status__text">{t('shell.ModuleLicenseRequiredHint')}</p>
-      <Link className="button button--primary" to={routes.settingsLicense}>
+    <section className="license-placeholder" aria-labelledby="license-placeholder-title">
+      <h1 id="license-placeholder-title" className="license-placeholder__title">
+        {t('shell.ModuleLicenseRequired')}
+      </h1>
+      <p className="license-placeholder__text">{t('shell.ModuleLicenseRequiredHint')}</p>
+      <Link className="button button--primary license-placeholder__link" to={routes.settingsLicense}>
         {t('shell.ModuleLicenseSettings')}
       </Link>
-    </div>
+    </section>
   );
 }
 

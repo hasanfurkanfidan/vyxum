@@ -29,7 +29,7 @@ export const routes = {
   /** Settings screens of the platform. */
   settingsDevices: '/settings/devices',
   settingsAbout: '/settings/about',
-  /** Modules and license settings (the page itself comes with the license screens). */
+  /** Modules and license settings. */
   settingsLicense: '/settings/license',
   /** Screens of separately built modules: `/m/{moduleId}/...`. */
   module: '/m/:moduleId/*',
@@ -59,6 +59,7 @@ export const navGroups: readonly NavGroup[] = [
     labelKey: 'setup.Settings',
     items: [
       { labelKey: 'devices.Title', path: routes.settingsDevices },
+      { labelKey: 'license.Title', path: routes.settingsLicense },
       { labelKey: 'setup.AboutTitle', path: routes.settingsAbout },
     ],
   },

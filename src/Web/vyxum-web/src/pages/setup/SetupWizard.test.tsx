@@ -73,7 +73,7 @@ describe('setup redirect', () => {
     expect(location()).toBe('/setup');
     // The wizard has its own frame without the menu.
     expect(screen.queryByRole('link', { name: 'Tartım' })).not.toBeInTheDocument();
-    expect(screen.getByText('Adım 1 / 3')).toBeInTheDocument();
+    expect(screen.getByText('Adım 1 / 4')).toBeInTheDocument();
   });
 
   it('accepts the Turkish address of the wizard', async () => {
@@ -118,7 +118,7 @@ describe('step rail', () => {
     await heading('Kayıtlar nerede saklansın?');
     const rail = screen.getByRole('navigation', { name: 'Kurulum' });
     const items = within(rail).getAllByRole('listitem');
-    expect(items.map((item) => item.textContent)).toEqual(['01Veritabanışimdi', '02Terazi', '03Firma']);
+    expect(items.map((item) => item.textContent)).toEqual(['01Veritabanışimdi', '02Terazi', '03Firma', '04Lisans']);
     expect(items[0]).toHaveAttribute('aria-current', 'step');
 
     await user.click(within(rail).getByRole('button', { name: 'English' }));
@@ -132,7 +132,7 @@ describe('step rail', () => {
     await heading('Kayıtlar nerede saklansın?');
     const rail = screen.getByRole('navigation', { name: 'Kurulum' });
     expect(within(rail).getByText('Ürünler')).toBeInTheDocument();
-    expect(screen.getByText('Adım 1 / 4')).toBeInTheDocument();
+    expect(screen.getByText('Adım 1 / 5')).toBeInTheDocument();
   });
 });
 
@@ -324,6 +324,9 @@ describe('company and products steps', () => {
     await user.type(screen.getByLabelText('Firma adı'), 'Örnek Gıda');
     await user.click(next());
 
+    expect(await heading('Lisans dosyanız var mı?')).toBeInTheDocument();
+    await user.click(next());
+
     expect(await heading('Kurulum tamamlandı')).toBeInTheDocument();
     expect(screen.queryByText('Ürünler')).not.toBeInTheDocument();
     const call = fetchMock.mock.calls.find(([input]) => String(input) === '/api/setup/company');
@@ -417,5 +420,62 @@ describe('done screen', () => {
     const menu = screen.getByRole('navigation');
     expect(await within(menu).findByText('Örnek Gıda')).toBeInTheDocument();
     expect(window.sessionStorage.getItem('vyxum.setup.step')).toBeNull();
+  });
+});
+
+describe('license step', () => {
+  const licenseFile = '{"format":"vxlic/1"}';
+
+  async function openLicenseStep(routes: Record<string, FakeHandler> = {}) {
+    window.sessionStorage.setItem('vyxum.setup.step', 'license');
+    const fetchMock = installWizardApi({ status: { company: { name: 'Örnek Gıda' } }, routes });
+    renderApp('/setup');
+    await heading('Lisans dosyanız var mı?');
+    return fetchMock;
+  }
+
+  it('has two options and continues free by default, without any request', async () => {
+    const user = userEvent.setup();
+    const fetchMock = await openLicenseStep();
+
+    expect(screen.getByRole('radio', { name: /Ücretsiz devam et/ })).toBeChecked();
+    expect(screen.getByRole('radio', { name: /Lisans dosyası yükle/ })).not.toBeChecked();
+    await user.click(next());
+
+    expect(await heading('Kurulum tamamlandı')).toBeInTheDocument();
+    expect(callsTo(fetchMock, 'POST /api/license')).toBe(0);
+  });
+
+  it('uploads a license file, shows the licensee and goes on', async () => {
+    let received: RequestInit | undefined;
+    const user = userEvent.setup();
+    const fetchMock = await openLicenseStep({
+      'POST /api/license': (_url, init) => {
+        received = init;
+        return jsonResponse({ licensee: { name: 'Örnek Kuruyemiş A.Ş.' }, status: 'valid' });
+      },
+    });
+
+    await user.click(screen.getByRole('radio', { name: /Lisans dosyası yükle/ }));
+    const modulesBefore = callsTo(fetchMock, 'GET /api/ui/modules');
+    await user.upload(screen.getByLabelText('Lisans dosyası'), new File([licenseFile], 'a.vxlic'));
+
+    expect(await screen.findByText('Lisans yüklendi: Örnek Kuruyemiş A.Ş..')).toBeInTheDocument();
+    expect(received?.body).toBe(licenseFile);
+    expect(callsTo(fetchMock, 'GET /api/ui/modules')).toBe(modulesBefore + 1);
+    await user.click(next());
+    expect(await heading('Kurulum tamamlandı')).toBeInTheDocument();
+  });
+
+  it('shows the message of a rejected file and can still be skipped', async () => {
+    const user = userEvent.setup();
+    await openLicenseStep({ 'POST /api/license': () => jsonResponse({ code: 'invalid_signature' }, 400) });
+
+    await user.click(screen.getByRole('radio', { name: /Lisans dosyası yükle/ }));
+    await user.upload(screen.getByLabelText('Lisans dosyası'), new File([licenseFile], 'a.vxlic'));
+    expect(await screen.findByRole('alert')).toHaveTextContent('İmza tutmuyor');
+
+    await user.click(next());
+    expect(await heading('Kurulum tamamlandı')).toBeInTheDocument();
   });
 });

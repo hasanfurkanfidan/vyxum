@@ -86,6 +86,8 @@ export type HttpMethod = 'GET' | 'POST' | 'PUT' | 'DELETE';
 export interface RequestOptions {
   signal?: AbortSignal;
   headers?: Record<string, string>;
+  /** Sends this text as the body as it is (UTF-8 text), instead of a JSON-encoded body. */
+  rawBody?: string;
 }
 
 async function readBody(response: Response): Promise<unknown> {
@@ -113,7 +115,10 @@ async function send(method: HttpMethod, path: string, body: unknown, options: Re
   const headers: Record<string, string> = { Accept: 'application/json', ...options.headers };
   const init: RequestInit = { method, headers, credentials: 'same-origin' };
   if (options.signal) init.signal = options.signal;
-  if (body !== undefined) {
+  if (options.rawBody !== undefined) {
+    headers['Content-Type'] = 'text/plain; charset=utf-8';
+    init.body = options.rawBody;
+  } else if (body !== undefined) {
     headers['Content-Type'] = 'application/json';
     init.body = JSON.stringify(body);
   }
@@ -144,6 +149,11 @@ export function apiGet<T>(path: string, options?: RequestOptions): Promise<T> {
 
 export function apiPost<T>(path: string, body?: unknown, options?: RequestOptions): Promise<T> {
   return request<T>('POST', path, body, options);
+}
+
+/** POST with a text body that is sent unchanged, for example the text of an uploaded file. */
+export function apiPostText<T>(path: string, text: string, options: RequestOptions = {}): Promise<T> {
+  return request<T>('POST', path, undefined, { ...options, rawBody: text });
 }
 
 export function apiPut<T>(path: string, body?: unknown, options?: RequestOptions): Promise<T> {
@@ -229,9 +239,21 @@ export interface UiModuleScreens {
   sdkVersion: number;
 }
 
+/** Overall license state in the module list. */
+export interface UiLicense {
+  /** `none`, `invalid`, `notYetValid`, `valid`, `grace` or `readOnly`. */
+  status: 'none' | 'invalid' | 'notYetValid' | 'valid' | 'grace' | 'readOnly';
+  /** Name of the licensee of a license that verifies, or null. */
+  licensee: string | null;
+  /** In the grace period: days left, counting today. */
+  graceDaysLeft: number | null;
+}
+
 export interface UiModules {
   modules: UiModule[];
   capabilities: string[];
+  /** Older hosts leave it out (no license). */
+  license?: UiLicense;
   /** Company name entered in the setup wizard, or null. Older hosts leave it out. */
   companyName?: string | null;
 }

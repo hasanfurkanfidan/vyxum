@@ -26,7 +26,7 @@ describe('shell menu', () => {
 
     const menu = await findMenu();
     const links = within(menu).getAllByRole('link').map((link) => link.textContent);
-    expect(links).toEqual(['Tartım', 'Kayıtlar', 'Ürünler', 'Cihazlar', 'Hakkında']);
+    expect(links).toEqual(['Tartım', 'Kayıtlar', 'Ürünler', 'Cihazlar', 'Modüller ve lisans', 'Hakkında']);
     expect(within(menu).getByRole('heading', { name: 'Ayarlar' })).toBeInTheDocument();
     expect(within(menu).getByRole('heading', { name: 'Çekirdek' })).toBeInTheDocument();
   });
@@ -46,7 +46,7 @@ describe('shell menu', () => {
 
     const menu = await findMenu();
     const links = within(menu).getAllByRole('link').map((link) => link.textContent);
-    expect(links).toEqual(['Ürünler', 'Cihazlar', 'Hakkında']);
+    expect(links).toEqual(['Ürünler', 'Cihazlar', 'Modüller ve lisans', 'Hakkında']);
     expect(await screen.findByRole('heading', { level: 1, name: 'Ürün kartları' })).toBeInTheDocument();
   });
 
@@ -56,7 +56,7 @@ describe('shell menu', () => {
 
     const menu = await findMenu();
     const links = within(menu).getAllByRole('link').map((link) => link.textContent);
-    expect(links).toEqual(['Tartım', 'Kayıtlar', 'Cihazlar', 'Hakkında']);
+    expect(links).toEqual(['Tartım', 'Kayıtlar', 'Cihazlar', 'Modüller ve lisans', 'Hakkında']);
     // The products route is not available, so the start page opens instead.
     expect(await screen.findByRole('heading', { level: 1, name: 'Tartım' })).toBeInTheDocument();
   });
@@ -67,7 +67,7 @@ describe('shell menu', () => {
 
     const menu = await findMenu();
     // Only the settings screens of the platform remain.
-    expect(within(menu).getAllByRole('link').map((link) => link.textContent)).toEqual(['Cihazlar', 'Hakkında']);
+    expect(within(menu).getAllByRole('link').map((link) => link.textContent)).toEqual(['Cihazlar', 'Modüller ve lisans', 'Hakkında']);
     expect(within(menu).queryByRole('heading', { name: 'Çekirdek' })).not.toBeInTheDocument();
   });
 

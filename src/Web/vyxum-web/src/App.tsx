@@ -15,6 +15,7 @@ import { Shell } from './shell/Shell';
 import { SetupWizard } from './pages/setup/SetupWizard';
 import { AboutPage } from './pages/settings/AboutPage';
 import { DevicesPage } from './pages/settings/DevicesPage';
+import { ModulesLicensePage } from './pages/settings/ModulesLicensePage';
 
 /**
  * Strings, module list, module screens and setup status. The router is supplied by the caller (BrowserRouter or
@@ -80,6 +81,7 @@ function MainScreens() {
           }
         />
         <Route path={routes.settingsDevices} element={<DevicesPage />} />
+        <Route path={routes.settingsLicense} element={<ModulesLicensePage />} />
         <Route path={routes.settingsAbout} element={<AboutPage />} />
         <Route path={routes.module} element={<ModuleScreen />} />
         <Route path="*" element={<Navigate to={routes.weighing} replace />} />

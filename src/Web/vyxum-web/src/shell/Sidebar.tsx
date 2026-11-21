@@ -3,11 +3,12 @@ import { useT } from '../i18n/I18nProvider';
 import { LanguageSwitch } from './LanguageSwitch';
 import { useModules } from './ModulesProvider';
 import { useModuleUi } from './ModuleUiProvider';
+import '../styles/license.css';
 import { navGroups, visibleNavGroups, withModuleNav } from './navigation';
 
 export function Sidebar() {
   const t = useT();
-  const { hasModule, companyName } = useModules();
+  const { hasModule, companyName, license } = useModules();
   const { navItems } = useModuleUi();
   const groups = visibleNavGroups(hasModule, withModuleNav(navGroups, navItems));
 
@@ -38,6 +39,13 @@ export function Sidebar() {
           </ul>
         </section>
       ))}
+
+      {license.licensee ? (
+        <div className="sidebar__licensee">
+          <span className="sidebar__licensee-label">{t('license.Licensee')}</span>
+          <span className="sidebar__licensee-name">{license.licensee}</span>
+        </div>
+      ) : null}
 
       <LanguageSwitch />
     </nav>
