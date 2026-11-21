@@ -14,7 +14,9 @@ namespace Vyxum.Platform;
 /// behind a permission. Errors are problem details (400) with a <c>code</c>: the reader's codes for a rejected file
 /// (<c>invalid_format</c>, <c>unsupported_format</c>, <c>unknown_key</c>, <c>invalid_signature</c>,
 /// <c>invalid_payload</c>, <c>too_large</c>), and <c>no_license</c>, <c>unknown_device</c>,
-/// <c>station_limit_exceeded</c>, <c>stations_too_long</c> for the station choice.
+/// <c>station_limit_exceeded</c>, <c>stations_too_long</c> for the station choice. The state-changing endpoints require
+/// the <c>X-Vyxum-Request: 1</c> header (or a JSON body) and reject a foreign <c>Origin</c> (403
+/// <c>request_header_required</c> or <c>cross_origin_request</c>, see <see cref="SameOriginRequestFilter"/>).
 /// </remarks>
 public static class LicenseEndpointExtensions
 {
@@ -39,9 +41,9 @@ public static class LicenseEndpointExtensions
         ArgumentNullException.ThrowIfNull(endpoints);
 
         endpoints.MapGet(LicensePath, (LicenseManager licenses, ModuleCatalog catalog) => Current(licenses, catalog));
-        endpoints.MapPost(LicensePath, UploadAsync);
-        endpoints.MapDelete(LicensePath, DeleteAsync);
-        endpoints.MapPut(StationsPath, SetStationsAsync);
+        endpoints.MapPost(LicensePath, UploadAsync).RequireSameOriginRequest();
+        endpoints.MapDelete(LicensePath, DeleteAsync).RequireSameOriginRequest();
+        endpoints.MapPut(StationsPath, SetStationsAsync).RequireSameOriginRequest();
         return endpoints;
     }
 

@@ -121,6 +121,9 @@ internal sealed class LicenseTestApp : IAsyncDisposable
             });
         });
         Client = _factory.CreateClient();
+
+        // As the web application sends it with every state-changing request.
+        Client.DefaultRequestHeaders.Add(SameOriginRequestFilter.HeaderName, SameOriginRequestFilter.HeaderValue);
     }
 
     public TestClock Clock { get; }
@@ -132,6 +135,9 @@ internal sealed class LicenseTestApp : IAsyncDisposable
     public TestServer Server => _factory.Server;
 
     public static StringContent Json(string json) => new(json, Encoding.UTF8, "application/json");
+
+    /// <summary>A client without the request header the web application sends.</summary>
+    public HttpClient CreatePlainClient() => _factory.CreateClient();
 
     public Task<HttpResponseMessage> UploadAsync(string file) =>
         Client.PostAsync(LicenseEndpointExtensions.LicensePath, new StringContent(file, Encoding.UTF8, "application/octet-stream"), TestContext.Current.CancellationToken);
