@@ -1,6 +1,7 @@
 // Test double for the host API: answers fetch calls from a route table.
 import { vi } from 'vitest';
 import type { UiModules } from '../lib/api';
+import type { SetupStatus } from '../lib/setup';
 import { readCultureCookie } from '../lib/culture';
 
 export type FakeHandler = (url: URL, init: RequestInit | undefined) => Response | Promise<Response>;
@@ -123,6 +124,58 @@ export const sampleStrings: Record<'tr' | 'en', Record<string, string>> = {
     'products.NewProduct': 'Yeni ürün',
     'products.Empty': 'Henüz ürün yok',
     'products.SearchPlaceholder': 'PLU ya da ad',
+    'setup.Title': "Kurulum",
+    'setup.StepDatabase': "Veritabanı",
+    'setup.StepScale': "Terazi",
+    'setup.StepCompany': "Firma",
+    'setup.StepProducts': "Ürünler",
+    'setup.StepOf': "Adım {0} / {1}",
+    'setup.Next': "İleri",
+    'setup.Back': "Geri",
+    'setup.Finish': "Bitir",
+    'setup.Skip': "Atla",
+    'setup.DatabaseTitle': "Kayıtlar nerede saklansın?",
+    'setup.DatabaseDescription': "Çoğu işletme için bu bilgisayar yeterlidir.",
+    'setup.SqliteOption': "Bu bilgisayarda sakla (önerilir)",
+    'setup.SqliteDescription': "Ek program gerekmez. Kayıtlar bu bilgisayarda kalır ve her güncellemeden önce yedeklenir.",
+    'setup.Advanced': "Gelişmiş: SQL Server",
+    'setup.SqlServerOption': "SQL Server veritabanına bağlan",
+    'setup.SqlServerDescription': "Kurumunuzda SQL Server varsa bağlantı bilgilerini bilgi işlem biriminizden alın.",
+    'setup.ConnectionString': "Bağlantı dizesi",
+    'setup.ConnectionStringHint': "Örnek: Server=SUNUCU;Database=Vyxum;User Id=vyxum;Password=…;TrustServerCertificate=True",
+    'setup.TestConnection': "Bağlantıyı dene",
+    'setup.Testing': "Bağlantı deneniyor…",
+    'setup.TestRequired': "Devam etmeden önce bağlantıyı deneyin.",
+    'setup.DbConnectionOk': "Bağlantı kuruldu.",
+    'setup.DbWillBeCreated': "Bağlantı kuruldu. Veritabanı henüz yok; oluşturulacak.",
+    'setup.DbLoginFailed': "Giriş yapılamadı. Kullanıcı adını ve şifreyi kontrol edin.",
+    'setup.DbServerNotFound': "Sunucuya ulaşılamadı. Sunucu adını ve ağ bağlantısını kontrol edin.",
+    'setup.DbUnknownError': "Bağlantı kurulamadı. Bilgileri kontrol edip yeniden deneyin.",
+    'setup.ProviderInvalid': "Kayıtların nerede saklanacağını seçin.",
+    'setup.ConnectionStringRequired': "Bağlantı dizesi gerekli.",
+    'setup.ConnectionStringInvalid': "Bağlantı dizesi okunamadı. Biçimini kontrol edin.",
+    'setup.DatabaseNameRequired': "Bağlantı dizesinde veritabanı adı olmalı (Database=…).",
+    'setup.SettingsNotSaved': "Ayar kaydedilemedi.",
+    'setup.Restarting': "Vyxum yeniden başlatılıyor…",
+    'setup.RestartingDescription': "Bu birkaç saniye sürer. Sayfa kendiliğinden yenilenir.",
+    'setup.RestartManual': "Ayar kaydedildi. Geçerli olması için Vyxum'u yeniden başlatın.",
+    'setup.CompanyTitle': "Firma bilgisi",
+    'setup.CompanyDescription': "Firma adı ekranlarda ve raporlarda görünür.",
+    'setup.CompanyName': "Firma adı",
+    'setup.CompanyNameRequired': "Firma adı gerekli.",
+    'setup.CompanyNameTooLong': "Firma adı çok uzun (en fazla 200 karakter).",
+    'setup.DoneTitle': "Kurulum tamamlandı",
+    'setup.DoneDescription': "Artık tartıma başlayabilirsiniz.",
+    'setup.GoToWeighing': "Tartıma geç",
+    'setup.LocalOnly': "Kurulum yalnızca Vyxum'un kurulu olduğu bilgisayardan yapılabilir.",
+    'setup.AlreadyCompleted': "Kurulum zaten tamamlandı. Ayarları Ayarlar ekranından değiştirin.",
+    'setup.Version': "Sürüm {0}",
+    'setup.StepDone': "tamamlandı",
+    'setup.StepCurrent': "şimdi",
+    'setup.PrivacyNote': "Kurulum sırasında hiçbir veri bu bilgisayardan dışarı gönderilmez.",
+    'setup.ProductsTitle': "İlk ürünler",
+    'setup.ProductsDescription': "Tartımda seçeceğiniz ürünleri ekleyin. Sonra Ürünler ekranından da ekleyebilirsiniz.",
+    'setup.ProductsAdded': "Eklenen ürünler",
   },
   en: {
     'shell.AppName': 'vyxum',
@@ -233,13 +286,81 @@ export const sampleStrings: Record<'tr' | 'en', Record<string, string>> = {
     'products.NewProduct': 'New product',
     'products.Empty': 'No products yet',
     'products.SearchPlaceholder': 'PLU or name',
+    'setup.Title': "Setup",
+    'setup.StepDatabase': "Database",
+    'setup.StepScale': "Scale",
+    'setup.StepCompany': "Company",
+    'setup.StepProducts': "Products",
+    'setup.StepOf': "Step {0} of {1}",
+    'setup.Next': "Next",
+    'setup.Back': "Back",
+    'setup.Finish': "Finish",
+    'setup.Skip': "Skip",
+    'setup.DatabaseTitle': "Where should records be stored?",
+    'setup.DatabaseDescription': "For most businesses this computer is the right place.",
+    'setup.SqliteOption': "Store on this computer (recommended)",
+    'setup.SqliteDescription': "No extra program is needed. Records stay on this computer and are backed up before every update.",
+    'setup.Advanced': "Advanced: SQL Server",
+    'setup.SqlServerOption': "Connect to a SQL Server database",
+    'setup.SqlServerDescription': "If your company has a SQL Server, ask your IT department for the connection details.",
+    'setup.ConnectionString': "Connection string",
+    'setup.ConnectionStringHint': "Example: Server=SERVER;Database=Vyxum;User Id=vyxum;Password=…;TrustServerCertificate=True",
+    'setup.TestConnection': "Test connection",
+    'setup.Testing': "Testing the connection…",
+    'setup.TestRequired': "Test the connection before you continue.",
+    'setup.DbConnectionOk': "Connection established.",
+    'setup.DbWillBeCreated': "Connection established. The database does not exist yet; it will be created.",
+    'setup.DbLoginFailed': "Could not log in. Check the user name and password.",
+    'setup.DbServerNotFound': "The server could not be reached. Check the server name and the network.",
+    'setup.DbUnknownError': "Could not connect. Check the details and try again.",
+    'setup.ProviderInvalid': "Choose where records are stored.",
+    'setup.ConnectionStringRequired': "Connection string is required.",
+    'setup.ConnectionStringInvalid': "The connection string could not be read. Check its format.",
+    'setup.DatabaseNameRequired': "The connection string must name a database (Database=…).",
+    'setup.SettingsNotSaved': "The setting could not be saved.",
+    'setup.Restarting': "Restarting Vyxum…",
+    'setup.RestartingDescription': "This takes a few seconds. The page reloads by itself.",
+    'setup.RestartManual': "The setting is saved. Restart Vyxum for it to take effect.",
+    'setup.CompanyTitle': "Company",
+    'setup.CompanyDescription': "The company name appears on screens and reports.",
+    'setup.CompanyName': "Company name",
+    'setup.CompanyNameRequired': "Company name is required.",
+    'setup.CompanyNameTooLong': "Company name is too long (at most 200 characters).",
+    'setup.DoneTitle': "Setup complete",
+    'setup.DoneDescription': "You can start weighing now.",
+    'setup.GoToWeighing': "Go to weighing",
+    'setup.LocalOnly': "Setup can only be done on the computer where Vyxum is installed.",
+    'setup.AlreadyCompleted': "Setup is already complete. Change settings on the Settings screen.",
+    'setup.Version': "Version {0}",
+    'setup.StepDone': "done",
+    'setup.StepCurrent': "current",
+    'setup.PrivacyNote': "No data leaves this computer during setup.",
+    'setup.ProductsTitle': "First products",
+    'setup.ProductsDescription': "Add the products you will choose when weighing. You can also add them later on the Products screen.",
+    'setup.ProductsAdded': "Added products",
   },
 };
 
 export interface FakeApiOptions {
   modules?: string[];
   capabilities?: string[];
+  /** Company name returned with the module list. */
+  companyName?: string | null;
   routes?: Record<string, FakeHandler>;
+}
+
+/** Setup status of an installation whose setup is complete; tests of the wizard override it. */
+export function setupStatus(change: Partial<SetupStatus> = {}): SetupStatus {
+  return {
+    completed: true,
+    version: '0.1.0',
+    database: { provider: 'Sqlite', isDefault: true },
+    company: { name: null },
+    dataDirectory: 'C:/ProgramData/Vyxum',
+    lastBackup: null,
+    restartPending: false,
+    ...change,
+  };
 }
 
 /** Replaces global fetch. `/api/ui/strings` answers in the language of the culture cookie. */
@@ -247,10 +368,12 @@ export function installFakeApi(options: FakeApiOptions = {}) {
   const modules: UiModules = {
     modules: (options.modules ?? ['weighing', 'products']).map((id) => ({ id, version: '1.0.0' })),
     capabilities: options.capabilities ?? [],
+    ...(options.companyName !== undefined ? { companyName: options.companyName } : {}),
   };
 
   const routes: Record<string, FakeHandler> = {
     'GET /api/ui/modules': () => jsonResponse(modules),
+    'GET /api/setup/status': () => jsonResponse(setupStatus()),
     'GET /api/ui/strings': () => {
       const culture = readCultureCookie() ?? 'tr';
       return jsonResponse({ culture, strings: sampleStrings[culture] });

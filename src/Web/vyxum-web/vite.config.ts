@@ -23,5 +23,8 @@ export default defineConfig({
     setupFiles: ['./src/test/setup.ts'],
     restoreMocks: true,
     unstubGlobals: true,
+    // Newer Node versions define their own localStorage global (undefined without a storage file),
+    // which hides the jsdom one. Turn it off so tests see the browser storage of jsdom.
+    execArgv: ['--no-experimental-webstorage'],
   },
 });

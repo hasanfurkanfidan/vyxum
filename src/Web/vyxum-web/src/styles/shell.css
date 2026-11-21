@@ -38,6 +38,20 @@
   text-transform: lowercase;
 }
 
+.sidebar__brand-block {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+/* Company name from the setup wizard, small under the product name. */
+.sidebar__company {
+  font-size: var(--text-label);
+  color: var(--color-ink-muted);
+  overflow-wrap: anywhere;
+}
+
 .sidebar__group {
   display: flex;
   flex-direction: column;

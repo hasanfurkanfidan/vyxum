@@ -22,6 +22,10 @@ export const routes = {
   weighing: '/',
   records: '/records',
   products: '/products',
+  /** First-run setup wizard (shown without the menu). */
+  setup: '/setup',
+  /** Turkish alias of the wizard address; it redirects to `setup`. */
+  setupTurkish: '/kurulum',
 } as const;
 
 export const navGroups: readonly NavGroup[] = [
