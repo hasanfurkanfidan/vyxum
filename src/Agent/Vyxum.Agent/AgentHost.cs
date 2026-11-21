@@ -20,7 +20,8 @@ public static class AgentHost
 
     /// <summary>
     /// Creates the builder used by the executable. Settings come from <c>appsettings.json</c> next to the executable
-    /// (or the file named by <c>--settings</c>), environment variables and the command line.
+    /// (or the file named by <c>--settings</c>), the shared <c>vyxum.json</c> in the data directory (see
+    /// <see cref="SharedSettingsFile"/>), environment variables and the command line, later ones winning.
     /// </summary>
     public static HostApplicationBuilder CreateBuilder(string[] args) =>
         CreateBuilder(new HostApplicationBuilderSettings
@@ -31,12 +32,21 @@ public static class AgentHost
             ContentRootPath = AppContext.BaseDirectory,
         });
 
-    /// <summary>Creates the builder from host settings, for example with defaults disabled and in-memory configuration in tests.</summary>
+    /// <summary>
+    /// Creates the builder from host settings, for example with defaults disabled and in-memory configuration in tests.
+    /// With defaults disabled the shared settings file is read only when <c>Vyxum:DataDirectory</c> is configured, so
+    /// tests never pick up the settings of an installed copy.
+    /// </summary>
     public static HostApplicationBuilder CreateBuilder(HostApplicationBuilderSettings settings)
     {
         ArgumentNullException.ThrowIfNull(settings);
         var builder = Host.CreateApplicationBuilder(settings);
         UseSettingsFile(builder.Configuration);
+        if (!settings.DisableDefaults || !string.IsNullOrWhiteSpace(builder.Configuration[SharedSettingsFile.DataDirectoryKey]))
+        {
+            SharedSettingsFile.AddTo(builder.Configuration);
+        }
+
         builder.Services.AddWindowsService(options => options.ServiceName = ServiceName);
         builder.Services.AddVyxumAgent(builder.Configuration);
         return builder;
