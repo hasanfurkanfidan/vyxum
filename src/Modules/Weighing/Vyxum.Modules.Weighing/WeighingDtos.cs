@@ -196,6 +196,9 @@ public static class WeighingErrors
     /// <summary>A number is negative.</summary>
     public const string NegativeNotAllowed = "weighing.NegativeNotAllowed";
 
+    /// <summary>The export has more records than the maximum.</summary>
+    public const string ExportTooLarge = "weighing.ExportTooLarge";
+
     /// <summary>The lot is too long.</summary>
     public const string LotTooLong = "weighing.LotTooLong";
 }

@@ -36,17 +36,30 @@ public sealed class WeighingQueries(WeighingDbContext db, IOptions<WeighingOptio
     {
         ArgumentNullException.ThrowIfNull(filter);
 
-        var filtered = Filter(db.Records.AsNoTracking(), filter);
-        var itemsQuery = filter.IncludeCancelled ? filtered : filtered.Where(r => r.Status == WeighingStatus.Saved);
-        var records = await itemsQuery
+        var records = await ItemsQuery(filter)
             .OrderByDescending(r => r.Id)
             .Skip(Math.Max(skip ?? 0, 0))
             .Take(Math.Clamp(take ?? DefaultTake, 0, MaxTake))
             .ToListAsync(cancellationToken);
 
-        var totals = await TotalsAsync(filtered, cancellationToken);
+        var totals = await TotalsAsync(filter, cancellationToken);
         return new WeighingRecordListDto([.. records.Select(WeighingMapper.ToDto)], totals);
     }
+
+    /// <summary>Largest number of records <c>GET /api/weighing/records/export</c> writes; a larger result is rejected.</summary>
+    public const int MaxExportRows = 100_000;
+
+    /// <summary>Totals of every filtered record (cancelled ones are counted, never summed).</summary>
+    internal async Task<WeighingTotalsDto> TotalsAsync(WeighingRecordFilter filter, CancellationToken cancellationToken = default) =>
+        await TotalsAsync(Filter(db.Records.AsNoTracking(), filter), cancellationToken);
+
+    /// <summary>Number of records <see cref="ItemsQuery"/> returns.</summary>
+    internal Task<int> CountItemsAsync(WeighingRecordFilter filter, CancellationToken cancellationToken = default) =>
+        ItemsQuery(filter).CountAsync(cancellationToken);
+
+    /// <summary>Streams the filtered records oldest first, without paging.</summary>
+    internal IAsyncEnumerable<WeighingRecord> StreamItems(WeighingRecordFilter filter) =>
+        ItemsQuery(filter).OrderBy(r => r.Id).AsAsyncEnumerable();
 
     /// <summary>The latest records, optionally of one device, newest first.</summary>
     public async Task<IReadOnlyList<WeighingRecordDto>> RecentAsync(string? deviceId, int? take, CancellationToken cancellationToken = default)
@@ -99,6 +112,13 @@ public sealed class WeighingQueries(WeighingDbContext db, IOptions<WeighingOptio
             CanPrintLabel: capabilities.IsAvailable(WeighingModule.LabelsCapability),
             ShowOperator: capabilities.IsAvailable(WeighingModule.UsersCapability),
             ProductsAvailable: capabilities.IsAvailable(WeighingModule.ProductsCapability));
+    }
+
+    /// <summary>The records the list and the export show: the filter, and without cancelled ones unless asked.</summary>
+    private IQueryable<WeighingRecord> ItemsQuery(WeighingRecordFilter filter)
+    {
+        var filtered = Filter(db.Records.AsNoTracking(), filter);
+        return filter.IncludeCancelled ? filtered : filtered.Where(r => r.Status == WeighingStatus.Saved);
     }
 
     private static IQueryable<WeighingRecord> Filter(IQueryable<WeighingRecord> query, WeighingRecordFilter filter)

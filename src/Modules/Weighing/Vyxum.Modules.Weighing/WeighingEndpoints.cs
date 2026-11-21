@@ -1,6 +1,8 @@
+using System.Globalization;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Routing;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace Vyxum.Modules.Weighing;
 
@@ -28,6 +30,31 @@ internal static class WeighingEndpoints
         {
             var filter = new WeighingRecordFilter(from?.UtcDateTime, to?.UtcDateTime, productId, lot, includeCancelled ?? true);
             return Results.Ok(await queries.ListAsync(filter, skip, take, ct));
+        });
+
+        group.MapGet("/records/export", async (
+            HttpContext http,
+            WeighingQueries queries,
+            WeighingExporter exporter,
+            DateTimeOffset? from,
+            DateTimeOffset? to,
+            Guid? productId,
+            string? lot,
+            bool? includeCancelled,
+            CancellationToken ct) =>
+        {
+            var filter = new WeighingRecordFilter(from?.UtcDateTime, to?.UtcDateTime, productId, lot, includeCancelled ?? true);
+            if (await queries.CountItemsAsync(filter, ct) > WeighingQueries.MaxExportRows)
+            {
+                return Results.Json(new { code = WeighingErrors.ExportTooLarge }, statusCode: StatusCodes.Status422UnprocessableEntity);
+            }
+
+            var file = await exporter.ExportAsync(filter, CultureInfo.CurrentUICulture, ct);
+            var today = (http.RequestServices.GetService<TimeProvider>() ?? TimeProvider.System).GetLocalNow();
+            return Results.File(
+                file,
+                WeighingExporter.ContentType,
+                $"weighing-records-{today.ToString("yyyyMMdd", CultureInfo.InvariantCulture)}.xlsx");
         });
 
         group.MapGet("/records/recent", async (WeighingQueries queries, string? deviceId, int? take, CancellationToken ct) =>

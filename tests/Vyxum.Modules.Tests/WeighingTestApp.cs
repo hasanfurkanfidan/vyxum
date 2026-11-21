@@ -80,6 +80,11 @@ internal sealed class WeighingTestApp : IAsyncDisposable
         builder.Services.AddSingleton<ILiveWeightSource>(scale);
 
         var app = builder.Build();
+        string[] cultures = ["tr", "en"];
+        app.UseRequestLocalization(new RequestLocalizationOptions()
+            .SetDefaultCulture("en")
+            .AddSupportedCultures(cultures)
+            .AddSupportedUICultures(cultures));
         app.MapVyxumModules();
         await app.StartAsync();
         return new WeighingTestApp(database, app, scale, clock);

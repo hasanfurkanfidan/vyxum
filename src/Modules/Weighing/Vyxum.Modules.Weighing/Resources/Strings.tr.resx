@@ -77,4 +77,9 @@
   <data name="CancelReason" xml:space="preserve"><value>İptal nedeni</value></data>
   <data name="CancelConfirm" xml:space="preserve"><value>{0} numaralı kayıt iptal edilsin mi? Listede kalır ama toplama girmez.</value></data>
   <data name="Empty" xml:space="preserve"><value>Kayıt bulunamadı.</value></data>
+  <data name="DateTime" xml:space="preserve"><value>Tarih ve saat</value></data>
+  <data name="Unit" xml:space="preserve"><value>Birim</value></data>
+  <data name="UnitPrice" xml:space="preserve"><value>Birim fiyat</value></data>
+  <data name="Currency" xml:space="preserve"><value>Para birimi</value></data>
+  <data name="ExportTooLarge" xml:space="preserve"><value>Dışa aktarılacak kayıt sayısı çok fazla (en çok 100000). Filtreyi daraltın.</value></data>
 </root>

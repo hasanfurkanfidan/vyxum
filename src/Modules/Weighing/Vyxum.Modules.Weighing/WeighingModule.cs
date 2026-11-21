@@ -47,6 +47,7 @@ public sealed class WeighingModule : IModule
             .ValidateOnStart();
         services.AddScoped<WeighingService>();
         services.AddScoped<WeighingQueries>();
+        services.AddScoped<WeighingExporter>();
         services.AddUiStrings(WeighingStrings.KeyPrefix, WeighingStrings.ResourceManager);
     }
 

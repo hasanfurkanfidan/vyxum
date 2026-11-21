@@ -1,6 +1,10 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <ItemGroup>
+    <PackageReference Include="DocumentFormat.OpenXml" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\..\..\Platform\Vyxum.Platform.Abstractions\Vyxum.Platform.Abstractions.csproj" />
   </ItemGroup>
 
