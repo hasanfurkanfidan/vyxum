@@ -1,5 +1,8 @@
 <Solution>
   <Folder Name="/src/" />
+  <Folder Name="/src/Agent/">
+    <Project Path="src/Agent/Vyxum.Agent/Vyxum.Agent.csproj" />
+  </Folder>
   <Folder Name="/src/Devices/">
     <Project Path="src/Devices/Vyxum.Devices/Vyxum.Devices.csproj" />
     <Project Path="src/Devices/Vyxum.Devices.GenericAscii/Vyxum.Devices.GenericAscii.csproj" />
