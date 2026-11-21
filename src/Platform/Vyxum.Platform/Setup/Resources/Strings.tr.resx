@@ -56,4 +56,21 @@
   <data name="ProductsTitle" xml:space="preserve"><value>İlk ürünler</value></data>
   <data name="ProductsDescription" xml:space="preserve"><value>Tartımda seçeceğiniz ürünleri ekleyin. Sonra Ürünler ekranından da ekleyebilirsiniz.</value></data>
   <data name="ProductsAdded" xml:space="preserve"><value>Eklenen ürünler</value></data>
+  <data name="Settings" xml:space="preserve"><value>Ayarlar</value></data>
+  <data name="AboutTitle" xml:space="preserve"><value>Hakkında</value></data>
+  <data name="AboutVersion" xml:space="preserve"><value>Sürüm</value></data>
+  <data name="AboutCompany" xml:space="preserve"><value>Firma</value></data>
+  <data name="AboutNoCompany" xml:space="preserve"><value>Girilmedi</value></data>
+  <data name="AboutDatabase" xml:space="preserve"><value>Veritabanı</value></data>
+  <data name="AboutSqlite" xml:space="preserve"><value>Bu bilgisayar (SQLite)</value></data>
+  <data name="AboutSqlServer" xml:space="preserve"><value>SQL Server</value></data>
+  <data name="AboutSqlServerBackup" xml:space="preserve"><value>SQL Server veritabanının yedeğini veritabanı yöneticiniz alır.</value></data>
+  <data name="AboutDataFolder" xml:space="preserve"><value>Veri klasörü</value></data>
+  <data name="AboutLastBackup" xml:space="preserve"><value>Son yedek</value></data>
+  <data name="AboutNoBackup" xml:space="preserve"><value>Henüz yedek alınmadı.</value></data>
+  <data name="UpdateTitle" xml:space="preserve"><value>Güncelleme</value></data>
+  <data name="UpdateNote" xml:space="preserve"><value>Yeni sürümün kurulum dosyasını çalıştırın; kayıtlarınız korunur, önce otomatik yedek alınır.</value></data>
+  <data name="ScaleTitle" xml:space="preserve"><value>Terazi</value></data>
+  <data name="ScaleDescription" xml:space="preserve"><value>Vyxum teraziyi seri porttan ya da ağdan okur. Terazi açık ve bağlıysa kendiliğinden bulunur.</value></data>
+  <data name="ScaleLaterHint" xml:space="preserve"><value>Teraziyi sonra Ayarlar, Cihazlar ekranından da ekleyebilirsiniz.</value></data>
 </root>

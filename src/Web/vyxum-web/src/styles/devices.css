@@ -1,0 +1,405 @@
+/* Device screens: the scale step of the setup wizard and Settings > Devices and About.
+   Values come from tokens.css (design direction B). Sections are separated by a rule on top, rows by a light line. */
+
+.scale-flow {
+  display: flex;
+  flex-direction: column;
+  gap: var(--gap-page);
+}
+
+.scale-flow__section {
+  gap: 16px;
+}
+
+.scale-flow__head {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.scale-flow__title {
+  font-size: 18px;
+  font-weight: 500;
+}
+
+.scale-flow__subtitle {
+  font-family: var(--font-mono);
+  font-size: var(--text-caption);
+  font-weight: 400;
+  letter-spacing: var(--tracking-caption);
+  text-transform: uppercase;
+  color: var(--color-ink-muted);
+}
+
+.scale-flow__hint {
+  max-width: 62ch;
+  font-size: var(--text-small);
+  line-height: 1.5;
+  color: var(--color-ink-muted);
+}
+
+.scale-flow__problem {
+  max-width: 62ch;
+  font-size: var(--text-body);
+  line-height: 1.5;
+  color: var(--color-warning-text);
+}
+
+.scale-flow__device {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 4px 16px;
+}
+
+.scale-flow__device-name {
+  font-weight: 500;
+}
+
+.scale-flow__device .mono {
+  font-size: var(--text-label);
+}
+
+.scale-flow__buttons {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+}
+
+.scale-flow__button {
+  min-height: 46px;
+  padding: 0 18px;
+}
+
+/* Progress of a running scan */
+.progress {
+  height: 4px;
+  background: var(--color-track);
+  border-radius: var(--radius-small);
+  overflow: hidden;
+}
+
+.progress__bar {
+  height: 100%;
+  background: var(--color-accent);
+}
+
+/* Ports and their scan state */
+.port-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+}
+
+.port-list__row {
+  display: grid;
+  grid-template-columns: minmax(80px, 140px) minmax(0, 180px) minmax(0, 1fr);
+  gap: 12px;
+  align-items: baseline;
+  padding: 10px 0;
+  border-top: var(--rule-row);
+  font-size: var(--text-small);
+}
+
+.port-list__row:first-child {
+  border-top: 0;
+}
+
+.port-list__state {
+  font-family: var(--font-mono);
+  font-size: var(--text-label);
+}
+
+.port-list__detail {
+  font-size: var(--text-label);
+}
+
+/* Found scales: one row each, the whole row is the button */
+.candidates {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+}
+
+.candidates li + li .candidate {
+  border-top: var(--rule-row);
+}
+
+.candidate {
+  width: 100%;
+  min-height: var(--control-height);
+  padding: 14px 12px;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px 24px;
+  border: 0;
+  background: transparent;
+  color: var(--color-ink);
+  text-align: left;
+}
+
+.candidate:hover:not(:disabled) {
+  background: var(--color-accent-bg);
+}
+
+.candidate__text {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+
+.candidate__description {
+  font-size: var(--text-body);
+}
+
+.candidate__serial {
+  font-size: var(--text-label);
+}
+
+.candidate__state {
+  font-family: var(--font-mono);
+  font-size: var(--text-eyebrow);
+}
+
+.candidate__weight {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+}
+
+.candidate__value {
+  font-family: var(--font-mono);
+  font-weight: 300;
+  font-size: 48px;
+  line-height: 1;
+  letter-spacing: -0.05em;
+  white-space: nowrap;
+}
+
+.candidate__unit {
+  font-size: 20px;
+  color: var(--color-ink-muted);
+}
+
+/* Live weight of one device */
+.live-weight {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  min-width: 0;
+}
+
+.live-weight__head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 4px 16px;
+}
+
+.live-weight__state,
+.device-status {
+  font-family: var(--font-mono);
+  font-size: var(--text-label);
+}
+
+.device-status__error {
+  margin-left: 8px;
+  font-family: var(--font-ui);
+}
+
+.live-weight__weight {
+  display: flex;
+  align-items: baseline;
+  gap: 14px;
+  overflow: hidden;
+}
+
+.live-weight__value {
+  font-family: var(--font-mono);
+  font-weight: 300;
+  font-size: 76px;
+  line-height: 1;
+  letter-spacing: -0.05em;
+  white-space: nowrap;
+}
+
+.live-weight__unit {
+  font-size: 30px;
+  color: var(--color-ink-muted);
+}
+
+.live-weight__weight.is-stale .live-weight__value {
+  color: var(--color-ink-muted);
+}
+
+.live-weight__empty {
+  min-height: 76px;
+  font-size: 18px;
+  color: var(--color-warning-text);
+}
+
+/* Form grid shared by the manual connection form and the device editor */
+.device-form__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(170px, 100%), 1fr));
+  gap: 14px 16px;
+}
+
+.device-form__wide {
+  grid-column: 1 / -1;
+}
+
+/* Settings > Devices */
+.devices__table td {
+  vertical-align: top;
+}
+
+.devices__name {
+  display: block;
+  font-weight: 500;
+}
+
+.devices__id {
+  display: block;
+  font-size: var(--text-eyebrow);
+}
+
+.devices__connection {
+  font-size: var(--text-label);
+}
+
+.devices__actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.devices__dialog-row td {
+  padding: 0;
+}
+
+.devices__dialog {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  max-width: 560px;
+  padding: 14px 8px 16px;
+}
+
+.devices__dialog-actions,
+.devices__footer {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.devices__footer {
+  border-top: var(--rule-row);
+  padding-top: 20px;
+}
+
+.devices__notice {
+  font-size: var(--text-small);
+}
+
+.devices__editor {
+  display: flex;
+  flex-direction: column;
+  gap: var(--gap-page);
+}
+
+.devices__section-title {
+  font-size: 18px;
+  font-weight: 500;
+}
+
+.devices__check {
+  min-height: var(--control-height);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+}
+
+.devices__check input {
+  width: 18px;
+  height: 18px;
+  margin: 0;
+  accent-color: var(--color-accent);
+}
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+/* Settings > About */
+.about__list {
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.about__row {
+  display: grid;
+  grid-template-columns: minmax(120px, 200px) minmax(0, 1fr);
+  gap: 12px 24px;
+  padding: 12px 0;
+  border-top: var(--rule-row);
+}
+
+.about__row:first-child {
+  border-top: 0;
+  padding-top: 0;
+}
+
+.about__label {
+  font-size: var(--text-label);
+  color: var(--color-ink-muted);
+}
+
+.about__data {
+  margin: 0;
+  min-width: 0;
+}
+
+.about__value {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.about__path {
+  font-size: var(--text-label);
+  overflow-wrap: anywhere;
+}
+
+.about__note {
+  max-width: 62ch;
+  line-height: 1.5;
+}
+
+@media (max-width: 760px) {
+  .port-list__row,
+  .about__row {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 2px;
+  }
+
+  .candidate__value {
+    font-size: 36px;
+  }
+}

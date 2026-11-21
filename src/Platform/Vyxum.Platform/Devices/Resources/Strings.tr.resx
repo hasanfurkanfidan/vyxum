@@ -20,4 +20,89 @@
   <data name="MustBePositive" xml:space="preserve"><value>Değer sıfırdan büyük olmalıdır.</value></data>
   <data name="DivisionAboveCapacity" xml:space="preserve"><value>Bölüntü kapasiteden büyük olamaz.</value></data>
   <data name="UnitTooLong" xml:space="preserve"><value>Birim çok uzun (en fazla 16 karakter).</value></data>
+  <data name="Title" xml:space="preserve"><value>Cihazlar</value></data>
+  <data name="AddScale" xml:space="preserve"><value>Terazi ekle</value></data>
+  <data name="Empty" xml:space="preserve"><value>Henüz terazi eklenmedi.</value></data>
+  <data name="ColName" xml:space="preserve"><value>Ad</value></data>
+  <data name="ColStatus" xml:space="preserve"><value>Durum</value></data>
+  <data name="ColLastWeight" xml:space="preserve"><value>Son ağırlık</value></data>
+  <data name="ColCapacity" xml:space="preserve"><value>Kapasite / e</value></data>
+  <data name="ColConnection" xml:space="preserve"><value>Bağlantı</value></data>
+  <data name="ColActions" xml:space="preserve"><value>İşlemler</value></data>
+  <data name="CapacityLine" xml:space="preserve"><value>Max {0} / e = {1}</value></data>
+  <data name="Edit" xml:space="preserve"><value>Düzenle</value></data>
+  <data name="Delete" xml:space="preserve"><value>Sil</value></data>
+  <data name="DeleteConfirm" xml:space="preserve"><value>{0} silinsin mi? Bu terazi artık okunmaz.</value></data>
+  <data name="Cancel" xml:space="preserve"><value>Vazgeç</value></data>
+  <data name="Save" xml:space="preserve"><value>Kaydet</value></data>
+  <data name="Saved" xml:space="preserve"><value>Kaydedildi.</value></data>
+  <data name="Disabled" xml:space="preserve"><value>kapalı</value></data>
+  <data name="StateConnected" xml:space="preserve"><value>bağlı</value></data>
+  <data name="StateConnecting" xml:space="preserve"><value>bağlanıyor</value></data>
+  <data name="StateDisconnected" xml:space="preserve"><value>bağlı değil</value></data>
+  <data name="StateError" xml:space="preserve"><value>hata</value></data>
+  <data name="ScaleError" xml:space="preserve"><value>terazi hatası</value></data>
+  <data name="ReadingStable" xml:space="preserve"><value>sabit</value></data>
+  <data name="ReadingMotion" xml:space="preserve"><value>hareketli</value></data>
+  <data name="ReadingOverload" xml:space="preserve"><value>aşırı yük</value></data>
+  <data name="ReadingUnderload" xml:space="preserve"><value>düşük yük</value></data>
+  <data name="NoReading" xml:space="preserve"><value>Teraziden henüz okuma gelmedi.</value></data>
+  <data name="LiveWeight" xml:space="preserve"><value>Canlı ağırlık</value></data>
+  <data name="FieldName" xml:space="preserve"><value>Ad</value></data>
+  <data name="FieldId" xml:space="preserve"><value>Cihaz kimliği</value></data>
+  <data name="FieldCapacity" xml:space="preserve"><value>Kapasite (Max)</value></data>
+  <data name="FieldDivision" xml:space="preserve"><value>Bölüntü (e)</value></data>
+  <data name="FieldUnit" xml:space="preserve"><value>Birim</value></data>
+  <data name="FieldEnabled" xml:space="preserve"><value>Bu teraziyi oku</value></data>
+  <data name="ConnectionSettings" xml:space="preserve"><value>Bağlantı ayarları</value></data>
+  <data name="FieldTransport" xml:space="preserve"><value>Bağlantı türü</value></data>
+  <data name="TransportSerial" xml:space="preserve"><value>Seri port</value></data>
+  <data name="TransportTcp" xml:space="preserve"><value>Ağ (TCP/IP)</value></data>
+  <data name="TransportSimulator" xml:space="preserve"><value>Simülatör</value></data>
+  <data name="FieldPortName" xml:space="preserve"><value>Port</value></data>
+  <data name="FieldBaudRate" xml:space="preserve"><value>Hız (baud)</value></data>
+  <data name="FieldFrame" xml:space="preserve"><value>Veri, parite, dur biti</value></data>
+  <data name="FieldHost" xml:space="preserve"><value>IP adresi</value></data>
+  <data name="FieldTcpPort" xml:space="preserve"><value>Ağ portu</value></data>
+  <data name="FieldProtocol" xml:space="preserve"><value>Protokol</value></data>
+  <data name="ProtocolMtSics" xml:space="preserve"><value>MT-SICS</value></data>
+  <data name="ProtocolToledoContinuous" xml:space="preserve"><value>Toledo sürekli çıkış</value></data>
+  <data name="ProtocolGenericAscii" xml:space="preserve"><value>Genel ASCII</value></data>
+  <data name="LiveTest" xml:space="preserve"><value>Canlı deneme</value></data>
+  <data name="LiveHint" xml:space="preserve"><value>Teraziye bir şey koyun; ağırlık burada değişmeli.</value></data>
+  <data name="DefaultName" xml:space="preserve"><value>Terazi {0}</value></data>
+  <data name="SerialNumber" xml:space="preserve"><value>Seri no {0}</value></data>
+  <data name="Searching" xml:space="preserve"><value>Terazi aranıyor…</value></data>
+  <data name="SearchingHint" xml:space="preserve"><value>Her port bilinen ayarlarla denenir. Teraziye yalnızca okuma komutu gönderilir.</value></data>
+  <data name="Ports" xml:space="preserve"><value>Portlar</value></data>
+  <data name="PortPending" xml:space="preserve"><value>sırada</value></data>
+  <data name="PortScanning" xml:space="preserve"><value>deneniyor</value></data>
+  <data name="PortFound" xml:space="preserve"><value>terazi bulundu</value></data>
+  <data name="PortNotFound" xml:space="preserve"><value>terazi yok</value></data>
+  <data name="PortInUse" xml:space="preserve"><value>kullanımda</value></data>
+  <data name="PortError" xml:space="preserve"><value>açılamadı</value></data>
+  <data name="Found" xml:space="preserve"><value>Bulunan teraziler</value></data>
+  <data name="FoundHint" xml:space="preserve"><value>Kullanacağınız teraziyi seçin.</value></data>
+  <data name="NoneFound" xml:space="preserve"><value>Terazi bulunamadı</value></data>
+  <data name="NoneFoundHint" xml:space="preserve"><value>Terazinin açık ve kablosunun takılı olduğundan emin olun, sonra yeniden arayın ya da bağlantıyı elle ayarlayın.</value></data>
+  <data name="NoPorts" xml:space="preserve"><value>Bu bilgisayarda seri port bulunamadı.</value></data>
+  <data name="SearchAgain" xml:space="preserve"><value>Tekrar ara</value></data>
+  <data name="Rescan" xml:space="preserve"><value>Yeniden ara</value></data>
+  <data name="Retry" xml:space="preserve"><value>Yeniden dene</value></data>
+  <data name="Manual" xml:space="preserve"><value>Elle ayarla</value></data>
+  <data name="ManualTitle" xml:space="preserve"><value>Bağlantıyı elle ayarla</value></data>
+  <data name="ManualHint" xml:space="preserve"><value>Terazinin menüsündeki ayarların aynısını girin. Ağdaki terazi için IP adresini ve portu yazın.</value></data>
+  <data name="SaveAndTest" xml:space="preserve"><value>Kaydet ve dene</value></data>
+  <data name="TryTcp" xml:space="preserve"><value>Dene</value></data>
+  <data name="ConfirmTitle" xml:space="preserve"><value>Teraziye bir şey koyun</value></data>
+  <data name="ConfirmHint" xml:space="preserve"><value>Aşağıdaki ağırlık değişiyorsa doğru teraziyi seçtiniz.</value></data>
+  <data name="ConfirmScale" xml:space="preserve"><value>Bu terazi doğru</value></data>
+  <data name="OtherScale" xml:space="preserve"><value>Başka terazi</value></data>
+  <data name="OptionalDetails" xml:space="preserve"><value>Terazi bilgileri (isteğe bağlı)</value></data>
+  <data name="OptionalHint" xml:space="preserve"><value>Kapasite ve bölüntü terazinin etiketinde yazar, örneğin Max 6 kg, e = 2 g.</value></data>
+  <data name="Existing" xml:space="preserve"><value>Kayıtlı terazi</value></data>
+  <data name="NoAgent" xml:space="preserve"><value>Vyxum Agent hizmeti çalışmıyor. Teraziler bu hizmetle okunur; hizmeti başlatıp yeniden deneyin.</value></data>
+  <data name="DiscoveryRunning" xml:space="preserve"><value>Başka bir arama sürüyor. Biraz bekleyip yeniden deneyin.</value></data>
+  <data name="AgentTimeout" xml:space="preserve"><value>Vyxum Agent hizmeti zamanında yanıt vermedi. Yeniden deneyin.</value></data>
+  <data name="DiscoveryFailed" xml:space="preserve"><value>Arama tamamlanamadı. Yeniden deneyin.</value></data>
 </root>

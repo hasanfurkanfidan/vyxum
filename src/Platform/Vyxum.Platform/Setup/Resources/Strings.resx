@@ -56,4 +56,21 @@
   <data name="ProductsTitle" xml:space="preserve"><value>First products</value></data>
   <data name="ProductsDescription" xml:space="preserve"><value>Add the products you will choose when weighing. You can also add them later on the Products screen.</value></data>
   <data name="ProductsAdded" xml:space="preserve"><value>Added products</value></data>
+  <data name="Settings" xml:space="preserve"><value>Settings</value></data>
+  <data name="AboutTitle" xml:space="preserve"><value>About</value></data>
+  <data name="AboutVersion" xml:space="preserve"><value>Version</value></data>
+  <data name="AboutCompany" xml:space="preserve"><value>Company</value></data>
+  <data name="AboutNoCompany" xml:space="preserve"><value>Not entered</value></data>
+  <data name="AboutDatabase" xml:space="preserve"><value>Database</value></data>
+  <data name="AboutSqlite" xml:space="preserve"><value>This computer (SQLite)</value></data>
+  <data name="AboutSqlServer" xml:space="preserve"><value>SQL Server</value></data>
+  <data name="AboutSqlServerBackup" xml:space="preserve"><value>Backups of a SQL Server database are taken by your database administrator.</value></data>
+  <data name="AboutDataFolder" xml:space="preserve"><value>Data folder</value></data>
+  <data name="AboutLastBackup" xml:space="preserve"><value>Last backup</value></data>
+  <data name="AboutNoBackup" xml:space="preserve"><value>No backup has been taken yet.</value></data>
+  <data name="UpdateTitle" xml:space="preserve"><value>Updating</value></data>
+  <data name="UpdateNote" xml:space="preserve"><value>Run the setup file of the new version; your records are kept and a backup is taken automatically first.</value></data>
+  <data name="ScaleTitle" xml:space="preserve"><value>Scale</value></data>
+  <data name="ScaleDescription" xml:space="preserve"><value>Vyxum reads the scale through a serial port or the network. If the scale is on and connected, it is found by itself.</value></data>
+  <data name="ScaleLaterHint" xml:space="preserve"><value>You can also add a scale later under Settings, Devices.</value></data>
 </root>
