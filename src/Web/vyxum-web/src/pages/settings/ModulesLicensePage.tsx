@@ -27,6 +27,11 @@ function fill(text: string, ...values: (string | number)[]): string {
 
 interface ModuleRow {
   id: string;
+  /** Display name from the module itself; null shows the id. */
+  name: string | null;
+  provides: readonly string[];
+  requires: readonly string[];
+  optional: readonly string[];
   paid: boolean;
   installed: boolean;
   state: LicenseModuleState;
@@ -36,13 +41,17 @@ interface ModuleRow {
 function moduleRows(modules: readonly UiModule[], license: LicenseState | null): ModuleRow[] {
   const rows: ModuleRow[] = modules.map((m) => ({
     id: m.id,
+    name: m.name ?? null,
+    provides: m.provides ?? [],
+    requires: m.requires ?? [],
+    optional: m.optional ?? [],
     paid: m.requiresLicense === true,
     installed: true,
     state: m.license ?? 'free',
   }));
   const installed = new Set(modules.map((m) => m.id));
   for (const m of license?.modules ?? []) {
-    if (!installed.has(m.id)) rows.push({ id: m.id, paid: true, installed: false, state: m.license });
+    if (!installed.has(m.id)) rows.push({ id: m.id, name: null, provides: [], requires: [], optional: [], paid: true, installed: false, state: m.license });
   }
   return rows;
 }
@@ -230,14 +239,14 @@ export function ModulesLicensePage() {
         </section>
       </div>
 
-      {verified && license.stationLimit > 0 ? <StationsSection license={license} onSaved={setLicense} /> : null}
-
       <section className="license-modules" aria-label={t('license.SectionModules')}>
         <table className="table">
           <thead>
             <tr>
               <th scope="col">{t('license.ColModule')}</th>
               <th scope="col">{t('license.ColKind')}</th>
+              <th scope="col">{t('license.ColProvides')}</th>
+              <th scope="col">{t('license.ColNeeds')}</th>
               <th scope="col">{t('license.ColStatus')}</th>
             </tr>
           </thead>
@@ -246,8 +255,12 @@ export function ModulesLicensePage() {
               const status = moduleStatus(row);
               return (
                 <tr key={row.id}>
-                  <td className="license-modules__name">{moduleName(row.id, t)}</td>
+                  <td className="license-modules__name">{row.name ?? row.id}</td>
                   <td className="license-modules__kind">{row.paid ? t('license.KindPaid') : t('license.KindOpen')}</td>
+                  <td className="license-modules__caps">{row.provides.join(', ')}</td>
+                  <td className="license-modules__caps license-modules__caps--muted">
+                    {needsText(row, t)}
+                  </td>
                   <td>
                     <span className={`chip ${status.className}`}>{t(status.textKey)}</span>
                   </td>
@@ -257,6 +270,8 @@ export function ModulesLicensePage() {
           </tbody>
         </table>
       </section>
+
+      {verified && license.stationLimit > 0 ? <StationsSection license={license} onSaved={setLicense} /> : null}
     </div>
   );
 }
@@ -306,9 +321,9 @@ function moduleStatus(row: ModuleRow): { textKey: string; className: string } {
   }
 }
 
-/** Display names exist for the modules the product family names; any other module shows its id. */
-const namedModules = new Set(['weighing', 'products', 'labels', 'users', 'formulation']);
-
-function moduleName(id: string, t: (key: string) => string): string {
-  return namedModules.has(id) ? t(`license.Module.${id}`) : id;
+/** Required capabilities, then the optional ones with a prefix word. */
+function needsText(row: ModuleRow, t: (key: string) => string): string {
+  const parts = [...row.requires];
+  if (row.optional.length > 0) parts.push(fill(t('license.NeedsOptional'), row.optional.join(', ')));
+  return parts.join('; ');
 }

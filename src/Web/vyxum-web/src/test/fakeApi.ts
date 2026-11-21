@@ -159,7 +159,7 @@ export const sampleStrings: Record<'tr' | 'en', Record<string, string>> = {
     'license.FileInput': "Lisans dosyası",
     'license.Uploading': "Yükleniyor…",
     'license.Uploaded': "Lisans yüklendi.",
-    'license.LoadedFor': "Lisans yüklendi: {0}.",
+    'license.LoadedFor': "Lisans yüklendi: {0}",
     'license.ReadFailed': "Dosya okunamadı.",
     'license.Remove': "Lisansı kaldır",
     'license.RemoveConfirm': "Lisans kaldırılsın mı? Ücretli modüller yeniden kilitlenir; kayıtlarınız silinmez.",
@@ -182,6 +182,9 @@ export const sampleStrings: Record<'tr' | 'en', Record<string, string>> = {
     'license.ColModule': "Modül",
     'license.ColKind': "Tür",
     'license.ColStatus': "Durum",
+    'license.ColProvides': "Sağladığı",
+    'license.ColNeeds': "İhtiyaç duyduğu",
+    'license.NeedsOptional': "isteğe bağlı: {0}",
     'license.KindOpen': "açık kaynak",
     'license.KindPaid': "ücretli",
     'license.ModuleOpen': "açık",
@@ -189,11 +192,6 @@ export const sampleStrings: Record<'tr' | 'en', Record<string, string>> = {
     'license.ModuleGrace': "ek süre",
     'license.ModuleReadOnly': "salt okunur",
     'license.ModuleNotInstalled': "kurulu değil",
-    'license.Module.weighing': "Tartım",
-    'license.Module.products': "Ürünler",
-    'license.Module.labels': "Etiket yönetimi",
-    'license.Module.users': "Kullanıcılar ve roller",
-    'license.Module.formulation': "Formülasyon",
     'license.StationsTitle': "İstasyonlar",
     'license.StationsHint': "Her lisanslı istasyon bir cihazdır (terazi). Ücretli modülleri kullanabilecek cihazları seçin; tartımın kendisi hiçbir zaman sınırlanmaz.",
     'license.StationsNoDevices': "Henüz cihaz eklenmedi. Cihazlar ekranından ekleyin.",
@@ -525,7 +523,7 @@ export const sampleStrings: Record<'tr' | 'en', Record<string, string>> = {
     'license.FileInput': "License file",
     'license.Uploading': "Uploading…",
     'license.Uploaded': "License loaded.",
-    'license.LoadedFor': "License loaded for {0}.",
+    'license.LoadedFor': "License loaded for {0}",
     'license.ReadFailed': "The file could not be read.",
     'license.Remove': "Remove license",
     'license.RemoveConfirm': "Remove the license? Paid modules are locked again; your records are kept.",
@@ -548,6 +546,9 @@ export const sampleStrings: Record<'tr' | 'en', Record<string, string>> = {
     'license.ColModule': "Module",
     'license.ColKind': "Kind",
     'license.ColStatus': "Status",
+    'license.ColProvides': "Provides",
+    'license.ColNeeds': "Needs",
+    'license.NeedsOptional': "optional: {0}",
     'license.KindOpen': "open source",
     'license.KindPaid': "paid",
     'license.ModuleOpen': "open",
@@ -555,11 +556,6 @@ export const sampleStrings: Record<'tr' | 'en', Record<string, string>> = {
     'license.ModuleGrace': "grace period",
     'license.ModuleReadOnly': "read-only",
     'license.ModuleNotInstalled': "not installed",
-    'license.Module.weighing': "Weighing",
-    'license.Module.products': "Products",
-    'license.Module.labels': "Label management",
-    'license.Module.users': "Users and roles",
-    'license.Module.formulation': "Formulation",
     'license.StationsTitle': "Stations",
     'license.StationsHint': "Each licensed station is one device (scale). Choose the devices that may use the paid modules; weighing itself is never limited.",
     'license.StationsNoDevices': "No device has been added yet. Add one under Devices.",
@@ -819,10 +815,13 @@ export function setupStatus(change: Partial<SetupStatus> = {}): SetupStatus {
   };
 }
 
+/** Display names the host would resolve for the built-in modules (current language: Turkish). */
+const moduleNames: Record<string, string> = { weighing: 'Tartım', products: 'Ürünler' };
+
 /** Replaces global fetch. `/api/ui/strings` answers in the language of the culture cookie. */
 export function installFakeApi(options: FakeApiOptions = {}) {
   const modules: UiModules = {
-    modules: [...(options.modules ?? ['weighing', 'products']).map((id) => ({ id, version: '1.0.0' })), ...(options.moduleList ?? [])],
+    modules: [...(options.modules ?? ['weighing', 'products']).map((id) => ({ id, version: '1.0.0', ...(moduleNames[id] ? { name: moduleNames[id] } : {}) })), ...(options.moduleList ?? [])],
     capabilities: options.capabilities ?? [],
     ...(options.companyName !== undefined ? { companyName: options.companyName } : {}),
     ...(options.license ? { license: options.license } : {}),

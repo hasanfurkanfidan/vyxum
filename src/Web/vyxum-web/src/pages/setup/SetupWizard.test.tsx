@@ -460,7 +460,7 @@ describe('license step', () => {
     const modulesBefore = callsTo(fetchMock, 'GET /api/ui/modules');
     await user.upload(screen.getByLabelText('Lisans dosyası'), new File([licenseFile], 'a.vxlic'));
 
-    expect(await screen.findByText('Lisans yüklendi: Örnek Kuruyemiş A.Ş..')).toBeInTheDocument();
+    expect(await screen.findByText('Lisans yüklendi: Örnek Kuruyemiş A.Ş.')).toBeInTheDocument();
     expect(received?.body).toBe(licenseFile);
     expect(callsTo(fetchMock, 'GET /api/ui/modules')).toBe(modulesBefore + 1);
     await user.click(next());

@@ -50,7 +50,7 @@ interface PageApi {
 function installPageApi({ license = licenseState(), routes = {} }: PageApi = {}) {
   return installFakeApi({
     modules: ['weighing', 'products'],
-    moduleList: [{ id: 'labels', version: '1.0.0', requiresLicense: true, license: 'licensed' }],
+    moduleList: [{ id: 'labels', version: '1.0.0', requiresLicense: true, license: 'licensed', name: 'Etiket yönetimi', provides: ['labels.print'], requires: ['weighing.records'], optional: ['products.catalog'] }],
     license: { status: license.status, licensee: license.licensee?.name ?? null, graceDaysLeft: license.graceDaysLeft },
     routes: {
       'GET /api/license': () => jsonResponse(license),
@@ -123,10 +123,10 @@ describe('settings > modules and license', () => {
     const rows = within(table).getAllByRole('row').slice(1);
     const text = rows.map((r) => within(r).getAllByRole('cell').map((c) => c.textContent));
     expect(text).toEqual([
-      ['Tartım', 'açık kaynak', 'açık'],
-      ['Ürünler', 'açık kaynak', 'açık'],
-      ['Etiket yönetimi', 'ücretli', 'açık'],
-      ['Formülasyon', 'ücretli', 'kurulu değil'],
+      ['Tartım', 'açık kaynak', '', '', 'açık'],
+      ['Ürünler', 'açık kaynak', '', '', 'açık'],
+      ['Etiket yönetimi', 'ücretli', 'labels.print', 'weighing.records; isteğe bağlı: products.catalog', 'açık'],
+      ['formulation', 'ücretli', '', '', 'kurulu değil'],
     ]);
   });
 
@@ -138,7 +138,7 @@ describe('settings > modules and license', () => {
     renderApp();
 
     const table = await screen.findByRole('table');
-    const row = within(table).getByText('Etiket yönetimi').closest('tr') as HTMLElement;
+    const row = within(table).getByText('labels').closest('tr') as HTMLElement;
     expect(within(row).getByText('lisans yok')).toBeInTheDocument();
     expect(within(row).getByText('ücretli')).toBeInTheDocument();
   });
@@ -204,7 +204,7 @@ describe('license upload', () => {
     const modulesBefore = callsTo(fetchMock, 'GET /api/ui/modules');
     await upload(user);
 
-    expect(await screen.findByText('Lisans yüklendi: Örnek Kuruyemiş A.Ş..')).toBeInTheDocument();
+    expect(await screen.findByText('Lisans yüklendi: Örnek Kuruyemiş A.Ş.')).toBeInTheDocument();
     expect(received?.body).toBe(licenseFile);
     expect(callsTo(fetchMock, 'GET /api/ui/modules')).toBe(modulesBefore + 1);
     expect(await screen.findByText('imza doğrulandı')).toBeInTheDocument();
@@ -319,9 +319,24 @@ describe('station choice', () => {
     expect(within(await screen.findByRole('region', { name: 'Lisans' })).getByText('2 / 3')).toBeInTheDocument();
   });
 
-  it('shows the limit error from the server and the count over the limit', async () => {
+  it('disables the unchecked devices once the limit is reached and enables them again', async () => {
+    installPageApi({ license: licenseState({ stationLimit: 2 }) });
+    const user = userEvent.setup();
+    renderApp();
+
+    const section = await screen.findByRole('region', { name: 'İstasyonlar' });
+    const third = await within(section).findByRole('checkbox', { name: 'Kantar terazisi' });
+    expect(third).toBeDisabled();
+    expect(within(section).getByRole('checkbox', { name: 'Peynir terazisi' })).toBeEnabled();
+
+    await user.click(within(section).getByRole('checkbox', { name: 'Ağ terazisi' }));
+    expect(third).toBeEnabled();
+  });
+
+  it('shows the limit error when the server rejects the choice', async () => {
+    // The page's license state is stale: the server already knows a lower limit.
     installPageApi({
-      license: licenseState({ stationLimit: 2 }),
+      license: licenseState({ stationLimit: 3 }),
       routes: {
         'PUT /api/license/stations': () => jsonResponse({ status: 400, code: 'station_limit_exceeded' }, 400),
       },
@@ -331,7 +346,7 @@ describe('station choice', () => {
 
     const section = await screen.findByRole('region', { name: 'İstasyonlar' });
     await user.click(await within(section).findByRole('checkbox', { name: 'Kantar terazisi' }));
-    expect(within(section).getByLabelText('İstasyon')).toHaveTextContent('3 / 2');
+    expect(within(section).getByLabelText('İstasyon')).toHaveTextContent('3 / 3');
     await user.click(within(section).getByRole('button', { name: 'İstasyonları kaydet' }));
 
     expect(await within(section).findByRole('alert')).toHaveTextContent(sampleStrings.tr['license.Error.station_limit_exceeded']!);

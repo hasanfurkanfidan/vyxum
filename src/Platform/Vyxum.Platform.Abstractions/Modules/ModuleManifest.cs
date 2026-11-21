@@ -31,6 +31,13 @@ public sealed class ModuleManifest
     /// </summary>
     public bool RequiresLicense { get; init; }
 
+    /// <summary>
+    /// Full UI string key (prefix included, for example <c>weighing.ModuleName</c>) of the module's display name. The key
+    /// must be in a string set the module registers itself (<c>AddUiStrings</c>); the platform checks at startup that it
+    /// exists and serves the name of the current culture in <c>GET /api/ui/modules</c>. Null: the UI shows the id.
+    /// </summary>
+    public string? DisplayNameKey { get; init; }
+
     /// <summary>The module's screens, embedded in its assembly, or null when the module has none.</summary>
     public ModuleUi? Ui { get; init; }
 }

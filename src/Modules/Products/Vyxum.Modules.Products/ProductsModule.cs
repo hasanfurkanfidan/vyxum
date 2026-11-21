@@ -14,6 +14,7 @@ public sealed class ProductsModule : IModule
     public ModuleManifest Manifest { get; } = new()
     {
         Id = "products",
+        DisplayNameKey = ProductsStrings.KeyPrefix + ".ModuleName",
         Version = new Version(1, 0),
         Provides = [CatalogCapability],
         Publishes = [typeof(ProductSaved)],

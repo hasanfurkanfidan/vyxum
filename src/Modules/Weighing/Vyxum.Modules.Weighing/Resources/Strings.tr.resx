@@ -90,4 +90,5 @@
   <data name="LiveWeight" xml:space="preserve"><value>Canlı ağırlık</value></data>
   <data name="ProductSelection" xml:space="preserve"><value>Ürün seçimi</value></data>
   <data name="NoRecent" xml:space="preserve"><value>Henüz tartım yok.</value></data>
+  <data name="ModuleName" xml:space="preserve"><value>Tartım</value></data>
 </root>

@@ -226,6 +226,12 @@ export interface UiModule {
   version: string;
   /** Whether the module works only with a license. Older hosts leave it out. */
   requiresLicense?: boolean;
+  /** Display name in the current language; null or absent when the module declares none (show the id). */
+  name?: string | null;
+  /** Capability ids the module provides, needs, and uses when available. Older hosts leave them out. */
+  provides?: string[];
+  requires?: string[];
+  optional?: string[];
   /** `free`, `licensed`, `grace`, `readOnly` or `locked`. Older hosts leave it out (free). */
   license?: 'free' | 'licensed' | 'grace' | 'readOnly' | 'locked';
   /** The module's screens, when it has some and may load them (not locked); otherwise null or absent. */

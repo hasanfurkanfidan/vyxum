@@ -32,7 +32,7 @@
   <data name="FileInput" xml:space="preserve"><value>License file</value></data>
   <data name="Uploading" xml:space="preserve"><value>Uploading…</value></data>
   <data name="Uploaded" xml:space="preserve"><value>License loaded.</value></data>
-  <data name="LoadedFor" xml:space="preserve"><value>License loaded for {0}.</value></data>
+  <data name="LoadedFor" xml:space="preserve"><value>License loaded for {0}</value></data>
   <data name="ReadFailed" xml:space="preserve"><value>The file could not be read.</value></data>
   <data name="Remove" xml:space="preserve"><value>Remove license</value></data>
   <data name="RemoveConfirm" xml:space="preserve"><value>Remove the license? Paid modules are locked again; your records are kept.</value></data>
@@ -62,11 +62,6 @@
   <data name="ModuleGrace" xml:space="preserve"><value>grace period</value></data>
   <data name="ModuleReadOnly" xml:space="preserve"><value>read-only</value></data>
   <data name="ModuleNotInstalled" xml:space="preserve"><value>not installed</value></data>
-  <data name="Module.weighing" xml:space="preserve"><value>Weighing</value></data>
-  <data name="Module.products" xml:space="preserve"><value>Products</value></data>
-  <data name="Module.labels" xml:space="preserve"><value>Label management</value></data>
-  <data name="Module.users" xml:space="preserve"><value>Users and roles</value></data>
-  <data name="Module.formulation" xml:space="preserve"><value>Formulation</value></data>
   <data name="StationsTitle" xml:space="preserve"><value>Stations</value></data>
   <data name="StationsHint" xml:space="preserve"><value>Each licensed station is one device (scale). Choose the devices that may use the paid modules; weighing itself is never limited.</value></data>
   <data name="StationsNoDevices" xml:space="preserve"><value>No device has been added yet. Add one under Devices.</value></data>
@@ -84,4 +79,7 @@
   <data name="OptionFreeHint" xml:space="preserve"><value>Weighing, Products and Records work without a license.</value></data>
   <data name="OptionFile" xml:space="preserve"><value>Load a license file</value></data>
   <data name="OptionFileHint" xml:space="preserve"><value>A file with the extension .vxlic that you received from us.</value></data>
+  <data name="ColProvides" xml:space="preserve"><value>Provides</value></data>
+  <data name="ColNeeds" xml:space="preserve"><value>Needs</value></data>
+  <data name="NeedsOptional" xml:space="preserve"><value>optional: {0}</value></data>
 </root>

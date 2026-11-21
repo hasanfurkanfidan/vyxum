@@ -90,4 +90,5 @@
   <data name="LiveWeight" xml:space="preserve"><value>Live weight</value></data>
   <data name="ProductSelection" xml:space="preserve"><value>Product selection</value></data>
   <data name="NoRecent" xml:space="preserve"><value>No weighings yet.</value></data>
+  <data name="ModuleName" xml:space="preserve"><value>Weighing</value></data>
 </root>

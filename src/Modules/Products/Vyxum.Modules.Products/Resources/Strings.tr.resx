@@ -41,4 +41,5 @@
   <data name="NewProduct" xml:space="preserve"><value>Yeni ürün</value></data>
   <data name="Empty" xml:space="preserve"><value>Henüz ürün yok</value></data>
   <data name="SearchPlaceholder" xml:space="preserve"><value>PLU ya da ad</value></data>
+  <data name="ModuleName" xml:space="preserve"><value>Ürünler</value></data>
 </root>

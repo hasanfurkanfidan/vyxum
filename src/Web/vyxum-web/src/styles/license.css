@@ -147,7 +147,7 @@
 }
 
 .license-modules .table {
-  min-width: 560px;
+  min-width: 820px;
 }
 
 .license-modules .table td:first-child,
@@ -376,4 +376,14 @@
   overflow: hidden;
   clip: rect(0 0 0 0);
   white-space: nowrap;
+}
+
+.license-modules__caps {
+  font-family: var(--font-mono);
+  font-size: var(--text-eyebrow);
+  overflow-wrap: anywhere;
+}
+
+.license-modules__caps--muted {
+  color: var(--color-ink-muted);
 }

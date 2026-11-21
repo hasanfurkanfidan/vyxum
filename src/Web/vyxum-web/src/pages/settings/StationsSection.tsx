@@ -86,7 +86,12 @@ export function StationsSection({ license, onSaved }: StationsSectionProps) {
           {devices.map((device) => (
             <li key={device.id} className="stations__item">
               <label className="stations__check">
-                <input type="checkbox" checked={chosen.has(device.id)} onChange={(event) => toggle(device.id, event.target.checked)} />
+                <input
+                  type="checkbox"
+                  checked={chosen.has(device.id)}
+                  disabled={!chosen.has(device.id) && chosen.size >= license.stationLimit}
+                  onChange={(event) => toggle(device.id, event.target.checked)}
+                />
                 <span>{device.name}</span>
                 {device.isEnabled ? null : <span className="muted">{t('license.StationsDisabled')}</span>}
               </label>

@@ -6,7 +6,7 @@ describe('api client', () => {
   it('returns the parsed JSON body', async () => {
     installFakeApi({ modules: ['weighing'], capabilities: ['weighing.records'] });
     await expect(getUiModules()).resolves.toEqual({
-      modules: [{ id: 'weighing', version: '1.0.0' }],
+      modules: [{ id: 'weighing', version: '1.0.0', name: 'Tartım' }],
       capabilities: ['weighing.records'],
     });
   });

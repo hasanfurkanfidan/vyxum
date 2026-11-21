@@ -17,7 +17,7 @@ public static class UiEndpointExtensions
     /// <summary>
     /// Maps <c>GET /api/ui/strings</c>, which returns <c>{ culture, strings: { "prefix.Key": "text" } }</c>
     /// in the request's UI culture (set by request localization), and <c>GET /api/ui/modules</c>, which
-    /// returns <c>{ modules: [{ id, version, requiresLicense, license, ui }], capabilities: ["..."], companyName,
+    /// returns <c>{ modules: [{ id, version, requiresLicense, name, provides, requires, optional, license, ui }], capabilities: ["..."], companyName,
     /// license: { status, licensee, graceDaysLeft } }</c>; <c>companyName</c> is the name entered in the setup wizard, or
     /// null.
     /// </summary>
@@ -40,14 +40,19 @@ public static class UiEndpointExtensions
             return Results.Json(new UiStringsResponse(culture.Name, catalog.GetStrings(culture)), DeviceEndpointExtensions.JsonOptions);
         });
 
-        endpoints.MapGet(ModulesPath, async (ModuleCatalog catalog, IPlatformSettings settings, LicenseManager licenses, CancellationToken cancellationToken) =>
+        endpoints.MapGet(ModulesPath, async (ModuleCatalog catalog, IPlatformSettings settings, LicenseManager licenses, ModuleDisplayNames names, CancellationToken cancellationToken) =>
         {
             var snapshot = licenses.GetSnapshot();
+            var culture = CultureInfo.CurrentUICulture;
             var modules = catalog.Modules
                 .Select(m => new UiModule(
                     m.Manifest.Id,
                     m.Manifest.Version.ToString(),
                     m.Manifest.RequiresLicense,
+                    names.Resolve(m.Manifest, culture),
+                    m.Manifest.Provides.Select(c => c.Id).ToList(),
+                    m.Manifest.Requires.Select(c => c.Id).ToList(),
+                    m.Manifest.Optional.Select(c => c.Id).ToList(),
                     LicenseText.Of(snapshot.GetModuleStatus(m.Manifest.Id)),
                     UiOf(m.Manifest, snapshot.GetModuleStatus(m.Manifest.Id))))
                 .ToList();
@@ -76,7 +81,16 @@ public static class UiEndpointExtensions
 
     internal sealed record UiStringsResponse(string Culture, IReadOnlyDictionary<string, string> Strings);
 
-    internal sealed record UiModule(string Id, string Version, bool RequiresLicense, string License, UiModuleScreens? Ui);
+    internal sealed record UiModule(
+        string Id,
+        string Version,
+        bool RequiresLicense,
+        string? Name,
+        IReadOnlyList<string> Provides,
+        IReadOnlyList<string> Requires,
+        IReadOnlyList<string> Optional,
+        string License,
+        UiModuleScreens? Ui);
 
     internal sealed record UiModuleScreens(string Entry, int SdkVersion);
 

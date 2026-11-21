@@ -23,6 +23,7 @@ public sealed class PaidModule : IModule
     public ModuleManifest Manifest { get; } = new()
     {
         Id = Id,
+        DisplayNameKey = StringsPrefix + ".ModuleName",
         Version = new Version(1, 0),
         Optional = ["samples.orders"],
         RequiresLicense = true,

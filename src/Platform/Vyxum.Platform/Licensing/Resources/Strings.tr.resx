@@ -32,7 +32,7 @@
   <data name="FileInput" xml:space="preserve"><value>Lisans dosyası</value></data>
   <data name="Uploading" xml:space="preserve"><value>Yükleniyor…</value></data>
   <data name="Uploaded" xml:space="preserve"><value>Lisans yüklendi.</value></data>
-  <data name="LoadedFor" xml:space="preserve"><value>Lisans yüklendi: {0}.</value></data>
+  <data name="LoadedFor" xml:space="preserve"><value>Lisans yüklendi: {0}</value></data>
   <data name="ReadFailed" xml:space="preserve"><value>Dosya okunamadı.</value></data>
   <data name="Remove" xml:space="preserve"><value>Lisansı kaldır</value></data>
   <data name="RemoveConfirm" xml:space="preserve"><value>Lisans kaldırılsın mı? Ücretli modüller yeniden kilitlenir; kayıtlarınız silinmez.</value></data>
@@ -62,11 +62,6 @@
   <data name="ModuleGrace" xml:space="preserve"><value>ek süre</value></data>
   <data name="ModuleReadOnly" xml:space="preserve"><value>salt okunur</value></data>
   <data name="ModuleNotInstalled" xml:space="preserve"><value>kurulu değil</value></data>
-  <data name="Module.weighing" xml:space="preserve"><value>Tartım</value></data>
-  <data name="Module.products" xml:space="preserve"><value>Ürünler</value></data>
-  <data name="Module.labels" xml:space="preserve"><value>Etiket yönetimi</value></data>
-  <data name="Module.users" xml:space="preserve"><value>Kullanıcılar ve roller</value></data>
-  <data name="Module.formulation" xml:space="preserve"><value>Formülasyon</value></data>
   <data name="StationsTitle" xml:space="preserve"><value>İstasyonlar</value></data>
   <data name="StationsHint" xml:space="preserve"><value>Her lisanslı istasyon bir cihazdır (terazi). Ücretli modülleri kullanabilecek cihazları seçin; tartımın kendisi hiçbir zaman sınırlanmaz.</value></data>
   <data name="StationsNoDevices" xml:space="preserve"><value>Henüz cihaz eklenmedi. Cihazlar ekranından ekleyin.</value></data>
@@ -84,4 +79,7 @@
   <data name="OptionFreeHint" xml:space="preserve"><value>Tartım, Ürünler ve Kayıtlar lisanssız çalışır.</value></data>
   <data name="OptionFile" xml:space="preserve"><value>Lisans dosyası yükle</value></data>
   <data name="OptionFileHint" xml:space="preserve"><value>Bizden aldığınız, uzantısı .vxlic olan dosya.</value></data>
+  <data name="ColProvides" xml:space="preserve"><value>Sağladığı</value></data>
+  <data name="ColNeeds" xml:space="preserve"><value>İhtiyaç duyduğu</value></data>
+  <data name="NeedsOptional" xml:space="preserve"><value>isteğe bağlı: {0}</value></data>
 </root>

@@ -82,6 +82,8 @@ public static class PlatformServiceCollectionExtensions
 
         // Merges the UiStringSource registrations of the host and the modules (GET /api/ui/strings).
         services.AddSingleton<UiStringCatalog>();
+        services.AddSingleton<ModuleDisplayNames>();
+        services.AddHostedService(provider => provider.GetRequiredService<ModuleDisplayNames>());
 
         // Setup wizard (GET/POST /api/setup/*): shared settings file, database settings, restart.
         var dataDirectory = DatabaseSettings.GetDataDirectory(configuration);
