@@ -33,6 +33,9 @@ public sealed class ProductSavedHandler(WeighingDbContext db) : IIntegrationEven
         product.ShelfLifeDays = integrationEvent.ShelfLifeDays;
         product.BarcodePrefix = integrationEvent.BarcodePrefix;
         product.IsActive = integrationEvent.IsActive;
+        product.TargetWeight = integrationEvent.TargetWeight;
+        product.LowerTolerance = integrationEvent.LowerTolerance;
+        product.UpperTolerance = integrationEvent.UpperTolerance;
         product.SourceOccurredAtUtc = context.OccurredAt;
         await db.SaveChangesAsync(cancellationToken);
     }

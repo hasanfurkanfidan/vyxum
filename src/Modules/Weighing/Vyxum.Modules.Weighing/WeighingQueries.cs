@@ -96,7 +96,10 @@ public sealed class WeighingQueries(WeighingDbContext db, IOptions<WeighingOptio
             WeighingMapper.FormatPrice(p.UnitPrice),
             WeighingMapper.FormatPrice(p.PackageTare),
             p.ShelfLifeDays,
-            p.BarcodePrefix))];
+            p.BarcodePrefix,
+            WeighingMapper.FormatPrice(p.TargetWeight),
+            WeighingMapper.FormatPrice(p.LowerTolerance),
+            WeighingMapper.FormatPrice(p.UpperTolerance)))];
     }
 
     /// <summary>The rules and the optional capabilities the screen needs.</summary>

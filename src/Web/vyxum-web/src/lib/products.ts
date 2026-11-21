@@ -10,6 +10,12 @@ export interface Product {
   shelfLifeDays: number | null;
   barcodePrefix: string | null;
   ingredients: string | null;
+  /** Target net weight in kg, e.g. "0.250". */
+  targetWeight: string | null;
+  /** Allowed amount below the target in kg. */
+  lowerTolerance: string | null;
+  /** Allowed amount above the target in kg. */
+  upperTolerance: string | null;
   isActive: boolean;
   updatedAt: string;
 }
@@ -22,10 +28,13 @@ export interface ProductInput {
   shelfLifeDays: number | null;
   barcodePrefix: string | null;
   ingredients: string | null;
+  targetWeight: string | null;
+  lowerTolerance: string | null;
+  upperTolerance: string | null;
 }
 
 /** Fields of the product card that the API validates. */
-export const productFields = ['code', 'name', 'unitPrice', 'packageTare', 'shelfLifeDays', 'barcodePrefix', 'ingredients'] as const;
+export const productFields = ['code', 'name', 'unitPrice', 'packageTare', 'shelfLifeDays', 'barcodePrefix', 'ingredients', 'targetWeight', 'lowerTolerance', 'upperTolerance'] as const;
 export type ProductField = (typeof productFields)[number];
 
 export function listProducts(search: string, includeInactive: boolean, options?: RequestOptions): Promise<Product[]> {

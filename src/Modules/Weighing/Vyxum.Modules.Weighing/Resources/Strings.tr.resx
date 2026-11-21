@@ -74,6 +74,9 @@
   <data name="CancelledNotInTotals" xml:space="preserve"><value>iptaller toplama girmez</value></data>
   <data name="Total" xml:space="preserve"><value>Toplam</value></data>
   <data name="CancelRecord" xml:space="preserve"><value>Kaydı iptal et</value></data>
+  <data name="TargetWeight" xml:space="preserve"><value>Hedef ağırlık (kg)</value></data>
+  <data name="LowerTolerance" xml:space="preserve"><value>Alt tolerans (kg)</value></data>
+  <data name="UpperTolerance" xml:space="preserve"><value>Üst tolerans (kg)</value></data>
   <data name="CancelReason" xml:space="preserve"><value>İptal nedeni</value></data>
   <data name="CancelConfirm" xml:space="preserve"><value>{0} numaralı kayıt iptal edilsin mi? Listede kalır ama toplama girmez.</value></data>
   <data name="Empty" xml:space="preserve"><value>Kayıt bulunamadı.</value></data>

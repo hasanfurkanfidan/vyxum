@@ -24,8 +24,11 @@ public class WeighingApiTests
         string name = "Pistachio",
         decimal? unitPrice = 780.00m,
         decimal? packageTare = 0.012m,
-        bool isActive = true) =>
-        new(id, code, name, unitPrice, packageTare, 30, "28", isActive);
+        bool isActive = true,
+        decimal? target = null,
+        decimal? lower = null,
+        decimal? upper = null) =>
+        new(id, code, name, unitPrice, packageTare, 30, "28", isActive, target, lower, upper);
 
     private static async Task<JsonElement> CreateAsync(WeighingTestApp app, object body)
     {
@@ -56,7 +59,7 @@ public class WeighingApiTests
     public async Task Saves_a_record_with_product_tare_amount_and_snapshot_and_publishes_the_event(DatabaseProvider provider)
     {
         await using var app = await WeighingTestApp.StartAsync(provider);
-        await app.DeliverAsync(Product(Pistachio, name: "Pistachio, roasted"));
+        await app.DeliverAsync(Product(Pistachio, name: "Pistachio, roasted", target: 1.25m, lower: 0.005m, upper: 0.01m));
         app.Scale.Set(Scale, 1.260m, "kg");
         var requestId = Guid.NewGuid();
 
@@ -83,6 +86,9 @@ public class WeighingApiTests
         Str(json, "cancelledAt").ShouldBeNull();
         Str(json, "cancelReason").ShouldBeNull();
         Str(json, "operator").ShouldBeNull();
+        Str(json, "targetWeight").ShouldBe("1.25");
+        Str(json, "lowerTolerance").ShouldBe("0.005");
+        Str(json, "upperTolerance").ShouldBe("0.01");
 
         var (got, gotJson) = await app.SendAsync(HttpMethod.Get, $"/api/weighing/records/{id}");
         got.StatusCode.ShouldBe(HttpStatusCode.OK);
@@ -108,6 +114,9 @@ public class WeighingApiTests
         recorded.UnitPrice.ShouldBe(780m);
         recorded.Amount.ShouldBe(973.44m);
         recorded.Currency.ShouldBe("TRY");
+        recorded.TargetWeight.ShouldBe(1.25m);
+        recorded.LowerTolerance.ShouldBe(0.005m);
+        recorded.UpperTolerance.ShouldBe(0.01m);
 
         var stored = await app.WithDbAsync(db => Task.FromResult(db.Records.Single()));
         stored.NetMilligrams.ShouldBe(1_248_000);
@@ -584,6 +593,44 @@ public class WeighingApiTests
     [Theory]
     [InlineData(DatabaseProvider.Sqlite)]
     [InlineData(DatabaseProvider.SqlServer)]
+    public async Task Records_keep_the_target_and_tolerances_from_save_time_and_the_products_endpoint_shows_the_current_ones(DatabaseProvider provider)
+    {
+        await using var app = await WeighingTestApp.StartAsync(provider);
+        var t0 = DateTime.UtcNow;
+        await app.DeliverAsync(Product(Pistachio, target: 1.25m, lower: 0.005m, upper: 0.01m), t0);
+        app.Scale.Set(Scale, 1.260m, "kg");
+        var withProduct = await CreateAsync(app, Body(productId: Pistachio));
+        var withoutProduct = await CreateAsync(app, Body());
+        Str(withoutProduct, "targetWeight").ShouldBeNull();
+        Str(withoutProduct, "lowerTolerance").ShouldBeNull();
+        Str(withoutProduct, "upperTolerance").ShouldBeNull();
+
+        // The product changes later; the old record keeps what was valid when it was saved.
+        await app.DeliverAsync(Product(Pistachio, target: 0.5m, lower: 0.01m, upper: null), t0.AddSeconds(1));
+        var newer = await CreateAsync(app, Body(productId: Pistachio));
+
+        var (_, old) = await app.SendAsync(HttpMethod.Get, $"/api/weighing/records/{withProduct.GetProperty("id").GetInt64()}");
+        Str(old, "targetWeight").ShouldBe("1.25");
+        Str(old, "lowerTolerance").ShouldBe("0.005");
+        Str(old, "upperTolerance").ShouldBe("0.01");
+        Str(newer, "targetWeight").ShouldBe("0.50");
+        Str(newer, "lowerTolerance").ShouldBe("0.01");
+        Str(newer, "upperTolerance").ShouldBeNull();
+
+        var (_, products) = await app.SendAsync(HttpMethod.Get, "/api/weighing/products");
+        var current = products.EnumerateArray().Single();
+        Str(current, "targetWeight").ShouldBe("0.50");
+        Str(current, "upperTolerance").ShouldBeNull();
+
+        var stored = await app.WithDbAsync(db => Task.FromResult(db.Records.OrderBy(r => r.Id).ToList()));
+        stored[0].TargetWeight.ShouldBe(1.25m);
+        stored[1].TargetWeight.ShouldBeNull();
+        stored[2].TargetWeight.ShouldBe(0.5m);
+    }
+
+    [Theory]
+    [InlineData(DatabaseProvider.Sqlite)]
+    [InlineData(DatabaseProvider.SqlServer)]
     public async Task Product_events_upsert_the_local_copy_idempotently(DatabaseProvider provider)
     {
         await using var app = await WeighingTestApp.StartAsync(provider);
@@ -601,10 +648,11 @@ public class WeighingApiTests
         Str(pistachio, "unitPrice").ShouldBe("780.00");
         Str(pistachio, "packageTare").ShouldBe("0.012");
         pistachio.GetProperty("shelfLifeDays").GetInt32().ShouldBe(30);
+        pistachio.GetProperty("targetWeight").ValueKind.ShouldBe(JsonValueKind.Null);
         Str(pistachio, "barcodePrefix").ShouldBe("28");
 
         // A newer event replaces the copy; delivering it again changes nothing; an older one is ignored.
-        var changed = Product(Pistachio, name: "Pistachio, roasted", unitPrice: 825.5m, packageTare: null);
+        var changed = Product(Pistachio, name: "Pistachio, roasted", unitPrice: 825.5m, packageTare: null, target: 0.25m, lower: 0.005m, upper: 0.01m);
         await app.DeliverAsync(changed, t0.AddSeconds(1));
         await app.DeliverAsync(changed, t0.AddSeconds(1));
         await app.DeliverAsync(Product(Pistachio, name: "Stale"), t0.AddMilliseconds(500));
@@ -613,6 +661,9 @@ public class WeighingApiTests
         copy.Name.ShouldBe("Pistachio, roasted");
         copy.UnitPrice.ShouldBe(825.5m);
         copy.PackageTare.ShouldBeNull();
+        copy.TargetWeight.ShouldBe(0.25m);
+        copy.LowerTolerance.ShouldBe(0.005m);
+        copy.UpperTolerance.ShouldBe(0.01m);
         (await app.WithDbAsync(db => Task.FromResult(db.Products.Count()))).ShouldBe(3);
 
         var (_, search) = await app.SendAsync(HttpMethod.Get, "/api/weighing/products?search=ROAST");
@@ -740,6 +791,14 @@ public class WeighingApiTests
         IntegrationEventAttribute.Find(typeof(WeighingCancelled))!.ToString().ShouldBe("weighing.cancelled v1");
         IntegrationEventAttribute.Find(typeof(ProductSaved))!.ToString().ShouldBe("products.product-saved v1");
 
+        // An event written before the target fields existed still reads: they come back empty.
+        var old = JsonSerializer.Deserialize<ProductSaved>(
+            """{"productId":"0e7d3f7a-5d0e-4a39-9f0e-000000000417","code":"0417","name":"Pistachio","unitPrice":780.0,"packageTare":null,"shelfLifeDays":30,"barcodePrefix":"28","isActive":true}""",
+            JsonSerializerOptions.Web)!;
+        old.TargetWeight.ShouldBeNull();
+        old.LowerTolerance.ShouldBeNull();
+        old.UpperTolerance.ShouldBeNull();
+
         // The local event copy matches the Products module's contract field by field.
         typeof(ProductSaved).GetProperties().Select(p => $"{p.Name}:{p.PropertyType}")
             .ShouldBe(typeof(Vyxum.Modules.Products.ProductSaved).GetProperties().Select(p => $"{p.Name}:{p.PropertyType}"));
@@ -753,7 +812,7 @@ public class WeighingApiTests
             "Zero", "ProductSearch", "NoProduct", "Lot", "RecentRecords", "AllRecords", "Saved", "Cancelled", "CancelRecord", "CancelReason",
             "CancelConfirm", "Date", "Time", "RecordNo", "Plu", "Product", "Operator", "Status", "AllProducts", "ExportExcel", "ValidSummary",
             "CancelledNotInTotals", "Device", "SelectDevice", "Saving", "SaveFailed", "Retrying", "ZeroDone", "ZeroNotSupported",
-            "ZeroRejected", "ZeroUnavailable", "Total",
+            "ZeroRejected", "ZeroUnavailable", "Total", "TargetWeight", "LowerTolerance", "UpperTolerance",
         ]))
         {
             WeighingStrings.Get(key, english).ShouldNotBeNullOrWhiteSpace(key);

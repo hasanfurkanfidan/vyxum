@@ -12,6 +12,9 @@ namespace Vyxum.Modules.Products;
 /// <param name="ShelfLifeDays">Shelf life in days.</param>
 /// <param name="BarcodePrefix">Barcode prefix.</param>
 /// <param name="Ingredients">Ingredients.</param>
+/// <param name="TargetWeight">Target net weight in kg, e.g. "0.250".</param>
+/// <param name="LowerTolerance">Allowed amount below the target in kg, e.g. "0.005".</param>
+/// <param name="UpperTolerance">Allowed amount above the target in kg, e.g. "0.010".</param>
 /// <param name="IsActive">Whether the product is active.</param>
 /// <param name="UpdatedAt">UTC time of the last change.</param>
 public sealed record ProductDto(
@@ -23,6 +26,9 @@ public sealed record ProductDto(
     int? ShelfLifeDays,
     string? BarcodePrefix,
     string? Ingredients,
+    string? TargetWeight,
+    string? LowerTolerance,
+    string? UpperTolerance,
     bool IsActive,
     DateTime UpdatedAt);
 
@@ -34,6 +40,9 @@ public sealed record ProductDto(
 /// <param name="ShelfLifeDays">Shelf life in days.</param>
 /// <param name="BarcodePrefix">Barcode prefix.</param>
 /// <param name="Ingredients">Ingredients.</param>
+/// <param name="TargetWeight">Target net weight in kg; optional.</param>
+/// <param name="LowerTolerance">Allowed amount below the target in kg; needs a target.</param>
+/// <param name="UpperTolerance">Allowed amount above the target in kg; needs a target.</param>
 public sealed record ProductInput(
     string? Code,
     string? Name,
@@ -41,7 +50,10 @@ public sealed record ProductInput(
     string? PackageTare,
     int? ShelfLifeDays,
     string? BarcodePrefix,
-    string? Ingredients);
+    string? Ingredients,
+    string? TargetWeight = null,
+    string? LowerTolerance = null,
+    string? UpperTolerance = null);
 
 /// <summary>Outcome of a product operation: the product, a not-found marker, or validation errors (field name to resx keys).</summary>
 public sealed class ProductResult
@@ -164,7 +176,8 @@ public sealed class ProductService(ProductsDbContext db)
     {
         db.Publish(new ProductSaved(
             product.Id, product.Code, product.Name, product.UnitPrice, product.PackageTare,
-            product.ShelfLifeDays, product.BarcodePrefix, product.IsActive));
+            product.ShelfLifeDays, product.BarcodePrefix, product.IsActive,
+            product.TargetWeight, product.LowerTolerance, product.UpperTolerance));
         try
         {
             await db.SaveChangesAsync(cancellationToken);
@@ -208,6 +221,9 @@ public sealed class ProductService(ProductsDbContext db)
         product.ShelfLifeDays = values.ShelfLifeDays;
         product.BarcodePrefix = values.BarcodePrefix;
         product.Ingredients = values.Ingredients;
+        product.TargetWeight = values.TargetWeight;
+        product.LowerTolerance = values.LowerTolerance;
+        product.UpperTolerance = values.UpperTolerance;
         product.UpdatedAtUtc = nowUtc;
     }
 
@@ -235,6 +251,22 @@ public sealed class ProductService(ProductsDbContext db)
 
         var unitPrice = ParseDecimal(input.UnitPrice, "unitPrice", errors);
         var packageTare = ParseDecimal(input.PackageTare, "packageTare", errors);
+        var targetWeight = ParseDecimal(input.TargetWeight, "targetWeight", errors);
+        var lowerTolerance = ParseDecimal(input.LowerTolerance, "lowerTolerance", errors);
+        var upperTolerance = ParseDecimal(input.UpperTolerance, "upperTolerance", errors);
+        if (targetWeight is null && !errors.ContainsKey("targetWeight"))
+        {
+            // Tolerances are amounts around a target; without one they have no meaning.
+            if (lowerTolerance is not null)
+            {
+                errors["lowerTolerance"] = ["products.ToleranceNeedsTarget"];
+            }
+
+            if (upperTolerance is not null)
+            {
+                errors["upperTolerance"] = ["products.ToleranceNeedsTarget"];
+            }
+        }
 
         if (input.ShelfLifeDays is < 0)
         {
@@ -255,7 +287,7 @@ public sealed class ProductService(ProductsDbContext db)
 
         return errors.Count > 0
             ? null
-            : new Values(code, name, unitPrice, packageTare, input.ShelfLifeDays, barcodePrefix, ingredients);
+            : new Values(code, name, unitPrice, packageTare, input.ShelfLifeDays, barcodePrefix, ingredients, targetWeight, lowerTolerance, upperTolerance);
     }
 
     private static decimal? ParseDecimal(string? text, string field, Dictionary<string, string[]> errors)
@@ -290,7 +322,7 @@ public sealed class ProductService(ProductsDbContext db)
 
     private static ProductDto ToDto(Product p) => new(
         p.Id, p.Code, p.Name, Format(p.UnitPrice), Format(p.PackageTare), p.ShelfLifeDays,
-        p.BarcodePrefix, p.Ingredients, p.IsActive, DateTime.SpecifyKind(p.UpdatedAtUtc, DateTimeKind.Utc));
+        p.BarcodePrefix, p.Ingredients, Format(p.TargetWeight), Format(p.LowerTolerance), Format(p.UpperTolerance), p.IsActive, DateTime.SpecifyKind(p.UpdatedAtUtc, DateTimeKind.Utc));
 
     private sealed record Values(
         string Code,
@@ -299,5 +331,8 @@ public sealed class ProductService(ProductsDbContext db)
         decimal? PackageTare,
         int? ShelfLifeDays,
         string? BarcodePrefix,
-        string? Ingredients);
+        string? Ingredients,
+        decimal? TargetWeight,
+        decimal? LowerTolerance,
+        decimal? UpperTolerance);
 }

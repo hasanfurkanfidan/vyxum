@@ -12,13 +12,16 @@ public class ProductsApiTests
 {
     private static CancellationToken Ct => TestContext.Current.CancellationToken;
 
-    private static object Body(string code = "101", string name = "Cheese", string? unitPrice = "780.00", string? packageTare = "0.012", int? shelfLifeDays = 30) => new
+    private static object Body(string code = "101", string name = "Cheese", string? unitPrice = "780.00", string? packageTare = "0.012", int? shelfLifeDays = 30, string? targetWeight = null, string? lowerTolerance = null, string? upperTolerance = null) => new
     {
         code,
         name,
         unitPrice,
         packageTare,
         shelfLifeDays,
+        targetWeight,
+        lowerTolerance,
+        upperTolerance,
         barcodePrefix = "28",
         ingredients = "Milk*, salt",
     };
@@ -53,6 +56,9 @@ public class ProductsApiTests
         json.GetProperty("ingredients").GetString().ShouldBe("Milk*, salt");
         json.GetProperty("isActive").GetBoolean().ShouldBeTrue();
         json.GetProperty("updatedAt").GetDateTime().Kind.ShouldBe(DateTimeKind.Utc);
+        json.GetProperty("targetWeight").ValueKind.ShouldBe(JsonValueKind.Null);
+        json.GetProperty("lowerTolerance").ValueKind.ShouldBe(JsonValueKind.Null);
+        json.GetProperty("upperTolerance").ValueKind.ShouldBe(JsonValueKind.Null);
         var id = json.GetProperty("id").GetGuid();
 
         var (got, gotJson) = await app.SendAsync(HttpMethod.Get, $"/api/products/{id}");
@@ -67,6 +73,62 @@ public class ProductsApiTests
         updatedJson.GetProperty("packageTare").ValueKind.ShouldBe(JsonValueKind.Null);
         updatedJson.GetProperty("shelfLifeDays").ValueKind.ShouldBe(JsonValueKind.Null);
         updatedJson.GetProperty("isActive").GetBoolean().ShouldBeTrue();
+    }
+
+    [Theory]
+    [InlineData(DatabaseProvider.Sqlite)]
+    [InlineData(DatabaseProvider.SqlServer)]
+    public async Task Target_weight_and_tolerances_round_trip_and_can_be_cleared(DatabaseProvider provider)
+    {
+        await using var app = await ProductsTestApp.StartAsync(provider);
+
+        var (created, json) = await app.SendAsync(
+            HttpMethod.Post, "/api/products", Body(targetWeight: "0.25", lowerTolerance: "0.005", upperTolerance: "0.0100"));
+        created.StatusCode.ShouldBe(HttpStatusCode.Created);
+        json.GetProperty("targetWeight").GetString().ShouldBe("0.25");
+        json.GetProperty("lowerTolerance").GetString().ShouldBe("0.005");
+        json.GetProperty("upperTolerance").GetString().ShouldBe("0.01");
+        var id = json.GetProperty("id").GetGuid();
+
+        var (_, got) = await app.SendAsync(HttpMethod.Get, $"/api/products/{id}");
+        got.GetProperty("targetWeight").GetString().ShouldBe("0.25");
+
+        // Only a target, zero tolerances and an empty tolerance are fine.
+        var (partial, partialJson) = await app.SendAsync(
+            HttpMethod.Put, $"/api/products/{id}", Body(targetWeight: "0.250", lowerTolerance: "0", upperTolerance: ""));
+        partial.StatusCode.ShouldBe(HttpStatusCode.OK);
+        partialJson.GetProperty("targetWeight").GetString().ShouldBe("0.25");
+        partialJson.GetProperty("lowerTolerance").GetString().ShouldBe("0.00");
+        partialJson.GetProperty("upperTolerance").ValueKind.ShouldBe(JsonValueKind.Null);
+
+        var (cleared, clearedJson) = await app.SendAsync(HttpMethod.Put, $"/api/products/{id}", Body());
+        cleared.StatusCode.ShouldBe(HttpStatusCode.OK);
+        clearedJson.GetProperty("targetWeight").ValueKind.ShouldBe(JsonValueKind.Null);
+    }
+
+    [Theory]
+    [InlineData(DatabaseProvider.Sqlite)]
+    [InlineData(DatabaseProvider.SqlServer)]
+    public async Task Target_weight_and_tolerances_are_validated(DatabaseProvider provider)
+    {
+        await using var app = await ProductsTestApp.StartAsync(provider);
+
+        var (needsTarget, needsTargetJson) = await app.SendAsync(
+            HttpMethod.Post, "/api/products", Body(lowerTolerance: "0.005", upperTolerance: "0.01"));
+        needsTarget.StatusCode.ShouldBe(HttpStatusCode.BadRequest);
+        ErrorKeys(needsTargetJson, "lowerTolerance").ShouldBe(["products.ToleranceNeedsTarget"]);
+        ErrorKeys(needsTargetJson, "upperTolerance").ShouldBe(["products.ToleranceNeedsTarget"]);
+
+        var (bad, badJson) = await app.SendAsync(
+            HttpMethod.Post, "/api/products", Body(targetWeight: "0,25", lowerTolerance: "-0.1", upperTolerance: "1e3"));
+        bad.StatusCode.ShouldBe(HttpStatusCode.BadRequest);
+        ErrorKeys(badJson, "targetWeight").ShouldBe(["products.InvalidNumber"]);
+        ErrorKeys(badJson, "lowerTolerance").ShouldBe(["products.NegativeNotAllowed"]);
+        ErrorKeys(badJson, "upperTolerance").ShouldBe(["products.InvalidNumber"]);
+
+        var (negative, negativeJson) = await app.SendAsync(HttpMethod.Post, "/api/products", Body(targetWeight: "-1"));
+        negative.StatusCode.ShouldBe(HttpStatusCode.BadRequest);
+        ErrorKeys(negativeJson, "targetWeight").ShouldBe(["products.NegativeNotAllowed"]);
     }
 
     [Theory]
@@ -227,7 +289,7 @@ public class ProductsApiTests
         await using var app = await ProductsTestApp.StartAsync(provider);
 
         var id = await CreateAsync(app, Body("101", "Cheese"));
-        await app.SendAsync(HttpMethod.Put, $"/api/products/{id}", Body("101", "Aged cheese", "900", "0.02", 60));
+        await app.SendAsync(HttpMethod.Put, $"/api/products/{id}", Body("101", "Aged cheese", "900", "0.02", 60, "0.25", "0.005", "0.01"));
         await app.SendAsync(HttpMethod.Post, $"/api/products/{id}/deactivate");
         await app.SendAsync(HttpMethod.Post, $"/api/products/{id}/activate");
         // Rejected requests publish nothing.
@@ -250,8 +312,18 @@ public class ProductsApiTests
         events[0].PackageTare.ShouldBe(0.012m);
         events[0].ShelfLifeDays.ShouldBe(30);
         events[0].BarcodePrefix.ShouldBe("28");
+        events[0].TargetWeight.ShouldBeNull();
+        events[1].TargetWeight.ShouldBe(0.25m);
+        events[1].LowerTolerance.ShouldBe(0.005m);
+        events[1].UpperTolerance.ShouldBe(0.01m);
+        events[3].UpperTolerance.ShouldBe(0.01m);
         events[1].UnitPrice.ShouldBe(900m);
         events[1].ShelfLifeDays.ShouldBe(60);
+
+        // An event stored before the target fields existed still reads, with them empty.
+        JsonSerializer.Deserialize<ProductSaved>(
+            """{"productId":"0e7d3f7a-5d0e-4a39-9f0e-000000000417","code":"1","name":"N","unitPrice":null,"packageTare":null,"shelfLifeDays":null,"barcodePrefix":null,"isActive":true}""",
+            JsonSerializerOptions.Web)!.TargetWeight.ShouldBeNull();
     }
 
     [Fact]
@@ -269,13 +341,15 @@ public class ProductsApiTests
             "CodeRequired", "CodeTaken", "CodeTooLong", "NameRequired", "NameTooLong", "InvalidNumber", "NegativeNotAllowed",
             "Title", "Breadcrumb", "CountSuffix", "AddProduct", "Code", "Product", "UnitPricePerKg", "PackageTare", "ShelfLife", "Days",
             "BarcodePrefix", "Ingredients", "IngredientsHint", "Name", "Save", "Deactivate", "Activate", "ShowInactive", "Inactive",
-            "Saved", "NewProduct", "Empty", "SearchPlaceholder",
+            "Saved", "NewProduct", "Empty", "SearchPlaceholder", "TargetWeight", "LowerTolerance", "UpperTolerance", "ToleranceHint", "ToleranceNeedsTarget",
         })
         {
             ProductsStrings.Get(key, english).ShouldNotBeNullOrWhiteSpace(key);
             ProductsStrings.Get(key, turkish).ShouldNotBeNullOrWhiteSpace(key);
         }
 
+        ProductsStrings.Get("TargetWeight", turkish).ShouldBe("Hedef ağırlık (kg)");
+        ProductsStrings.Get("UpperTolerance", english).ShouldBe("Upper tolerance (kg)");
         ProductsStrings.Get("Title", english).ShouldBe("Product cards");
         ProductsStrings.Get("Title", turkish).ShouldBe("Ürün kartları");
         ProductsStrings.Get("SearchPlaceholder", turkish).ShouldBe("PLU ya da ad");

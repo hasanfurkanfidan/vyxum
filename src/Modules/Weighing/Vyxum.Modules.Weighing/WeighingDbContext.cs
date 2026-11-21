@@ -27,6 +27,9 @@ public sealed class WeighingDbContext(DbContextOptions<WeighingDbContext> option
             entity.Property(p => p.Name).IsRequired().HasMaxLength(WeighingLimits.ProductNameMaxLength);
             entity.Property(p => p.UnitPrice).HasPrecision(18, 4);
             entity.Property(p => p.PackageTare).HasPrecision(18, 4);
+            entity.Property(p => p.TargetWeight).HasPrecision(18, 4);
+            entity.Property(p => p.LowerTolerance).HasPrecision(18, 4);
+            entity.Property(p => p.UpperTolerance).HasPrecision(18, 4);
             entity.Property(p => p.BarcodePrefix).HasMaxLength(WeighingLimits.BarcodePrefixMaxLength);
             entity.HasIndex(p => p.Code);
         });
@@ -45,6 +48,9 @@ public sealed class WeighingDbContext(DbContextOptions<WeighingDbContext> option
             entity.Property(r => r.Net).HasPrecision(18, 6);
             entity.Property(r => r.Unit).HasMaxLength(WeighingLimits.UnitMaxLength);
             entity.Property(r => r.UnitPrice).HasPrecision(18, 4);
+            entity.Property(r => r.TargetWeight).HasPrecision(18, 4);
+            entity.Property(r => r.LowerTolerance).HasPrecision(18, 4);
+            entity.Property(r => r.UpperTolerance).HasPrecision(18, 4);
             entity.Property(r => r.Amount).HasPrecision(18, WeighingLimits.AmountMaxDecimals);
             entity.Property(r => r.Currency).IsRequired().HasMaxLength(WeighingLimits.CurrencyMaxLength);
             entity.Property(r => r.Status).HasConversion<string>().HasMaxLength(16).IsConcurrencyToken();
@@ -113,6 +119,15 @@ public sealed class WeighingProduct
 
     /// <summary>Package tare in kg.</summary>
     public decimal? PackageTare { get; set; }
+
+    /// <summary>Target net weight in kg.</summary>
+    public decimal? TargetWeight { get; set; }
+
+    /// <summary>Allowed amount below <see cref="TargetWeight"/> in kg.</summary>
+    public decimal? LowerTolerance { get; set; }
+
+    /// <summary>Allowed amount above <see cref="TargetWeight"/> in kg.</summary>
+    public decimal? UpperTolerance { get; set; }
 
     /// <summary>Shelf life in days.</summary>
     public int? ShelfLifeDays { get; set; }
@@ -193,6 +208,15 @@ public sealed class WeighingRecord
 
     /// <summary>Price per kg at the time of weighing.</summary>
     public decimal? UnitPrice { get; init; }
+
+    /// <summary>Target net weight in kg on the product when the record was saved; null without a product or target.</summary>
+    public decimal? TargetWeight { get; init; }
+
+    /// <summary>Allowed amount below the target in kg when the record was saved.</summary>
+    public decimal? LowerTolerance { get; init; }
+
+    /// <summary>Allowed amount above the target in kg when the record was saved.</summary>
+    public decimal? UpperTolerance { get; init; }
 
     /// <summary>Amount, rounded to <see cref="AmountScale"/> decimals; null without a price.</summary>
     public decimal? Amount { get; init; }

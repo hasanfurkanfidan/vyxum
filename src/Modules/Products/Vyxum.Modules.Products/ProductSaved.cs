@@ -11,6 +11,9 @@ namespace Vyxum.Modules.Products;
 /// <param name="ShelfLifeDays">Shelf life in days, if set.</param>
 /// <param name="BarcodePrefix">Barcode prefix, if set.</param>
 /// <param name="IsActive">Whether the product is active.</param>
+/// <param name="TargetWeight">Target net weight in kg, if set.</param>
+/// <param name="LowerTolerance">Allowed amount below the target in kg, if set.</param>
+/// <param name="UpperTolerance">Allowed amount above the target in kg, if set.</param>
 [IntegrationEvent("products.product-saved", 1)]
 public sealed record ProductSaved(
     Guid ProductId,
@@ -20,4 +23,7 @@ public sealed record ProductSaved(
     decimal? PackageTare,
     int? ShelfLifeDays,
     string? BarcodePrefix,
-    bool IsActive) : IIntegrationEvent;
+    bool IsActive,
+    decimal? TargetWeight = null,
+    decimal? LowerTolerance = null,
+    decimal? UpperTolerance = null) : IIntegrationEvent;

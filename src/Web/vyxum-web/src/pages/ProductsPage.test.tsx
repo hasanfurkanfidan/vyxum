@@ -16,6 +16,9 @@ function product(overrides: Partial<Product> = {}): Product {
     shelfLifeDays: 180,
     barcodePrefix: '29',
     ingredients: '*Antep fıstığı* (%98), tuz.',
+    targetWeight: '0.250',
+    lowerTolerance: '0.005',
+    upperTolerance: null,
     isActive: true,
     updatedAt: '2026-11-21T10:00:00Z',
     ...overrides,
@@ -119,6 +122,9 @@ describe('products screen', () => {
     await user.click(await screen.findByRole('button', { name: 'Antep Fıstığı, kavrulmuş' }));
     expect(screen.getByLabelText('Birim fiyat (kg başına)')).toHaveValue('780,00');
     expect(screen.getByLabelText('Ambalaj darası (kg)')).toHaveValue('0,012');
+    expect(screen.getByLabelText('Hedef ağırlık (kg)')).toHaveValue('0,250');
+    expect(screen.getByLabelText('Alt tolerans (kg)')).toHaveValue('0,005');
+    expect(screen.getByLabelText('Üst tolerans (kg)')).toHaveValue('');
 
     const name = screen.getByLabelText('Ürün adı');
     await user.clear(name);
@@ -130,7 +136,7 @@ describe('products screen', () => {
 
     expect(await screen.findByText('Kaydedildi')).toBeInTheDocument();
     const put = fetchMock.mock.calls.find(([, init]) => init?.method === 'PUT');
-    expect(bodyOf(put?.[1])).toMatchObject({ name: 'Antep Fıstığı', unitPrice: '800.5', packageTare: '0.012', shelfLifeDays: 180 });
+    expect(bodyOf(put?.[1])).toMatchObject({ name: 'Antep Fıstığı', unitPrice: '800.5', packageTare: '0.012', shelfLifeDays: 180, targetWeight: '0.250', lowerTolerance: '0.005', upperTolerance: null });
     const row = (await screen.findByRole('button', { name: 'Antep Fıstığı' })).closest('tr');
     expect(row).toHaveClass('is-selected');
     expect(screen.getByLabelText('Birim fiyat (kg başına)')).toHaveValue('800.5'.replace('.', ','));
@@ -158,6 +164,9 @@ describe('products screen', () => {
     await user.type(screen.getByLabelText('Birim fiyat (kg başına)'), '12,5');
     await user.type(screen.getByLabelText('Ambalaj darası (kg)'), '0,012');
     await user.type(screen.getByLabelText('Raf ömrü (gün)'), '30');
+    await user.type(screen.getByLabelText('Hedef ağırlık (kg)'), '0,25');
+    await user.type(screen.getByLabelText('Alt tolerans (kg)'), '0,005');
+    await user.type(screen.getByLabelText('Üst tolerans (kg)'), '0,01');
     await user.click(screen.getByRole('button', { name: 'Kaydet' }));
 
     expect(await screen.findByText('Kaydedildi')).toBeInTheDocument();
@@ -170,6 +179,9 @@ describe('products screen', () => {
       shelfLifeDays: 30,
       barcodePrefix: '',
       ingredients: '',
+      targetWeight: '0.25',
+      lowerTolerance: '0.005',
+      upperTolerance: '0.01',
     });
     expect(await screen.findByText('Ürünler / 1 ürün')).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Ürünü pasifleştir' })).toBeInTheDocument();

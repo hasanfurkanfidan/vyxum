@@ -74,6 +74,9 @@
   <data name="CancelledNotInTotals" xml:space="preserve"><value>cancelled records are not included in totals</value></data>
   <data name="Total" xml:space="preserve"><value>Total</value></data>
   <data name="CancelRecord" xml:space="preserve"><value>Cancel record</value></data>
+  <data name="TargetWeight" xml:space="preserve"><value>Target weight (kg)</value></data>
+  <data name="LowerTolerance" xml:space="preserve"><value>Lower tolerance (kg)</value></data>
+  <data name="UpperTolerance" xml:space="preserve"><value>Upper tolerance (kg)</value></data>
   <data name="CancelReason" xml:space="preserve"><value>Reason for cancellation</value></data>
   <data name="CancelConfirm" xml:space="preserve"><value>Cancel record {0}? It stays in the list but is not included in totals.</value></data>
   <data name="Empty" xml:space="preserve"><value>No records found.</value></data>

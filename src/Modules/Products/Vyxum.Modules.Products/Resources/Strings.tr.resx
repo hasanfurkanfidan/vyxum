@@ -21,6 +21,11 @@
   <data name="Product" xml:space="preserve"><value>Ürün</value></data>
   <data name="UnitPricePerKg" xml:space="preserve"><value>Birim fiyat (kg başına)</value></data>
   <data name="PackageTare" xml:space="preserve"><value>Ambalaj darası (kg)</value></data>
+  <data name="TargetWeight" xml:space="preserve"><value>Hedef ağırlık (kg)</value></data>
+  <data name="LowerTolerance" xml:space="preserve"><value>Alt tolerans (kg)</value></data>
+  <data name="UpperTolerance" xml:space="preserve"><value>Üst tolerans (kg)</value></data>
+  <data name="ToleranceHint" xml:space="preserve"><value>Hedefin altında ve üstünde kabul edilen miktarlar, örneğin 0,250 için 0,005 ve 0,010</value></data>
+  <data name="ToleranceNeedsTarget" xml:space="preserve"><value>Tolerans girmeden önce hedef ağırlığı girin.</value></data>
   <data name="ShelfLife" xml:space="preserve"><value>Raf ömrü (gün)</value></data>
   <data name="Days" xml:space="preserve"><value>{0} gün</value></data>
   <data name="BarcodePrefix" xml:space="preserve"><value>Barkod öneki</value></data>

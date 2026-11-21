@@ -275,6 +275,9 @@ public sealed class WeighingService(
             NetMilligrams = unitKnown ? (long)decimal.Round(net * WeightUnits.ToMilligrams(unit!), 0, MidpointRounding.AwayFromZero) : null,
             Unit = unit,
             UnitPrice = unitPrice,
+            TargetWeight = product?.TargetWeight,
+            LowerTolerance = product?.LowerTolerance,
+            UpperTolerance = product?.UpperTolerance,
             Amount = amount,
             AmountMinor = amountMinor,
             AmountScale = _options.AmountDecimals,
@@ -376,7 +379,10 @@ internal static class WeighingMapper
         r.Status.ToString(),
         r.CancelledAtUtc,
         r.CancelReason,
-        r.Operator);
+        r.Operator,
+        FormatPrice(r.TargetWeight),
+        FormatPrice(r.LowerTolerance),
+        FormatPrice(r.UpperTolerance));
 
     public static WeighingRecorded ToRecordedEvent(WeighingRecord r) => new(
         r.Id,
@@ -396,5 +402,8 @@ internal static class WeighingMapper
         r.UnitPrice,
         r.Amount,
         r.Currency,
-        r.Operator);
+        r.Operator,
+        r.TargetWeight,
+        r.LowerTolerance,
+        r.UpperTolerance);
 }

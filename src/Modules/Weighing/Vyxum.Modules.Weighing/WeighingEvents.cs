@@ -21,6 +21,9 @@ namespace Vyxum.Modules.Weighing;
 /// <param name="Amount">Net (kg) times unit price, rounded; null without a price.</param>
 /// <param name="Currency">Currency of <paramref name="Amount"/>.</param>
 /// <param name="Operator">Operator; null until a users module exists.</param>
+/// <param name="TargetWeight">Target weight in kg on the product when the record was saved, if any.</param>
+/// <param name="LowerTolerance">Allowed amount below the target in kg, if any.</param>
+/// <param name="UpperTolerance">Allowed amount above the target in kg, if any.</param>
 [IntegrationEvent("weighing.recorded", 1)]
 public sealed record WeighingRecorded(
     long RecordId,
@@ -40,7 +43,10 @@ public sealed record WeighingRecorded(
     decimal? UnitPrice,
     decimal? Amount,
     string Currency,
-    string? Operator) : IIntegrationEvent;
+    string? Operator,
+    decimal? TargetWeight = null,
+    decimal? LowerTolerance = null,
+    decimal? UpperTolerance = null) : IIntegrationEvent;
 
 /// <summary>Published when a weighing record is cancelled.</summary>
 /// <param name="RecordId">Record id.</param>

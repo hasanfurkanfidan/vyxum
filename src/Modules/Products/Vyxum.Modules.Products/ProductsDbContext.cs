@@ -24,6 +24,9 @@ public sealed class ProductsDbContext(DbContextOptions<ProductsDbContext> option
             entity.Property(p => p.Name).IsRequired().HasMaxLength(ProductLimits.NameMaxLength);
             entity.Property(p => p.UnitPrice).HasPrecision(18, 4);
             entity.Property(p => p.PackageTare).HasPrecision(18, 4);
+            entity.Property(p => p.TargetWeight).HasPrecision(18, 4);
+            entity.Property(p => p.LowerTolerance).HasPrecision(18, 4);
+            entity.Property(p => p.UpperTolerance).HasPrecision(18, 4);
             entity.Property(p => p.BarcodePrefix).HasMaxLength(ProductLimits.BarcodePrefixMaxLength);
             entity.Property(p => p.Ingredients).HasMaxLength(ProductLimits.IngredientsMaxLength);
             entity.HasIndex(p => p.Code).IsUnique();
@@ -64,6 +67,15 @@ public sealed class Product
 
     /// <summary>Package tare in kg.</summary>
     public decimal? PackageTare { get; set; }
+
+    /// <summary>Target net weight in kg.</summary>
+    public decimal? TargetWeight { get; set; }
+
+    /// <summary>Allowed amount below <see cref="TargetWeight"/> in kg.</summary>
+    public decimal? LowerTolerance { get; set; }
+
+    /// <summary>Allowed amount above <see cref="TargetWeight"/> in kg.</summary>
+    public decimal? UpperTolerance { get; set; }
 
     /// <summary>Shelf life in days.</summary>
     public int? ShelfLifeDays { get; set; }

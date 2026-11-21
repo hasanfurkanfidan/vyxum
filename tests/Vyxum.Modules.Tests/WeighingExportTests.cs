@@ -19,8 +19,8 @@ public class WeighingExportTests
 
     private sealed record Sheet(Dictionary<string, string> Cells, Dictionary<string, uint?> Styles, List<string> Formats);
 
-    private static Vyxum.Modules.Weighing.ProductSaved Product(Guid id, string code, string name, decimal price) =>
-        new(id, code, name, price, null, 30, "28", true);
+    private static Vyxum.Modules.Weighing.ProductSaved Product(Guid id, string code, string name, decimal price, decimal? target = null, decimal? lower = null, decimal? upper = null) =>
+        new(id, code, name, price, null, 30, "28", true, target, lower, upper);
 
     private static async Task<long> WeighAsync(WeighingTestApp app, decimal value, string unit, Guid? product, string? lot)
     {
@@ -96,7 +96,7 @@ public class WeighingExportTests
 
     private static async Task<(long A, long B, long C, long D)> SeedAsync(WeighingTestApp app)
     {
-        await app.DeliverAsync(Product(Pistachio, "0417", "Pistachio", 780m));
+        await app.DeliverAsync(Product(Pistachio, "0417", "Pistachio", 780m, 1.25m, 0.005m, 0.01m));
         await app.DeliverAsync(Product(Cashew, "0203", "Cashew", 640m));
         var a = await WeighAsync(app, 0.512m, "kg", Cashew, "L-2");      // 327.68
         var b = await WeighAsync(app, 0.498m, "kg", Cashew, "L-2");      // 318.72, cancelled
@@ -125,7 +125,10 @@ public class WeighingExportTests
         var sheet = Read(bytes);
         sheet.Cells["A1"].ShouldBe("s:Date and time");
         sheet.Cells["N1"].ShouldBe("s:Reason for cancellation");
-        sheet.Cells.ContainsKey("O1").ShouldBeFalse(); // no users capability, no operator column
+        sheet.Cells["O1"].ShouldBe("s:Target weight (kg)");
+        sheet.Cells["P1"].ShouldBe("s:Lower tolerance (kg)");
+        sheet.Cells["Q1"].ShouldBe("s:Upper tolerance (kg)");
+        sheet.Cells.ContainsKey("R1").ShouldBeFalse(); // no users capability, no operator column
 
         // Oldest first: a, b (cancelled), c, d on rows 2 to 5.
         sheet.Cells["B2"].ShouldBe("s:" + a.ToString("D6", CultureInfo.InvariantCulture));
@@ -157,6 +160,15 @@ public class WeighingExportTests
         sheet.Cells["M3"].ShouldBe("s:cancelled");
         sheet.Cells["N3"].ShouldBe("s:Wrong");
 
+        // Target and tolerances of the product at save time; empty for a product without them and for a record without a product.
+        Number(sheet, "O4").ShouldBe(1.25m);
+        FormatOf(sheet, "O4").ShouldBe("0.00");
+        Number(sheet, "P4").ShouldBe(0.005m);
+        FormatOf(sheet, "P4").ShouldBe("0.000");
+        Number(sheet, "Q4").ShouldBe(0.01m);
+        sheet.Cells.ContainsKey("O2").ShouldBeFalse();
+        sheet.Cells.ContainsKey("O5").ShouldBeFalse();
+
         // Totals: label, valid count (3), net per unit and amount; the cancelled record is not summed.
         sheet.Cells["A6"].ShouldBe("s:Total");
         Number(sheet, "B6").ShouldBe(3m);
@@ -182,6 +194,9 @@ public class WeighingExportTests
         tr.Cells["B1"].ShouldBe("s:Kayıt no");
         tr.Cells["I1"].ShouldBe("s:Birim");
         tr.Cells["M1"].ShouldBe("s:Durum");
+        tr.Cells["O1"].ShouldBe("s:Hedef ağırlık (kg)");
+        tr.Cells["P1"].ShouldBe("s:Alt tolerans (kg)");
+        tr.Cells["Q1"].ShouldBe("s:Üst tolerans (kg)");
         tr.Cells["M3"].ShouldBe("s:iptal");
         tr.Cells["A6"].ShouldBe("s:Toplam");
         tr.Cells["A7"].ShouldBe("s:iptaller toplama girmez");

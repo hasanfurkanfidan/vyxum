@@ -62,6 +62,7 @@ public sealed class WeighingExporter(WeighingQueries queries)
                     Text("DateTime"), Text("RecordNo"), Text("Plu"), Text("Product"), Text("Lot"),
                     Text("Gross"), Text("Tare"), Text("Net"), Text("Unit"), Text("UnitPrice"),
                     Text("Amount"), Text("Currency"), Text("Status"), Text("CancelReason"),
+                    Text("TargetWeight"), Text("LowerTolerance"), Text("UpperTolerance"),
                 };
                 if (showOperator)
                 {
@@ -92,10 +93,13 @@ public sealed class WeighingExporter(WeighingQueries queries)
                         Cell.Text(11, r.Currency),
                         Cell.Text(12, r.Status == WeighingStatus.Cancelled ? cancelledText : savedText),
                         Cell.Text(13, r.CancelReason),
+                        TargetCell(14, r.TargetWeight),
+                        TargetCell(15, r.LowerTolerance),
+                        TargetCell(16, r.UpperTolerance),
                     };
                     if (showOperator)
                     {
-                        cells.Add(Cell.Text(14, r.Operator));
+                        cells.Add(Cell.Text(17, r.Operator));
                     }
 
                     WriteRow(writer, rowNumber++, cells);
@@ -145,6 +149,9 @@ public sealed class WeighingExporter(WeighingQueries queries)
         }
     }
 
+    private static Cell TargetCell(int column, decimal? value) =>
+        value is { } v ? Cell.Decimal(column, v, ParseInvariant(WeighingMapper.FormatPrice(v)!).Decimals) : Cell.Empty(column);
+
     private static WorksheetPart AddSheetPart(WorkbookPart workbookPart) => workbookPart.AddNewPart<WorksheetPart>();
 
     private static string SheetName(string name)
@@ -167,7 +174,7 @@ public sealed class WeighingExporter(WeighingQueries queries)
 
     private static Columns ColumnWidths(bool showOperator)
     {
-        double[] widths = [20, 11, 10, 28, 14, 11, 11, 11, 8, 12, 13, 10, 14, 30, 18];
+        double[] widths = [20, 11, 10, 28, 14, 11, 11, 11, 8, 12, 13, 10, 14, 30, 14, 14, 14, 18];
         var count = showOperator ? widths.Length : widths.Length - 1;
         var columns = new Columns();
         for (var i = 0; i < count; i++)

@@ -21,6 +21,11 @@
   <data name="Product" xml:space="preserve"><value>Product</value></data>
   <data name="UnitPricePerKg" xml:space="preserve"><value>Unit price per kg</value></data>
   <data name="PackageTare" xml:space="preserve"><value>Package tare (kg)</value></data>
+  <data name="TargetWeight" xml:space="preserve"><value>Target weight (kg)</value></data>
+  <data name="LowerTolerance" xml:space="preserve"><value>Lower tolerance (kg)</value></data>
+  <data name="UpperTolerance" xml:space="preserve"><value>Upper tolerance (kg)</value></data>
+  <data name="ToleranceHint" xml:space="preserve"><value>Amounts below and above the target that are still acceptable, for example 0.250 with 0.005 and 0.010</value></data>
+  <data name="ToleranceNeedsTarget" xml:space="preserve"><value>Enter a target weight before setting tolerances.</value></data>
   <data name="ShelfLife" xml:space="preserve"><value>Shelf life (days)</value></data>
   <data name="Days" xml:space="preserve"><value>{0} days</value></data>
   <data name="BarcodePrefix" xml:space="preserve"><value>Barcode prefix</value></data>

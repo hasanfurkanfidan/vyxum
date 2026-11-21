@@ -20,6 +20,9 @@ namespace Vyxum.Modules.Weighing;
 /// <param name="CancelledAt">UTC time of the cancel.</param>
 /// <param name="CancelReason">Cancel reason.</param>
 /// <param name="Operator">Operator; null until a users module exists.</param>
+/// <param name="TargetWeight">Target weight in kg on the product when the record was saved, e.g. "0.250"; null if none.</param>
+/// <param name="LowerTolerance">Allowed amount below the target in kg when the record was saved.</param>
+/// <param name="UpperTolerance">Allowed amount above the target in kg when the record was saved.</param>
 public sealed record WeighingRecordDto(
     long Id,
     string Number,
@@ -39,7 +42,10 @@ public sealed record WeighingRecordDto(
     string Status,
     DateTime? CancelledAt,
     string? CancelReason,
-    string? Operator);
+    string? Operator,
+    string? TargetWeight,
+    string? LowerTolerance,
+    string? UpperTolerance);
 
 /// <summary>Body of <c>POST /api/weighing/records</c>.</summary>
 /// <param name="RequestId">Client-generated id; repeating it returns the record saved the first time.</param>
@@ -78,6 +84,9 @@ public sealed record WeighingRecordListDto(IReadOnlyList<WeighingRecordDto> Item
 /// <param name="PackageTare">Package tare in kg, e.g. "0.012".</param>
 /// <param name="ShelfLifeDays">Shelf life in days.</param>
 /// <param name="BarcodePrefix">Barcode prefix.</param>
+/// <param name="TargetWeight">Target weight in kg, e.g. "0.250".</param>
+/// <param name="LowerTolerance">Allowed amount below the target in kg.</param>
+/// <param name="UpperTolerance">Allowed amount above the target in kg.</param>
 public sealed record WeighingProductDto(
     Guid Id,
     string Code,
@@ -85,7 +94,10 @@ public sealed record WeighingProductDto(
     string? UnitPrice,
     string? PackageTare,
     int? ShelfLifeDays,
-    string? BarcodePrefix);
+    string? BarcodePrefix,
+    string? TargetWeight,
+    string? LowerTolerance,
+    string? UpperTolerance);
 
 /// <summary>Weighing settings for the screen.</summary>
 /// <param name="RequireStable">Only a stable weight can be recorded.</param>

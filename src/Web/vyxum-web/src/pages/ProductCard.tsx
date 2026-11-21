@@ -20,6 +20,9 @@ interface FormValues {
   shelfLifeDays: string;
   barcodePrefix: string;
   ingredients: string;
+  targetWeight: string;
+  lowerTolerance: string;
+  upperTolerance: string;
 }
 
 type FieldErrors = Partial<Record<ProductField, readonly string[]>>;
@@ -32,6 +35,9 @@ const emptyValues: FormValues = {
   shelfLifeDays: '',
   barcodePrefix: '',
   ingredients: '',
+  targetWeight: '',
+  lowerTolerance: '',
+  upperTolerance: '',
 };
 
 export interface ProductCardProps {
@@ -51,6 +57,9 @@ function toValues(product: Product | null, culture: 'tr' | 'en'): FormValues {
     shelfLifeDays: product.shelfLifeDays === null ? '' : String(product.shelfLifeDays),
     barcodePrefix: product.barcodePrefix ?? '',
     ingredients: product.ingredients ?? '',
+    targetWeight: toInputDecimal(product.targetWeight, culture),
+    lowerTolerance: toInputDecimal(product.lowerTolerance, culture),
+    upperTolerance: toInputDecimal(product.upperTolerance, culture),
   };
 }
 
@@ -155,6 +164,9 @@ export function ProductCard({ product: initial, onChanged }: ProductCardProps) {
       shelfLifeDays: shelfLife === '' ? null : Number(shelfLife),
       barcodePrefix: values.barcodePrefix,
       ingredients: values.ingredients,
+      targetWeight: optionalDecimal(values.targetWeight),
+      lowerTolerance: optionalDecimal(values.lowerTolerance),
+      upperTolerance: optionalDecimal(values.upperTolerance),
     };
 
     setBusy(true);
@@ -267,6 +279,48 @@ export function ProductCard({ product: initial, onChanged }: ProductCardProps) {
                 inputMode="numeric"
                 value={values.shelfLifeDays}
                 onChange={(event) => set('shelfLifeDays', event.target.value)}
+              />
+            )}
+          </Field>
+          <Field
+            id={fieldId('targetWeight')}
+            label={t('products.TargetWeight')}
+            hint={t('products.ToleranceHint')}
+            errors={errors.targetWeight}
+            wide
+          >
+            {(a) => (
+              <input
+                {...a}
+                className="input input--mono"
+                type="text"
+                inputMode="decimal"
+                value={values.targetWeight}
+                onChange={(event) => set('targetWeight', event.target.value)}
+              />
+            )}
+          </Field>
+          <Field id={fieldId('lowerTolerance')} label={t('products.LowerTolerance')} errors={errors.lowerTolerance}>
+            {(a) => (
+              <input
+                {...a}
+                className="input input--mono"
+                type="text"
+                inputMode="decimal"
+                value={values.lowerTolerance}
+                onChange={(event) => set('lowerTolerance', event.target.value)}
+              />
+            )}
+          </Field>
+          <Field id={fieldId('upperTolerance')} label={t('products.UpperTolerance')} errors={errors.upperTolerance}>
+            {(a) => (
+              <input
+                {...a}
+                className="input input--mono"
+                type="text"
+                inputMode="decimal"
+                value={values.upperTolerance}
+                onChange={(event) => set('upperTolerance', event.target.value)}
               />
             )}
           </Field>
