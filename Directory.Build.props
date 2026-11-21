@@ -7,6 +7,8 @@
     <LangVersion>latest</LangVersion>
     <AnalysisLevel>latest</AnalysisLevel>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <!-- Single version source: used by every assembly and by installer/build-installer.ps1. -->
+    <Version>0.1.0</Version>
   </PropertyGroup>
 
 </Project>
