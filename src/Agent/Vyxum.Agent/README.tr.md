@@ -6,9 +6,23 @@ Vyxum Agent, terazinin bağlı olduğu bilgisayarda çalışır. Teraziyi seri p
 SignalR ile Vyxum web uygulamasına gönderir. Web uygulamasına kendisi bağlanır; hem teraziyle hem web uygulamasıyla
 bağlantı koparsa kendiliğinden yeniden bağlanır.
 
+## Cihazlar nereden gelir
+
+Cihazlar web uygulamasında, Ayarlar → Cihazlar altında ayarlanır ve onun veritabanında saklanır. Agent bağlanınca
+cihazlarını web uygulamasından ister; orada her değişiklikte yeniden ister. Sonra kendini yeniden başlatmadan yeni
+cihazları başlatır, silinenleri durdurur, değişenleri yeniden kurar. Değişmeyen cihazlar çalışmaya devam eder. Agent'ın
+kullanamadığı ayarlara sahip bir cihaz çalışmaz; `Error` durumu ve nedeniyle gösterilir.
+
+Bilgisayar adı verilmemiş bir cihaza, cihazlarını ilk isteyen Agent bakar; tek bilgisayarlı kurulumda bu tek Agent'tır.
+Bilgisayar adı (`agentName`) verilmiş bir cihaza `AgentName` değeri o ad olan Agent bakar.
+
+Agent'ın kendi ayar dosyasındaki `Devices` listesi geliştirme ve web ayarı kullanılmayan düzenler içindir: listede
+cihaz varsa Agent onları kullanır, web uygulamasında ayarlanan cihazları yok sayar. Kurulan Agent boş listeyle gelir.
+
 ## Konsol uygulaması olarak çalıştırma
 
-Gelen `appsettings.json` ile Agent benzetilmiş bir MT-SICS terazisini (572 g) okur; donanım olmadan çalışır:
+`dotnet run` Agent'ı Development ortamında başlatır (bkz. `Properties/launchSettings.json`); bu ortamda
+`appsettings.Development.json` benzetilmiş bir MT-SICS terazisi (572 g) ekler, böylece donanım olmadan çalışır:
 
 ```
 dotnet run --project src/Agent/Vyxum.Agent
@@ -49,9 +63,10 @@ hangi ayarın hatalı olduğunu yazar.
 | `HeartbeatInterval` | Değişmese de son okuma bu aralıkla yeniden gönderilir | `00:00:01` |
 | `ReconnectDelay` | Teraziye ya da sunucuya yeniden bağlanmadan önceki ilk bekleme; her başarısızlıkta iki katına çıkar | `00:00:01` |
 | `MaxReconnectDelay` | Denemeler arasındaki en uzun bekleme | `00:00:30` |
-| `Devices` | Cihaz listesi, aşağıya bakın | |
+| `Devices` | Yerel cihaz listesi, aşağıya bakın. Boş değilse web uygulamasındaki cihazlar yok sayılır. | boş |
 
 Her cihazın bir `Id`, bir `Transport` (taşıma) ve bir `Protocol` ayarı vardır. Her taşıma her protokolle çalışır.
+Web uygulamasındaki cihaz ayarlarında aynı `transport` ve `protocol` alanları (küçük harfle başlayarak) bulunur.
 
 - `Transport.Type`:
   - `serial`: `PortName` (zorunlu, örneğin `COM3`), `BaudRate` (9600), `DataBits` (8), `Parity` (`None`, `Odd`,

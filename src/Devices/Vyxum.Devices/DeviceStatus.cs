@@ -11,6 +11,12 @@ public enum DeviceStatus
 
     /// <summary>The transport is closed. The runner waits before the next attempt, or has stopped.</summary>
     Disconnected,
+
+    /// <summary>
+    /// The device cannot run because its settings are invalid; the error says why. A <see cref="DeviceRunner"/> never
+    /// reports it: a host reports it for a device it could not create.
+    /// </summary>
+    Error,
 }
 
 /// <summary>A status change reported by a <see cref="DeviceRunner"/>.</summary>

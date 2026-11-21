@@ -97,7 +97,9 @@ dotnet run --project src/Host/Vyxum.Host --urls http://localhost:5000
 dotnet run --project src/Agent/Vyxum.Agent
 ```
 
-Then open http://localhost:5000/api/devices. The agent's shipped settings use a simulated MT-SICS scale (572 g), so no hardware is needed.
+Then open http://localhost:5000/api/devices. Under `dotnet run` the agent starts in the Development environment, whose `appsettings.Development.json` adds a simulated MT-SICS scale (572 g), so no hardware is needed.
+
+Devices are configured in the web application (Settings → Devices) and stored in the `plt_Devices` table; the agent fetches them when it connects and applies every change without restarting. `GET`, `POST /api/devices/config` and `GET`, `PUT`, `DELETE /api/devices/config/{id}` read and change them (`transport` and `protocol` have the same fields as the agent settings; `capacity` and `division` are decimal strings). The `Devices` list in the agent's own settings file is for development: when it is not empty, the agent ignores the devices from the web application. See the [agent README](src/Agent/Vyxum.Agent/README.md). Each device in `/api/devices` also carries `name`, `capacity`, `division` and `unit` from its settings; a device whose settings the agent cannot use has the state `Error`.
 
 http://localhost:5000/api/devices/{id}/live streams one device as Server-Sent Events: its current state at once, then a new event whenever its state or weight changes. A device id the agent has not reported yet is not an error; the stream starts in the `Disconnected` state and continues once the agent connects.
 

@@ -1,3 +1,4 @@
+using System.Text.Json;
 using Vyxum.Platform.Abstractions;
 
 namespace Vyxum.Platform;
@@ -27,7 +28,27 @@ public static class AgentHubContract
     /// The agent sends the zero command to the device at most once and answers within <c>timeout</c>.
     /// </summary>
     public const string Zero = "Zero";
+
+    /// <summary>
+    /// Hub method: <c>AgentDeviceConfig[] GetDevices()</c>. Returns the enabled devices from the device settings that the
+    /// calling agent serves (see <see cref="AgentDeviceAssignments"/>). Call it after <see cref="Register"/>. An agent that
+    /// calls it takes part in the device settings and is sent <see cref="DevicesChanged"/>; agents that never call it
+    /// (older agents, agents with devices in their own settings file) are left alone.
+    /// </summary>
+    public const string GetDevices = "GetDevices";
+
+    /// <summary>
+    /// Client method without arguments: <c>DevicesChanged()</c>. The device settings changed; the agent calls
+    /// <see cref="GetDevices"/> again. Sent only to agents that have called <see cref="GetDevices"/>.
+    /// </summary>
+    public const string DevicesChanged = "DevicesChanged";
 }
+
+/// <summary>One device an agent should run, from <see cref="AgentHubContract.GetDevices"/>.</summary>
+/// <param name="Id">The device id.</param>
+/// <param name="Transport">The transport settings, a JSON object with <c>type</c>; the agent reads the rest.</param>
+/// <param name="Protocol">The protocol settings, a JSON object with <c>type</c>; the agent reads the rest.</param>
+public sealed record AgentDeviceConfig(string Id, JsonElement Transport, JsonElement Protocol);
 
 /// <summary>Sent by an agent after connecting.</summary>
 /// <param name="AgentName">A name for the agent, usually the computer name.</param>

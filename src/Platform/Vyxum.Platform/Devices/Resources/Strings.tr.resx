@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype"><value>text/microsoft-resx</value></resheader>
+  <resheader name="version"><value>2.0</value></resheader>
+  <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+  <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+  <data name="IdRequired" xml:space="preserve"><value>Cihaz kimliği zorunludur.</value></data>
+  <data name="IdInvalid" xml:space="preserve"><value>Yalnızca küçük harf, rakam ve kısa çizgi kullanın (en fazla 64 karakter), örneğin terazi-1.</value></data>
+  <data name="IdTaken" xml:space="preserve"><value>Bu kimliği başka bir cihaz kullanıyor.</value></data>
+  <data name="NameTooLong" xml:space="preserve"><value>Ad çok uzun (en fazla 200 karakter).</value></data>
+  <data name="AgentNameTooLong" xml:space="preserve"><value>Bilgisayar adı çok uzun (en fazla 200 karakter).</value></data>
+  <data name="TransportRequired" xml:space="preserve"><value>Cihazın nasıl bağlandığını seçin.</value></data>
+  <data name="TransportTypeInvalid" xml:space="preserve"><value>Bağlantı türü seri port, ağ ya da simülatör olmalıdır.</value></data>
+  <data name="PortNameRequired" xml:space="preserve"><value>Seri port zorunludur, örneğin COM3.</value></data>
+  <data name="HostRequired" xml:space="preserve"><value>IP adresi ya da bilgisayar adı zorunludur.</value></data>
+  <data name="PortInvalid" xml:space="preserve"><value>Port 1 ile 65535 arasında bir sayı olmalıdır.</value></data>
+  <data name="ProtocolRequired" xml:space="preserve"><value>Cihaz protokolünü seçin.</value></data>
+  <data name="SettingsTooLong" xml:space="preserve"><value>Ayarlar çok uzun.</value></data>
+  <data name="InvalidNumber" xml:space="preserve"><value>En fazla 6 ondalık basamaklı bir sayı girin.</value></data>
+  <data name="MustBePositive" xml:space="preserve"><value>Değer sıfırdan büyük olmalıdır.</value></data>
+  <data name="DivisionAboveCapacity" xml:space="preserve"><value>Bölüntü kapasiteden büyük olamaz.</value></data>
+  <data name="UnitTooLong" xml:space="preserve"><value>Birim çok uzun (en fazla 16 karakter).</value></data>
+</root>

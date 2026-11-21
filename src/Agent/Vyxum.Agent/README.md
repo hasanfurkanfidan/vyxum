@@ -6,9 +6,24 @@ Vyxum Agent runs on the computer the scale is connected to. It reads the scale o
 sends the live weight to the Vyxum web application over SignalR. It connects to the web application by itself and
 reconnects automatically, both to the scale and to the web application.
 
+## Where the devices come from
+
+Devices are configured in the web application, under Settings → Devices, and stored in its database. The agent asks
+the web application for its devices when it connects, and again whenever they change there; it then starts new
+devices, stops removed ones and restarts changed ones without restarting itself. Devices that did not change keep
+running. A device whose settings the agent cannot use does not run and is shown with status `Error` and the reason.
+
+A device without a computer name is served by the first agent that asked for its devices; on a single computer that
+is the only agent. A device with a computer name (`agentName`) is served by the agent with that `AgentName`.
+
+The `Devices` list in the agent's own settings file is for development and for setups without the web settings: when
+it lists any device, the agent uses those devices and ignores the ones configured in the web application. The
+installed agent ships with an empty list.
+
 ## Run as a console application
 
-With the shipped `appsettings.json` the agent reads a simulated MT-SICS scale (572 g), so it works without hardware:
+`dotnet run` starts the agent in the Development environment (see `Properties/launchSettings.json`), where
+`appsettings.Development.json` adds a simulated MT-SICS scale (572 g), so it works without hardware:
 
 ```
 dotnet run --project src/Agent/Vyxum.Agent
@@ -49,9 +64,10 @@ a message that names the setting.
 | `HeartbeatInterval` | The latest reading is sent again this often when it does not change | `00:00:01` |
 | `ReconnectDelay` | First wait before reconnecting to a scale or to the server; doubles after each failure | `00:00:01` |
 | `MaxReconnectDelay` | Longest wait between attempts | `00:00:30` |
-| `Devices` | List of devices, see below | |
+| `Devices` | Local list of devices, see below. When it is not empty, the devices from the web application are ignored. | empty |
 
-Each device has an `Id`, a `Transport` and a `Protocol`. Any transport works with any protocol.
+Each device has an `Id`, a `Transport` and a `Protocol`. Any transport works with any protocol. The device settings
+in the web application have the same `transport` and `protocol` fields (in camel case).
 
 - `Transport.Type`:
   - `serial`: `PortName` (required, for example `COM3`), `BaudRate` (9600), `DataBits` (8), `Parity` (`None`, `Odd`,

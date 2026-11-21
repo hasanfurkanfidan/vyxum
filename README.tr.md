@@ -99,7 +99,9 @@ dotnet run --project src/Host/Vyxum.Host --urls http://localhost:5000
 dotnet run --project src/Agent/Vyxum.Agent
 ```
 
-Ardından http://localhost:5000/api/devices adresini açın. Agent'ın hazır ayarları simüle edilmiş bir MT-SICS terazisi (572 g) kullanır; donanım gerekmez.
+Ardından http://localhost:5000/api/devices adresini açın. `dotnet run` ile Agent Development ortamında başlar; bu ortamın `appsettings.Development.json` dosyası simüle edilmiş bir MT-SICS terazisi (572 g) ekler, donanım gerekmez.
+
+Cihazlar web uygulamasında (Ayarlar → Cihazlar) ayarlanır ve `plt_Devices` tablosunda saklanır; Agent bağlanınca onları alır ve her değişikliği yeniden başlamadan uygular. `GET`, `POST /api/devices/config` ve `GET`, `PUT`, `DELETE /api/devices/config/{id}` cihaz ayarlarını okur ve değiştirir (`transport` ve `protocol` Agent ayarlarıyla aynı alanlara sahiptir; `capacity` ve `division` ondalık metindir). Agent'ın kendi ayar dosyasındaki `Devices` listesi geliştirme içindir: boş değilse Agent web uygulamasındaki cihazları yok sayar. Bkz. [Agent README](src/Agent/Vyxum.Agent/README.tr.md). `/api/devices` içindeki her cihaz ayarlarından gelen `name`, `capacity`, `division` ve `unit` alanlarını da taşır; Agent'ın kullanamadığı ayarlara sahip bir cihazın durumu `Error` olur.
 
 http://localhost:5000/api/devices/{id}/live bir cihazı Server-Sent Events olarak yayınlar: önce o anki durumu, ardından durumu ya da ağırlığı her değiştiğinde yeni bir olay. Agent'ın henüz bildirmediği bir cihaz kimliği hata değildir; yayın `Disconnected` durumunda başlar ve agent bağlanınca sürer.
 

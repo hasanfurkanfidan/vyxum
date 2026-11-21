@@ -1,3 +1,4 @@
+using System.Text.Json;
 using Vyxum.Devices;
 
 namespace Vyxum.Agent.Contract;
@@ -29,7 +30,22 @@ public static class AgentHubContract
     /// The agent sends the zero command to the device at most once and answers within <c>timeout</c>.
     /// </summary>
     public const string Zero = "Zero";
+
+    /// <summary>
+    /// Hub method: <c>AgentDeviceConfig[] GetDevices()</c>, called after <see cref="Register"/>. Returns the devices from
+    /// the device settings of the web application that this agent serves.
+    /// </summary>
+    public const string GetDevices = "GetDevices";
+
+    /// <summary>Client method without arguments: <c>DevicesChanged()</c>. The device settings changed; call <see cref="GetDevices"/> again.</summary>
+    public const string DevicesChanged = "DevicesChanged";
 }
+
+/// <summary>One device from <see cref="AgentHubContract.GetDevices"/>.</summary>
+/// <param name="Id">The device id.</param>
+/// <param name="Transport">The transport settings: a JSON object with the shape of <see cref="Configuration.TransportSettings"/>.</param>
+/// <param name="Protocol">The protocol settings: a JSON object with the shape of <see cref="Configuration.ProtocolSettings"/>.</param>
+public sealed record AgentDeviceConfig(string Id, JsonElement Transport, JsonElement Protocol);
 
 /// <summary>Names of the commands a device can carry out, as reported in <see cref="AgentRegistration.DeviceCommands"/>.</summary>
 public static class AgentDeviceCommands

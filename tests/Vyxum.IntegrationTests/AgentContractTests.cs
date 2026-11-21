@@ -37,6 +37,8 @@ public class AgentContractTests
         AgentSide.AgentHubContract.ReportReading.ShouldBe(PlatformSide.AgentHubContract.ReportReading);
         AgentSide.AgentHubContract.ReportStatus.ShouldBe(PlatformSide.AgentHubContract.ReportStatus);
         AgentSide.AgentHubContract.Zero.ShouldBe(PlatformSide.AgentHubContract.Zero);
+        AgentSide.AgentHubContract.GetDevices.ShouldBe(PlatformSide.AgentHubContract.GetDevices);
+        AgentSide.AgentHubContract.DevicesChanged.ShouldBe(PlatformSide.AgentHubContract.DevicesChanged);
         AgentSide.AgentDeviceCommands.Zero.ShouldBe(DeviceCommandNames.Zero);
     }
 
@@ -56,6 +58,7 @@ public class AgentContractTests
     [InlineData(typeof(AgentSide.AgentReading), typeof(PlatformSide.AgentReading))]
     [InlineData(typeof(AgentSide.AgentDeviceStatus), typeof(PlatformSide.AgentDeviceStatus))]
     [InlineData(typeof(AgentSide.AgentCommandResult), typeof(PlatformSide.AgentCommandResult))]
+    [InlineData(typeof(AgentSide.AgentDeviceConfig), typeof(PlatformSide.AgentDeviceConfig))]
     public void Dtos_have_the_same_properties(Type agentType, Type platformType)
     {
         var agentProperties = Properties(agentType);
@@ -191,6 +194,54 @@ public class AgentContractTests
         received.ShouldNotBeNull();
         received.Result.ToString().ShouldBe(outcome.ToString());
         received.Detail.ShouldBe(detail);
+    }
+
+    [Fact]
+    public void GetDevices_hub_method_returns_the_device_list()
+    {
+        var method = typeof(AgentHub).GetMethod(PlatformSide.AgentHubContract.GetDevices, BindingFlags.Public | BindingFlags.Instance);
+        method.ShouldNotBeNull();
+        method.GetParameters().ShouldBeEmpty();
+        method.ReturnType.ShouldBe(typeof(Task<IReadOnlyList<PlatformSide.AgentDeviceConfig>>));
+    }
+
+    [Fact]
+    public void Device_sent_by_the_platform_is_read_by_the_agent()
+    {
+        using var transport = JsonDocument.Parse("""{"type":"serial","portName":"COM3","baudRate":"19200","parity":"Even","dataBits":7}""");
+        using var protocol = JsonDocument.Parse("""{"type":"mt-sics","command":"SI","pollInterval":"00:00:00.200"}""");
+        var sent = new PlatformSide.AgentDeviceConfig("scale-1", transport.RootElement, protocol.RootElement);
+
+        var json = JsonSerializer.Serialize(new[] { sent }, Json);
+        var received = JsonSerializer.Deserialize<AgentSide.AgentDeviceConfig[]>(json, Json).ShouldNotBeNull().ShouldHaveSingleItem();
+        var errors = new List<string>();
+        var settings = Vyxum.Agent.Configuration.AgentConfiguration.ReadServerDevice(received, "Device scale-1", errors);
+
+        errors.ShouldBeEmpty();
+        settings.ShouldNotBeNull();
+        settings.Id.ShouldBe("scale-1");
+        settings.Transport!.PortName.ShouldBe("COM3");
+        settings.Transport.BaudRate.ShouldBe(19200);
+        settings.Transport.DataBits.ShouldBe(7);
+        settings.Transport.Parity.ShouldBe(Vyxum.Devices.Transports.SerialParity.Even);
+        settings.Protocol!.PollInterval.ShouldBe(TimeSpan.FromMilliseconds(200));
+        var device = Vyxum.Agent.Configuration.AgentConfiguration.CreateDevice(settings, "Device scale-1", errors);
+        errors.ShouldBeEmpty();
+        device.ShouldNotBeNull().PortName.ShouldBe("COM3");
+    }
+
+    [Fact]
+    public void Device_with_a_value_of_the_wrong_type_is_reported_not_thrown()
+    {
+        using var transport = JsonDocument.Parse("""{"type":"serial","portName":"COM3","baudRate":"fast"}""");
+        using var protocol = JsonDocument.Parse("""{"type":"mt-sics"}""");
+        var errors = new List<string>();
+
+        var settings = Vyxum.Agent.Configuration.AgentConfiguration.ReadServerDevice(
+            new AgentSide.AgentDeviceConfig("scale-1", transport.RootElement.Clone(), protocol.RootElement.Clone()), "Device scale-1", errors);
+
+        settings.ShouldBeNull();
+        errors.ShouldHaveSingleItem().ShouldStartWith("Device scale-1:");
     }
 
     [Fact]

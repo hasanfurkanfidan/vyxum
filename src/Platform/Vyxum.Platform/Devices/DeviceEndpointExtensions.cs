@@ -22,13 +22,16 @@ public static class DeviceEndpointExtensions
     /// <summary>Route of the zero command; <c>{id}</c> is the device id.</summary>
     public const string ZeroPath = "/api/devices/{id}/zero";
 
+    /// <summary>Path of the device settings list; <c>/api/devices/config/{id}</c> addresses one device.</summary>
+    public const string ConfigPath = "/api/devices/config";
+
     /// <summary>JSON settings of the device endpoints and the agent hub: web defaults, enums as strings.</summary>
     public static JsonSerializerOptions JsonOptions { get; } = CreateJsonOptions();
 
     /// <summary>
     /// Maps <see cref="AgentHub"/> at <see cref="AgentHubContract.Path"/>, guarded by
     /// <see cref="AgentConnectionGate"/>, <c>GET /api/devices</c>, <c>GET /api/devices/{id}/live</c> and
-    /// <c>POST /api/devices/{id}/zero</c>.
+    /// <c>POST /api/devices/{id}/zero</c>, and the device settings API under <see cref="ConfigPath"/>.
     /// </summary>
     /// <remarks>
     /// The live endpoint is a Server-Sent Events stream (<c>text/event-stream</c>). Every event is an
@@ -60,8 +63,45 @@ public static class DeviceEndpointExtensions
         endpoints.MapGet(LivePath, StreamLiveAsync);
         endpoints.MapPost(ZeroPath, async (string id, IDeviceCommands commands, CancellationToken cancellationToken) =>
             Results.Json(await commands.ZeroAsync(id, cancellationToken), JsonOptions));
+        MapConfig(endpoints);
         return endpoints;
     }
+
+    /// <summary>
+    /// Maps the device settings API (decision V-39) under <see cref="ConfigPath"/>: <c>GET</c> (list, ordered by id),
+    /// <c>GET {id}</c>, <c>POST</c> (201 with the device), <c>PUT {id}</c> (200 with the device) and <c>DELETE {id}</c>
+    /// (204). An unknown id is 404; invalid input is a 400 validation problem whose messages are UI string keys
+    /// (<c>devices.*</c>). Like the product cards, the free edition has no login (decision V-03), so the API is open
+    /// to every caller that can reach the web application.
+    /// </summary>
+    private static void MapConfig(IEndpointRouteBuilder endpoints)
+    {
+        var group = endpoints.MapGroup(ConfigPath);
+        group.MapGet("/", async (DeviceConfigService devices, CancellationToken ct) =>
+            Results.Json(await devices.ListAsync(ct), JsonOptions));
+        group.MapGet("/{id}", async (string id, DeviceConfigService devices, CancellationToken ct) =>
+            await devices.GetAsync(id, ct) is { } device ? Results.Json(device, JsonOptions) : Results.NotFound());
+        group.MapPost("/", async (DeviceConfigInput input, DeviceConfigService devices, HttpContext context, CancellationToken ct) =>
+        {
+            var result = await devices.CreateAsync(input, ct);
+            if (result.Device is not { } device)
+            {
+                return ToHttp(result);
+            }
+
+            context.Response.Headers.Location = ConfigPath + "/" + device.Id;
+            return Results.Json(device, JsonOptions, statusCode: StatusCodes.Status201Created);
+        });
+        group.MapPut("/{id}", async (string id, DeviceConfigInput input, DeviceConfigService devices, CancellationToken ct) =>
+            ToHttp(await devices.UpdateAsync(id, input, ct)));
+        group.MapDelete("/{id}", async (string id, DeviceConfigService devices, CancellationToken ct) =>
+            await devices.DeleteAsync(id, ct) ? Results.NoContent() : Results.NotFound());
+    }
+
+    private static IResult ToHttp(DeviceConfigResult result) =>
+        result.NotFound ? Results.NotFound()
+        : result.Errors is { } errors ? Results.ValidationProblem(errors.ToDictionary(e => e.Key, e => e.Value))
+        : Results.Json(result.Device, JsonOptions);
 
     private static async Task StreamLiveAsync(string id, ILiveWeightSource source, HttpContext context)
     {
