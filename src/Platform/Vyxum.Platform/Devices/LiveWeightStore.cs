@@ -29,11 +29,14 @@ public sealed class LiveWeightStore(TimeProvider time) : ILiveWeightSource
             _agentNames[connectionId] = agentName;
             foreach (var deviceId in deviceIds)
             {
+                var before = Snapshot(deviceId);
                 var entry = Claim(connectionId, deviceId, now);
                 if (entry.State == DeviceConnectionState.Disconnected)
                 {
                     entry.State = DeviceConnectionState.Connecting;
                 }
+
+                PublishIfChanged(entry, before);
             }
         }
     }
@@ -47,6 +50,7 @@ public sealed class LiveWeightStore(TimeProvider time) : ILiveWeightSource
         var now = time.GetUtcNow();
         lock (_lock)
         {
+            var before = Snapshot(deviceId);
             var entry = Claim(connectionId, deviceId, now);
             var weight = new LiveWeight(
                 entry.DeviceId, reading.Value, reading.Unit, reading.State, reading.Tare, reading.IsNet, reading.Timestamp, now);
@@ -58,6 +62,7 @@ public sealed class LiveWeightStore(TimeProvider time) : ILiveWeightSource
                 watcher.Writer.TryWrite(weight);
             }
 
+            PublishIfChanged(entry, before);
             return weight;
         }
     }
@@ -71,9 +76,11 @@ public sealed class LiveWeightStore(TimeProvider time) : ILiveWeightSource
         var now = time.GetUtcNow();
         lock (_lock)
         {
+            var before = Snapshot(deviceId);
             var entry = Claim(connectionId, deviceId, now);
             entry.State = status.Status;
             entry.LastError = status.LastError;
+            PublishIfChanged(entry, before);
         }
     }
 
@@ -88,8 +95,10 @@ public sealed class LiveWeightStore(TimeProvider time) : ILiveWeightSource
             var count = 0;
             foreach (var entry in _devices.Values.Where(e => e.ConnectionId == connectionId))
             {
+                var before = entry.ToSnapshot();
                 entry.ConnectionId = null;
                 entry.State = DeviceConnectionState.Disconnected;
+                PublishIfChanged(entry, before);
                 count++;
             }
 
@@ -177,6 +186,87 @@ public sealed class LiveWeightStore(TimeProvider time) : ILiveWeightSource
         }
     }
 
+    /// <inheritdoc />
+    public async IAsyncEnumerable<LiveDevice> WatchDeviceAsync(
+        string deviceId,
+        [EnumeratorCancellation] CancellationToken cancellationToken = default)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(deviceId);
+
+        var channel = Channel.CreateBounded<LiveDevice>(new BoundedChannelOptions(WatcherCapacity)
+        {
+            FullMode = BoundedChannelFullMode.DropOldest,
+            SingleReader = true,
+        });
+        DeviceEntry entry;
+        lock (_lock)
+        {
+            entry = GetOrAdd(deviceId, lastSeen: null);
+            entry.DeviceWatchers.Add(channel);
+            channel.Writer.TryWrite(entry.ToSnapshot());
+        }
+
+        try
+        {
+            while (true)
+            {
+                LiveDevice device;
+                try
+                {
+                    device = await channel.Reader.ReadAsync(cancellationToken);
+                }
+                catch (OperationCanceledException)
+                {
+                    yield break;
+                }
+
+                yield return device;
+            }
+        }
+        finally
+        {
+            lock (_lock)
+            {
+                entry.DeviceWatchers.Remove(channel);
+            }
+        }
+    }
+
+    /// <summary>
+    /// The current snapshot of an entry that has device watchers; null otherwise, so that readings
+    /// nobody watches cost nothing extra. Call under the lock.
+    /// </summary>
+    private LiveDevice? Snapshot(string deviceId) =>
+        deviceId is not null && _devices.TryGetValue(deviceId, out var entry) && entry.DeviceWatchers.Count > 0
+            ? entry.ToSnapshot()
+            : null;
+
+    /// <summary>Sends the entry's snapshot to its device watchers when more than the timestamps changed. Call under the lock.</summary>
+    private static void PublishIfChanged(DeviceEntry entry, LiveDevice? before)
+    {
+        if (entry.DeviceWatchers.Count == 0)
+        {
+            return;
+        }
+
+        var after = entry.ToSnapshot();
+        if (before is not null && WithoutTimes(before) == WithoutTimes(after))
+        {
+            return;
+        }
+
+        foreach (var watcher in entry.DeviceWatchers)
+        {
+            watcher.Writer.TryWrite(after);
+        }
+    }
+
+    private static LiveDevice WithoutTimes(LiveDevice device) => device with
+    {
+        LastSeen = default,
+        LastWeight = device.LastWeight is { } weight ? weight with { Timestamp = default, ReceivedAt = default } : null,
+    };
+
     private DeviceEntry Claim(string connectionId, string deviceId, DateTimeOffset now)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(deviceId);
@@ -220,6 +310,8 @@ public sealed class LiveWeightStore(TimeProvider time) : ILiveWeightSource
         public bool Known { get; set; }
 
         public List<Channel<LiveWeight>> Watchers { get; } = [];
+
+        public List<Channel<LiveDevice>> DeviceWatchers { get; } = [];
 
         public LiveDevice ToSnapshot() => new(DeviceId, AgentName, State, LastError, LastWeight, LastSeen);
     }

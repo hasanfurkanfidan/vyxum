@@ -5,4 +5,28 @@
   <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
   <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
   <data name="Hello" xml:space="preserve"><value>Hello from Vyxum</value></data>
+  <data name="AppName" xml:space="preserve"><value>Vyxum</value></data>
+  <data name="Weighing" xml:space="preserve"><value>Weighing</value></data>
+  <data name="Records" xml:space="preserve"><value>Records</value></data>
+  <data name="Products" xml:space="preserve"><value>Products</value></data>
+  <data name="Core" xml:space="preserve"><value>CORE</value></data>
+  <data name="Modules" xml:space="preserve"><value>MODULES</value></data>
+  <data name="System" xml:space="preserve"><value>SYSTEM</value></data>
+  <data name="Language" xml:space="preserve"><value>Language</value></data>
+  <data name="Turkish" xml:space="preserve"><value>Türkçe</value></data>
+  <data name="English" xml:space="preserve"><value>English</value></data>
+  <data name="Save" xml:space="preserve"><value>Save</value></data>
+  <data name="Cancel" xml:space="preserve"><value>Cancel</value></data>
+  <data name="Search" xml:space="preserve"><value>Search</value></data>
+  <data name="Loading" xml:space="preserve"><value>Loading…</value></data>
+  <data name="Error" xml:space="preserve"><value>Error</value></data>
+  <data name="Retry" xml:space="preserve"><value>Retry</value></data>
+  <data name="Stable" xml:space="preserve"><value>stable</value></data>
+  <data name="Motion" xml:space="preserve"><value>motion</value></data>
+  <data name="Overload" xml:space="preserve"><value>overload</value></data>
+  <data name="Underload" xml:space="preserve"><value>underload</value></data>
+  <data name="Connected" xml:space="preserve"><value>connected</value></data>
+  <data name="Connecting" xml:space="preserve"><value>connecting</value></data>
+  <data name="Disconnected" xml:space="preserve"><value>disconnected</value></data>
+  <data name="NoDevice" xml:space="preserve"><value>No scale connected</value></data>
 </root>

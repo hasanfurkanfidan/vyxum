@@ -5,4 +5,28 @@
   <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
   <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
   <data name="Hello" xml:space="preserve"><value>Vyxum'dan merhaba</value></data>
+  <data name="AppName" xml:space="preserve"><value>Vyxum</value></data>
+  <data name="Weighing" xml:space="preserve"><value>Tartım</value></data>
+  <data name="Records" xml:space="preserve"><value>Kayıtlar</value></data>
+  <data name="Products" xml:space="preserve"><value>Ürünler</value></data>
+  <data name="Core" xml:space="preserve"><value>ÇEKİRDEK</value></data>
+  <data name="Modules" xml:space="preserve"><value>MODÜLLER</value></data>
+  <data name="System" xml:space="preserve"><value>SİSTEM</value></data>
+  <data name="Language" xml:space="preserve"><value>Dil</value></data>
+  <data name="Turkish" xml:space="preserve"><value>Türkçe</value></data>
+  <data name="English" xml:space="preserve"><value>English</value></data>
+  <data name="Save" xml:space="preserve"><value>Kaydet</value></data>
+  <data name="Cancel" xml:space="preserve"><value>Vazgeç</value></data>
+  <data name="Search" xml:space="preserve"><value>Ara</value></data>
+  <data name="Loading" xml:space="preserve"><value>Yükleniyor…</value></data>
+  <data name="Error" xml:space="preserve"><value>Hata</value></data>
+  <data name="Retry" xml:space="preserve"><value>Yeniden dene</value></data>
+  <data name="Stable" xml:space="preserve"><value>sabit</value></data>
+  <data name="Motion" xml:space="preserve"><value>kararsız</value></data>
+  <data name="Overload" xml:space="preserve"><value>aşırı yük</value></data>
+  <data name="Underload" xml:space="preserve"><value>düşük yük</value></data>
+  <data name="Connected" xml:space="preserve"><value>bağlı</value></data>
+  <data name="Connecting" xml:space="preserve"><value>bağlanıyor</value></data>
+  <data name="Disconnected" xml:space="preserve"><value>bağlı değil</value></data>
+  <data name="NoDevice" xml:space="preserve"><value>Bağlı terazi yok</value></data>
 </root>

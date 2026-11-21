@@ -63,6 +63,9 @@ public static class PlatformServiceCollectionExtensions
         // Always available, so modules can depend on it; it stays empty until an agent connects (AddVyxumAgentHub).
         services.AddSingleton<LiveWeightStore>();
         services.AddSingleton<ILiveWeightSource>(provider => provider.GetRequiredService<LiveWeightStore>());
+
+        // Merges the UiStringSource registrations of the host and the modules (GET /api/ui/strings).
+        services.AddSingleton<UiStringCatalog>();
         return catalog;
     }
 }

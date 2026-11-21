@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Localization;
 using Microsoft.Extensions.Localization;
 using Vyxum.Host;
 using Vyxum.Platform;
+using Vyxum.Platform.Abstractions;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -12,6 +13,7 @@ builder.Services.Configure<HostOptions>(o => o.ShutdownTimeout = TimeSpan.FromSe
 var catalog = builder.Services.AddVyxumPlatform(builder.Configuration, HostModules.Load(builder.Configuration));
 builder.Services.AddVyxumAgentHub(builder.Configuration);
 builder.Services.AddLocalization(options => options.ResourcesPath = "Resources");
+builder.Services.AddUiStrings(Strings.UiPrefix, Strings.ResourceManager);
 
 var app = builder.Build();
 
@@ -35,6 +37,7 @@ app.MapGet("/api/hello", (IStringLocalizer<Strings> strings) => Results.Ok(new
 }));
 
 app.MapVyxumDevices();
+app.MapVyxumUi();
 app.MapVyxumModules();
 
 app.Run();

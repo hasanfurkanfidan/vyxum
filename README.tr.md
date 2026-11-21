@@ -98,6 +98,8 @@ dotnet run --project src/Agent/Vyxum.Agent
 
 Ardından http://localhost:5000/api/devices adresini açın. Agent'ın hazır ayarları simüle edilmiş bir MT-SICS terazisi (572 g) kullanır; donanım gerekmez.
 
+http://localhost:5000/api/devices/{id}/live bir cihazı Server-Sent Events olarak yayınlar: önce o anki durumu, ardından durumu ya da ağırlığı her değiştiğinde yeni bir olay. Agent'ın henüz bildirmediği bir cihaz kimliği hata değildir; yayın `Disconnected` durumunda başlar ve agent bağlanınca sürer.
+
 ## Yapılandırma
 
 Anahtarlar `appsettings.json`, ortam değişkenleri (örneğin `Vyxum__Database__Provider`) ya da komut satırı argümanlarından okunur.
