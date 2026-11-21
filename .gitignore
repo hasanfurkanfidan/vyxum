@@ -25,7 +25,8 @@ project.lock.json
 project.fragment.lock.json
 artifacts/
 
-# Node (frontend arrives in F2)
+# Node and the built frontend (served by the host, produced by src/Web/vyxum-web)
+src/Host/Vyxum.Host/wwwroot/
 node_modules/
 dist/
 npm-debug.log*

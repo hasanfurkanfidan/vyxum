@@ -1,0 +1,49 @@
+/* Design values of direction B ("Laboratory"). Source: tasarim/TASARIM.md.
+   No shadows, no gradients. Sections are separated by a 1px ink rule on top, rows by a 1px light line. */
+:root {
+  /* Colors */
+  --color-bg: #fbfcfc;              /* page */
+  --color-surface: #ffffff;         /* inputs, buttons */
+  --color-ink: #101820;             /* main text, section rules */
+  --color-ink-muted: #4a5560;       /* labels, descriptions */
+  --color-line: #d5dadf;            /* row separators */
+  --color-accent: #0b4f6c;          /* primary button, active menu item, progress bar */
+  --color-on-accent: #ffffff;
+  --color-accent-bg: #eef3f6;       /* selected row */
+  --color-positive: #1e6b45;        /* stable, connected, done */
+  --color-warning: #a14a00;         /* unstable, waiting, cancelled (borders, marks) */
+  --color-warning-text: #7a3800;    /* warning as text */
+  --color-track: #e8ecef;           /* progress bar background */
+
+  /* Type */
+  --font-ui: 'Instrument Sans', 'Segoe UI', Arial, sans-serif;
+  --font-mono: 'JetBrains Mono', Consolas, monospace;
+  --text-body: 15px;
+  --text-small: 14px;
+  --text-label: 13px;
+  --text-eyebrow: 12px;
+  --text-caption: 11px;             /* table headers and menu groups, upper case, mono */
+  --text-page-title: 34px;
+  --text-operator-title: 30px;
+  --text-live-weight: clamp(76px, 13vw, 164px);
+  --tracking-title: -0.02em;
+  --tracking-caption: 0.06em;
+  --tracking-group: 0.08em;
+
+  /* Shape */
+  --radius: 3px;
+  --radius-small: 2px;
+  --rule-section: 1px solid var(--color-ink);
+  --rule-row: 1px solid var(--color-line);
+
+  /* Controls */
+  --control-height: 44px;
+  --control-height-operator: 56px;
+  --focus-ring: 2px solid var(--color-accent);
+
+  /* Layout */
+  --sidebar-basis: 200px;
+  --page-padding: 28px 36px 36px;
+  --gap-page: 24px;
+  --gap-columns: 36px;
+}
