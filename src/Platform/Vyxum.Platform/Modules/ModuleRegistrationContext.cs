@@ -32,4 +32,21 @@ internal sealed class ModuleRegistrationContext(
         Services.AddDbContext<TContext>((provider, options) =>
             provider.GetRequiredService<DatabaseSettings>().Configure(options));
     }
+
+    public override void AddEventHandler<TEvent, THandler>()
+    {
+        if (Descriptor.EventHandlers.Any(h => h.HandlerType == typeof(THandler)))
+        {
+            throw new InvalidOperationException(
+                $"Module '{Descriptor.Manifest.Id}' registered event handler {typeof(THandler).FullName} more than once.");
+        }
+
+        Services.AddScoped<THandler>();
+        Descriptor.AddEventHandler(new EventHandlerRegistration(
+            Descriptor.Manifest.Id,
+            typeof(TEvent),
+            typeof(THandler),
+            (provider, integrationEvent, context, cancellationToken) =>
+                provider.GetRequiredService<THandler>().HandleAsync((TEvent)integrationEvent, context, cancellationToken)));
+    }
 }

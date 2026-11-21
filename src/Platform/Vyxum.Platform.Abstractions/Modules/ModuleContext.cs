@@ -17,4 +17,12 @@ public abstract class ModuleContext
     /// </summary>
     public abstract void AddDbContext<TContext>()
         where TContext : ModuleDbContext;
+
+    /// <summary>
+    /// Registers <typeparamref name="THandler"/> (scoped) for <typeparamref name="TEvent"/>.
+    /// The module needs a DbContext, which holds the inbox.
+    /// </summary>
+    public abstract void AddEventHandler<TEvent, THandler>()
+        where TEvent : IIntegrationEvent
+        where THandler : class, IIntegrationEventHandler<TEvent>;
 }

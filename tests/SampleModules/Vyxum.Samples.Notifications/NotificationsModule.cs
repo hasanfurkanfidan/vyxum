@@ -18,5 +18,7 @@ public sealed class NotificationsModule : IModule
     public void ConfigureServices(IServiceCollection services, ModuleContext context)
     {
         context.AddDbContext<NotificationsDbContext>();
+        context.AddEventHandler<OrderPlaced, OrderPlacedHandler>();
+        services.AddSingleton<HandlerFaults>();
     }
 }

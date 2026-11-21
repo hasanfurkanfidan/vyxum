@@ -1,6 +1,7 @@
 using System.Reflection;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 using Vyxum.Platform.Abstractions;
 
 namespace Vyxum.Platform;
@@ -53,6 +54,11 @@ public static class PlatformServiceCollectionExtensions
             provider.GetRequiredService<DatabaseSettings>().Configure(options));
         services.AddSingleton<IModuleDatabaseInitializer, ModuleDatabaseInitializer>();
         services.AddHostedService<ModuleDatabaseInitializerService>();
+
+        services.TryAddSingleton(TimeProvider.System);
+        services.Configure<OutboxOptions>(configuration.GetSection(OutboxOptions.SectionName));
+        services.AddSingleton<OutboxDispatcher>();
+        services.AddHostedService<OutboxDispatcherService>();
         return catalog;
     }
 }

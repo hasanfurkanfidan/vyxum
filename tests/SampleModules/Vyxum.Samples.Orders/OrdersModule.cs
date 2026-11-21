@@ -12,6 +12,7 @@ public sealed class OrdersModule : IModule
         Id = "samples.orders",
         Version = new Version(1, 0),
         Provides = ["samples.orders"],
+        Publishes = [typeof(OrderPlaced)],
     };
 
     /// <inheritdoc />

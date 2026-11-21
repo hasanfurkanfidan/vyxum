@@ -9,6 +9,7 @@ namespace Vyxum.Platform.Abstractions;
 /// Base class for the single DbContext every module owns. All modules share one database without
 /// schemas (SQLite has none), so every table of the module is named <c>{TablePrefix}_{Table}</c>
 /// automatically. <see cref="DateTime"/> values are stored and read as UTC.
+/// The context also holds the module's outbox and inbox tables; see <see cref="Publish"/>.
 /// Register it with <see cref="ModuleContext.AddDbContext{TContext}"/>.
 /// </summary>
 public abstract partial class ModuleDbContext : DbContext
@@ -25,6 +26,19 @@ public abstract partial class ModuleDbContext : DbContext
     /// </summary>
     public abstract string TablePrefix { get; }
 
+    /// <summary>Integration events this module published, waiting for or done with delivery.</summary>
+    public DbSet<OutboxMessage> OutboxMessages => Set<OutboxMessage>();
+
+    /// <summary>Integration events this module's handlers have processed.</summary>
+    public DbSet<InboxMessage> InboxMessages => Set<InboxMessage>();
+
+    /// <summary>
+    /// Adds <paramref name="integrationEvent"/> to the outbox. It is written by the next
+    /// <c>SaveChanges</c>, in the same transaction as the module's other changes, and delivered afterwards.
+    /// </summary>
+    public void Publish(IIntegrationEvent integrationEvent) =>
+        OutboxMessages.Add(OutboxMessage.Create(integrationEvent, DateTime.UtcNow));
+
     /// <summary>Configures the module's entities. Table names are prefixed afterwards.</summary>
     protected abstract void ConfigureModel(ModelBuilder modelBuilder);
 
@@ -38,6 +52,7 @@ public abstract partial class ModuleDbContext : DbContext
         }
 
         ConfigureModel(modelBuilder);
+        ConfigureMessaging(modelBuilder);
         ApplyTablePrefix(modelBuilder.Model, TablePrefix!);
     }
 
@@ -46,6 +61,26 @@ public abstract partial class ModuleDbContext : DbContext
     {
         ArgumentNullException.ThrowIfNull(configurationBuilder);
         configurationBuilder.Properties<DateTime>().HaveConversion<UtcDateTimeConverter>();
+    }
+
+    private static void ConfigureMessaging(ModelBuilder modelBuilder)
+    {
+        modelBuilder.Entity<OutboxMessage>(entity =>
+        {
+            entity.ToTable("OutboxMessages");
+            entity.HasKey(m => m.Id);
+            entity.Property(m => m.Id).ValueGeneratedNever();
+            entity.Property(m => m.EventName).HasMaxLength(200);
+            entity.Property(m => m.LastError).HasMaxLength(OutboxMessage.LastErrorMaxLength);
+            entity.HasIndex(m => new { m.ProcessedAt, m.NextAttemptAt });
+        });
+
+        modelBuilder.Entity<InboxMessage>(entity =>
+        {
+            entity.ToTable("InboxMessages");
+            entity.HasKey(m => new { m.MessageId, m.HandlerName });
+            entity.Property(m => m.HandlerName).HasMaxLength(300);
+        });
     }
 
     private static void ApplyTablePrefix(IMutableModel model, string prefix)

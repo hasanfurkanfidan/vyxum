@@ -146,33 +146,53 @@ public static partial class ModuleValidator
 
     private static void CheckEvents(IReadOnlyList<ModuleDescriptor> modules, List<string> problems)
     {
-        var published = new List<(string ModuleId, Type EventType, IntegrationEventAttribute Event)>();
+        var declared = new List<(string ModuleId, Type EventType, IntegrationEventAttribute Event, bool Published)>();
 
         foreach (var module in modules)
         {
-            foreach (var eventType in module.Manifest.Publishes.Distinct())
+            var id = module.Manifest.Id;
+            var published = module.Manifest.Publishes.Distinct().ToList();
+            var handled = module.EventHandlers.Select(h => h.EventType).Distinct().Except(published);
+
+            foreach (var eventType in published)
             {
-                var attribute = CheckEventType(module.Manifest.Id, eventType, problems);
+                var attribute = CheckEventType(id, eventType, problems);
                 if (attribute is not null)
                 {
-                    published.Add((module.Manifest.Id, eventType, attribute));
+                    declared.Add((id, eventType, attribute, Published: true));
                 }
+            }
+
+            foreach (var eventType in handled)
+            {
+                var attribute = CheckEventType(id, eventType, problems);
+                if (attribute is not null)
+                {
+                    declared.Add((id, eventType, attribute, Published: false));
+                }
+            }
+
+            if (module.EventHandlers.Count > 0 && module.DbContextType is null)
+            {
+                problems.Add($"Module '{id}' registers integration event handlers but no DbContext; " +
+                             "handlers need the module's DbContext, which holds its inbox.");
             }
         }
 
-        foreach (var group in published.GroupBy(p => (p.Event.Name, p.Event.Version)))
+        foreach (var group in declared.Where(d => d.Published).GroupBy(d => (d.Event.Name, d.Event.Version)))
         {
-            var moduleIds = group.Select(p => p.ModuleId).Distinct().ToList();
+            var moduleIds = group.Select(d => d.ModuleId).Distinct().ToList();
             if (moduleIds.Count > 1)
             {
                 problems.Add($"Integration event '{group.Key.Name}' v{group.Key.Version} is published by more than one module: " +
-                             string.Join(", ", moduleIds.Select(id => $"'{id}'")) + ".");
+                             string.Join(", ", moduleIds.Select(m => $"'{m}'")) + ".");
             }
-            else if (group.Count() > 1)
-            {
-                problems.Add($"Module '{moduleIds[0]}' uses integration event '{group.Key.Name}' v{group.Key.Version} on more than one type: " +
-                             string.Join(", ", group.Select(p => p.EventType.FullName)) + ".");
-            }
+        }
+
+        foreach (var group in declared.GroupBy(d => (d.ModuleId, d.Event.Name, d.Event.Version)).Where(g => g.Count() > 1))
+        {
+            problems.Add($"Module '{group.Key.ModuleId}' uses integration event '{group.Key.Name}' v{group.Key.Version} on more than one type: " +
+                         string.Join(", ", group.Select(d => d.EventType.FullName)) + ".");
         }
     }
 
