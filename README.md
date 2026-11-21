@@ -177,7 +177,7 @@ How the screen works with the scale:
 - Tare is kept in software by Vyxum. **Take tare** stores the current gross weight as the tare. The scale's own tare command is never sent.
 - The **Zero** button sends `Z` to the scale, once per press. Nothing else is sent.
 
-The database schema is created on the first start. The default SQLite file is `vyxum.db` in the data directory: `data/` under the working directory (`src/Host/Vyxum.Host/data/` when you start the host with the commands above), or `%ProgramData%\Vyxum` on Windows. There are no migrations yet. After a model change during development, stop the host and delete that file, together with `vyxum.db-shm` and `vyxum.db-wal` if they exist. This deletes all records, so use it only on test data.
+The database schema is created on the first start. The default SQLite file is `vyxum.db` in the data directory: `data/` under the working directory (`src/Host/Vyxum.Host/data/` when you start the host with the commands above), or `%ProgramData%\Vyxum` on Windows. On every start the platform and each module apply their pending EF Core migrations, so an existing database is upgraded and keeps its records. Before a SQLite database is changed, a copy is written to `backupsvyxum-<date>-<time>-migration.db` in the data directory; the newest 10 copies are kept. A SQL Server database is not copied: back it up yourself before an upgrade. See [CONTRIBUTING.md](CONTRIBUTING.md#database-migrations) for adding a migration.
 
 ## Configuration
 
@@ -212,8 +212,7 @@ These rules are enforced by the architecture tests where they can be checked mec
 
 ## Known limitations in F0
 
-- **No schema migrations yet.** Each module's tables are created on first start. If a module's model changes after its tables exist, the change is not applied and a warning is logged. Per-provider EF Core migrations are planned for phase F2.
-- **Crash during table creation.** If the process stops after a module's tables are created but before the installation is recorded, the database must be cleaned up by hand.
+- **Modules without migrations.** A module that ships no migrations for the active provider gets its tables created once and cannot be upgraded until it ships migrations.
 - **Single-node dispatcher.** Run one host instance per database. Several dispatchers on the same database are not coordinated.
 - **No outbox cleanup.** Delivered messages are kept in the outbox tables.
 - **No plugin folder loading.** Modules are loaded from assemblies listed in configuration; loading from a plugin folder is planned for phase F4.

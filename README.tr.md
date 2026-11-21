@@ -179,7 +179,7 @@ Ekranın terazi ile çalışma biçimi:
 - Dara Vyxum tarafından yazılımsal olarak tutulur. **Dara al** o anki brüt ağırlığı dara olarak kaydeder. Teraziye kendi dara komutu asla gönderilmez.
 - **Sıfırla** düğmesi her basışta teraziye bir kez `Z` gönderir. Başka hiçbir komut gönderilmez.
 
-Veritabanı şeması ilk açılışta oluşturulur. Varsayılan SQLite dosyası veri klasöründeki `vyxum.db` dosyasıdır: çalışma klasöründeki `data/` (yukarıdaki komutlarla başlatırsanız `src/Host/Vyxum.Host/data/`) ya da Windows'ta `%ProgramData%\Vyxum`. Henüz şema geçişi (migration) yoktur. Geliştirme sırasında modelde bir değişiklik yaptıktan sonra sunucuyu durdurup bu dosyayı silin; varsa `vyxum.db-shm` ve `vyxum.db-wal` dosyalarını da silin. Bu işlem bütün kayıtları siler, yalnızca test verisinde kullanın.
+Veritabanı şeması ilk açılışta oluşturulur. Varsayılan SQLite dosyası veri klasöründeki `vyxum.db` dosyasıdır: çalışma klasöründeki `data/` (yukarıdaki komutlarla başlatırsanız `src/Host/Vyxum.Host/data/`) ya da Windows'ta `%ProgramData%\Vyxum`. Her açılışta platform ve her modül bekleyen EF Core şema geçişlerini (migration) uygular; böylece var olan veritabanı güncellenir ve kayıtlarını korur. Bir SQLite veritabanı değişmeden önce veri klasöründeki `backupsvyxum-<tarih>-<saat>-migration.db` dosyasına kopyalanır; en yeni 10 kopya tutulur. SQL Server veritabanı kopyalanmaz: güncellemeden önce yedeğini kendiniz alın. Geçiş eklemek için [CONTRIBUTING.md](CONTRIBUTING.md#veritabanı-geçişleri) dosyasına bakın.
 
 ## Yapılandırma
 
@@ -214,8 +214,7 @@ Mimari testlerin kontrol edebildiği kurallar bu testlerle denetlenir.
 
 ## F0 sürümünün bilinen sınırları
 
-- **Henüz şema geçişi (migration) yok.** Her modülün tabloları ilk açılışta oluşturulur. Tablolar oluştuktan sonra modelde yapılan değişiklik uygulanmaz ve bir uyarı kaydedilir. Sağlayıcıya özel EF Core geçişleri F2 fazında planlanmıştır.
-- **Tablo oluşturma sırasında çökme.** Bir modülün tabloları oluşturulduktan sonra, kurulum kaydı yazılmadan süreç durursa veritabanı elle temizlenmelidir.
+- **Geçişi olmayan modüller.** Etkin sağlayıcı için geçiş içermeyen bir modülün tabloları bir kez oluşturulur; modül geçiş içerene kadar şeması güncellenemez.
 - **Tek düğümlü dağıtıcı.** Her veritabanı için tek bir sunucu örneği çalıştırın. Aynı veritabanındaki birden fazla dağıtıcı birbiriyle koordine edilmez.
 - **Outbox temizliği yok.** İletilmiş mesajlar outbox tablolarında tutulur.
 - **Eklenti klasöründen yükleme yok.** Modüller yapılandırmada listelenen derlemelerden yüklenir; eklenti klasöründen yükleme F4 fazında planlanmıştır.
