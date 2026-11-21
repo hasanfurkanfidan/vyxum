@@ -100,6 +100,23 @@ const pistachio: WeighingProduct = {
   packageTare: '0.012',
   shelfLifeDays: 180,
   barcodePrefix: '29',
+  targetWeight: null,
+  lowerTolerance: null,
+  upperTolerance: null,
+};
+
+/** A product packed to a target: 250 g, 5 g under and 10 g over allowed. */
+const coffee: WeighingProduct = {
+  id: '00000000-0000-0000-0000-000000000002',
+  code: '0520',
+  name: 'Türk kahvesi',
+  unitPrice: null,
+  packageTare: null,
+  shelfLifeDays: null,
+  barcodePrefix: null,
+  targetWeight: '0.25',
+  lowerTolerance: '0.005',
+  upperTolerance: '0.01',
 };
 
 function record(overrides: Partial<WeighingRecord> = {}): WeighingRecord {
@@ -405,6 +422,113 @@ describe('weighing screen', () => {
     await user.type(screen.getByLabelText('Ürün, PLU ya da ad'), '041');
     await waitFor(() => {
       expect(fetchMock.mock.calls.map(([input]) => String(input))).toContain('/api/weighing/products?search=041');
+    });
+  });
+  describe('target bar', () => {
+    async function chooseCoffee(devices = `[${deviceJson({ value: '0.240' })}]`) {
+      setup({ devices, products: [pistachio, coffee] });
+      const user = userEvent.setup();
+      renderWeighing();
+      await liveNet();
+      await user.click(await screen.findByRole('button', { name: /Türk kahvesi/ }));
+      return screen.getByTestId('target');
+    }
+
+    it('shows the target, the remaining amount and the tolerance range of the selected product', async () => {
+      const target = await chooseCoffee();
+      expect(within(target).getByTestId('target-value')).toHaveTextContent('0,250 kg');
+      expect(within(target).getByText('Kalan')).toBeInTheDocument();
+      expect(within(target).getByTestId('target-difference')).toHaveTextContent('0,010 kg');
+      expect(within(target).getByTestId('target-range')).toHaveTextContent('0,245 – 0,260 kg');
+      expect(within(target).getByTestId('target-status')).toHaveTextContent('tolerans altında');
+
+      const meter = within(target).getByRole('meter', { name: 'Hedef' });
+      expect(meter).toHaveAttribute('aria-valuemin', '0');
+      expect(meter).toHaveAttribute('aria-valuemax', '0.3');
+      expect(meter).toHaveAttribute('aria-valuenow', '0.24');
+      expect(meter).toHaveAttribute('aria-valuetext', '0,240 kg, tolerans altında');
+      // 0.240 of a bar that ends at 0.300; the band runs from 0.245 to 0.260.
+      expect(within(target).getByTestId('target-fill')).toHaveStyle({ width: '80%' });
+      const band = within(target).getByTestId('target-band');
+      expect(band.style.left).toBe('81.66%');
+      expect(band.style.width).toBe('5%');
+    });
+
+    it('follows the live weight through the tolerance and past the target', async () => {
+      const target = await chooseCoffee();
+      const source = FakeEventSource.latest();
+
+      source.emit(deviceJson({ value: '0.248', state: 'Motion' }));
+      await expectNet('0,248');
+      expect(within(target).getByTestId('target-status')).toHaveTextContent('tolerans içinde');
+      expect(within(target).getByTestId('target-status')).toHaveClass('state--positive');
+      expect(target).toHaveClass('target--within');
+      expect(within(target).getByTestId('target-difference')).toHaveTextContent('0,002 kg');
+
+      source.emit(deviceJson({ value: '0.256' }));
+      await expectNet('0,256');
+      expect(within(target).getByTestId('target-status')).toHaveTextContent('tolerans içinde');
+      expect(within(target).getByText('Hedefi aşan')).toBeInTheDocument();
+      expect(within(target).getByTestId('target-difference')).toHaveTextContent('0,006 kg');
+
+      source.emit(deviceJson({ value: '0.400' }));
+      await expectNet('0,400');
+      expect(within(target).getByTestId('target-status')).toHaveTextContent('tolerans üstünde');
+      expect(within(target).getByTestId('target-status')).toHaveClass('state--warning');
+      expect(target).toHaveClass('target--over');
+      expect(within(target).getByTestId('target-difference')).toHaveTextContent('0,150 kg');
+      expect(within(target).getByTestId('target-fill')).toHaveStyle({ width: '100%' });
+      expect(within(target).getByRole('meter')).toHaveAttribute('aria-valuenow', '0.3');
+    });
+
+    it('measures the net after the tare against the target', async () => {
+      const target = await chooseCoffee(`[${deviceJson({ value: '0.012' })}]`);
+      await userEvent.setup().click(screen.getByRole('button', { name: 'Dara al' }));
+      FakeEventSource.latest().emit(deviceJson({ value: '0.262' }));
+      await expectNet('0,250');
+      expect(within(target).getByTestId('target-status')).toHaveTextContent('tolerans içinde');
+      expect(within(target).getByText('Kalan')).toBeInTheDocument();
+      expect(within(target).getByTestId('target-difference')).toHaveTextContent('0,000 kg');
+    });
+
+    it('converts the target to the unit of the scale', async () => {
+      const target = await chooseCoffee(`[${deviceJson({ value: '251', unit: 'g' })}]`);
+      expect(within(target).getByTestId('target-value')).toHaveTextContent('250 g');
+      expect(within(target).getByTestId('target-range')).toHaveTextContent('245 – 260 g');
+      expect(within(target).getByTestId('target-difference')).toHaveTextContent('1 g');
+    });
+
+    it('shows the target without a status while there is no reading', async () => {
+      const target = await chooseCoffee(`[${deviceJson({ value: null, state: 'Overload' })}]`);
+      expect(within(target).getByTestId('target-status')).toHaveTextContent('Teraziden henüz okuma gelmedi.');
+      expect(within(target).getByTestId('target-difference')).toHaveTextContent('–');
+      expect(within(target).getByTestId('target-fill')).toHaveStyle({ width: '0%' });
+    });
+
+    it('mutes the bar when the scale is not live', async () => {
+      const target = await chooseCoffee();
+      expect(target).not.toHaveClass('is-stale');
+      FakeEventSource.latest().fail();
+      await waitFor(() => expect(screen.getByTestId('target')).toHaveClass('is-stale'));
+    });
+
+    it('is not shown without a product, for a product without a target or for a unit it cannot convert', async () => {
+      setup({ devices: `[${deviceJson({ value: '0.240' })}]`, products: [pistachio, coffee] });
+      const user = userEvent.setup();
+      renderWeighing();
+      await liveNet();
+      await screen.findByRole('button', { name: /Türk kahvesi/ });
+      expect(screen.queryByTestId('target')).not.toBeInTheDocument();
+
+      await user.click(screen.getByRole('button', { name: /Antep Fıstığı/ }));
+      expect(screen.queryByTestId('target')).not.toBeInTheDocument();
+
+      await user.click(screen.getByRole('button', { name: /Türk kahvesi/ }));
+      expect(screen.getByTestId('target')).toBeInTheDocument();
+
+      FakeEventSource.latest().emit(deviceJson({ value: '3', unit: 'pcs' }));
+      await expectNet('3');
+      expect(screen.queryByTestId('target')).not.toBeInTheDocument();
     });
   });
 });

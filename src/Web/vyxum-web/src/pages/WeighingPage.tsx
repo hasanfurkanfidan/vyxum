@@ -1,8 +1,10 @@
 import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import { Link } from 'react-router-dom';
+import { TargetGauge } from '../components/weighing/TargetGauge';
 import { useCulture, useT } from '../i18n/I18nProvider';
 import { ApiError, RuleError, ruleErrorKey, ValidationError } from '../lib/api';
 import { formatDecimal, formatMoney, formatTime, formatWeight } from '../lib/format';
+import { targetView } from '../lib/target';
 import {
   createRecord,
   getDevices,
@@ -193,7 +195,10 @@ function saveErrorKey(error: unknown): string {
 
 type LoadStatus = 'loading' | 'ready' | 'error';
 
-/** Operator screen (design source: BTartim): live weight, tare, zero, save, product choice and recent weighings. */
+/**
+ * Operator screen (design source: BTartim): live weight, the product's target bar, tare, zero, save,
+ * product choice and recent weighings.
+ */
 export function WeighingPage() {
   const t = useT();
   const culture = useCulture();
@@ -453,6 +458,7 @@ export function WeighingPage() {
   // Package tare in kg, shown as it is when the scale's unit is unknown and it cannot be converted.
   const packageTareKg = product?.packageTare ? `${formatDecimal(product.packageTare, culture)} kg` : null;
   const price = parseDecimal(product?.unitPrice);
+  const target = targetView(product, shown.net, unit);
   const amount =
     settings && price && shown.net && unit && isKnownUnit(unit) ? amountOf(shown.net, unit, price, settings.amountDecimals) : undefined;
 
@@ -554,6 +560,7 @@ export function WeighingPage() {
           </output>
           {unit ? <span className="weighing__unit">{unit}</span> : null}
         </div>
+        {target && unit ? <TargetGauge view={target} unit={unit} net={shown.net} stale={!connected} /> : null}
         <div className="weighing__figures">
           <div className="weighing__figure">
             <span>{t('weighing.Tare')}</span>

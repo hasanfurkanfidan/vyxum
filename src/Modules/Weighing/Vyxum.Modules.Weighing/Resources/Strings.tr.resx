@@ -91,4 +91,11 @@
   <data name="ProductSelection" xml:space="preserve"><value>Ürün seçimi</value></data>
   <data name="NoRecent" xml:space="preserve"><value>Henüz tartım yok.</value></data>
   <data name="ModuleName" xml:space="preserve"><value>Tartım</value></data>
+  <data name="Target" xml:space="preserve"><value>Hedef</value></data>
+  <data name="TargetTolerance" xml:space="preserve"><value>Tolerans aralığı</value></data>
+  <data name="TargetRemaining" xml:space="preserve"><value>Kalan</value></data>
+  <data name="TargetExcess" xml:space="preserve"><value>Hedefi aşan</value></data>
+  <data name="TargetUnder" xml:space="preserve"><value>tolerans altında</value></data>
+  <data name="TargetWithin" xml:space="preserve"><value>tolerans içinde</value></data>
+  <data name="TargetOver" xml:space="preserve"><value>tolerans üstünde</value></data>
 </root>
