@@ -182,7 +182,7 @@ begin
     Exit;
   end;
   if not RegQueryStringValue(HKLM, UninstallKey, 'DisplayVersion', OldVersion) then
-    OldVersion := 'unknown';
+    OldVersion := 'first-install';
   BackupDatabase(OldVersion);
 end;
 
