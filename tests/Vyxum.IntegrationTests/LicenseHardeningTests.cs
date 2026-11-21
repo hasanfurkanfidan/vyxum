@@ -261,6 +261,37 @@ public sealed class LicenseHardeningTests : IDisposable
     [Theory]
     [InlineData(DatabaseProvider.Sqlite)]
     [InlineData(DatabaseProvider.SqlServer)]
+    public async Task A_device_added_after_the_upload_takes_a_free_station(DatabaseProvider provider)
+    {
+        await using var database = Databases.CreateOrSkip(provider);
+        await using var app = new LicenseTestApp(database, _issuer, maintenance: false);
+        var state = app.Services.GetRequiredService<ILicenseState>();
+
+        // Without a license nothing is chosen.
+        await app.CreateDeviceAsync("before");
+        state.LicensedStations.ShouldBeEmpty();
+
+        await ShouldUploadAsync(app, _issuer.Sign(TestLicenseIssuer.Payload(stations: 3)));
+        state.LicensedStations.ShouldBe(["before"]);
+
+        // Free stations are taken by new enabled devices, in creation order; a disabled device takes none.
+        await app.CreateDeviceAsync("second");
+        await app.CreateDeviceAsync("disabled", enabled: false);
+        await app.CreateDeviceAsync("third");
+        state.LicensedStations.ShouldBe(["before", "second", "third"]);
+        state.IsStationLicensed("third").ShouldBeTrue();
+
+        // No free station left.
+        await app.CreateDeviceAsync("fourth");
+        state.LicensedStations.ShouldBe(["before", "second", "third"]);
+        state.IsStationLicensed("fourth").ShouldBeFalse();
+        var license = await LicenseAsync(app);
+        license.GetProperty("stations").EnumerateArray().Select(s => s.GetString()).ShouldBe(["before", "second", "third"]);
+    }
+
+    [Theory]
+    [InlineData(DatabaseProvider.Sqlite)]
+    [InlineData(DatabaseProvider.SqlServer)]
     public async Task A_database_failure_while_reading_the_license_keeps_the_module_closed(DatabaseProvider provider)
     {
         await using var database = Databases.CreateOrSkip(provider);

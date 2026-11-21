@@ -63,6 +63,37 @@ internal static class LicenseStations
         ];
     }
 
+    /// <summary>
+    /// Adds a newly created device to the choice when the installed license (<paramref name="snapshot"/>, any state of a
+    /// file that verifies) has a free station; tracked change, the caller saves and invalidates. Returns whether it was added.
+    /// </summary>
+    public static async Task<bool> AddDeviceAsync(PlatformDbContext db, LicenseSnapshot snapshot, string deviceId, DateTime now, CancellationToken cancellationToken)
+    {
+        if (snapshot.License is null || snapshot.Stations.Count >= snapshot.StationLimit || snapshot.Stations.Contains(deviceId, StringComparer.Ordinal))
+        {
+            return false;
+        }
+
+        var json = Serialize([.. snapshot.Stations, deviceId]);
+        if (json.Length > IPlatformSettings.MaxValueLength)
+        {
+            return false;
+        }
+
+        var row = await db.Settings.SingleOrDefaultAsync(s => s.Key == PlatformSettingKeys.LicenseStations, cancellationToken);
+        if (row is null)
+        {
+            db.Settings.Add(new PlatformSetting { Key = PlatformSettingKeys.LicenseStations, Value = json, UpdatedAt = now });
+        }
+        else
+        {
+            row.Value = json;
+            row.UpdatedAt = now;
+        }
+
+        return true;
+    }
+
     /// <summary>Removes <paramref name="deviceId"/> from the stored choice (tracked change; the caller saves).</summary>
     public static async Task RemoveDeviceAsync(PlatformDbContext db, string deviceId, DateTime now, CancellationToken cancellationToken)
     {

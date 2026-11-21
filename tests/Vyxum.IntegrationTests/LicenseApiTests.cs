@@ -351,12 +351,12 @@ public sealed class LicenseApiTests : IDisposable
         license = (await app.GetLicenseAsync()).Body;
         license.GetProperty("stations").GetArrayLength().ShouldBe(0);
         app.Services.GetRequiredService<ILicenseState>().IsStationLicensed("d-third").ShouldBeFalse();
-        await app.CreateDeviceAsync("d-third");
+        await app.CreateDeviceAsync("d-third", enabled: false);
         app.Services.GetRequiredService<ILicenseState>().IsStationLicensed("d-third").ShouldBeFalse();
 
-        // Nothing of the old choice is left, so the next upload chooses again.
+        // Nothing of the old choice is left, so the next upload chooses again (enabled devices only).
         license = (await UploadAsync(app, _issuer.Sign(TestLicenseIssuer.Payload(licenseId: "lic-3", stations: 3)))).Body;
-        Strings(license.GetProperty("stations")).ShouldBe(["b-first", "c-second", "d-third"]);
+        Strings(license.GetProperty("stations")).ShouldBe(["b-first", "c-second"]);
     }
 
     [Theory]

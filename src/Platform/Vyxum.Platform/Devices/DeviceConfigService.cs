@@ -151,7 +151,7 @@ public sealed partial class DeviceConfigService
         return device is null ? null : ToDto(device);
     }
 
-    /// <summary>Creates a device.</summary>
+    /// <summary>Creates a device; an enabled device takes a free licensed station, if the license has one.</summary>
     public async Task<DeviceConfigResult> CreateAsync(DeviceConfigInput input, CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(input);
@@ -188,6 +188,13 @@ public sealed partial class DeviceConfigService
         {
             // Created by a concurrent request after the check above.
             return DeviceConfigResult.Invalid(new Dictionary<string, string[]> { ["id"] = [DeviceStrings.Code("IdTaken")] });
+        }
+
+        // An enabled device becomes a licensed station while the license has a free one (decision V-49).
+        if (device.IsEnabled && await LicenseStations.AddDeviceAsync(_db, _licenses.GetSnapshot(), device.Id, now, cancellationToken))
+        {
+            await _db.SaveChangesAsync(cancellationToken);
+            _licenses.Invalidate();
         }
 
         await ChangedAsync(cancellationToken);
