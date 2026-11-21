@@ -1,3 +1,4 @@
+using System.Text.Encodings.Web;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
@@ -19,7 +20,32 @@ internal static class LicenseJson
         Converters = { new JsonStringEnumConverter(JsonNamingPolicy.CamelCase, allowIntegerValues: false) },
     };
 
-    /// <summary>The envelope as written to the file.</summary>
+    /// <summary>
+    /// Writes envelopes: the same settings, but without escaping <c>+</c> in base64 (the values are base64, the format
+    /// string and a trusted key id, none of which needs escaping in JSON).
+    /// </summary>
+    private static readonly JsonSerializerOptions EnvelopeWriteOptions = new(Options)
+    {
+        Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping,
+    };
+
+    /// <summary>
+    /// The canonical text of an envelope: <c>format</c>, <c>keyId</c>, <c>payload</c> and <c>signature</c> in this
+    /// order, standard base64, no white space. The signer writes it and the reader stores it after verification.
+    /// </summary>
+    public static string WriteEnvelope(string keyId, ReadOnlySpan<byte> payload, ReadOnlySpan<byte> signature) =>
+        JsonSerializer.Serialize(
+            new Envelope
+            {
+                Format = FormatV1,
+                KeyId = keyId,
+                Payload = Convert.ToBase64String(payload),
+                Signature = Convert.ToBase64String(signature),
+            },
+            EnvelopeWriteOptions);
+
+    /// <summary>The envelope as written to the file. Unknown properties are rejected: nothing unsigned is kept.</summary>
+    [JsonUnmappedMemberHandling(JsonUnmappedMemberHandling.Disallow)]
     internal sealed class Envelope
     {
         public string? Format { get; set; }

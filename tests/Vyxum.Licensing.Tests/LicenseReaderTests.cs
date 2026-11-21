@@ -12,6 +12,9 @@ public class LicenseReaderTests
 
     private static byte[] PayloadBytes(string text) => Convert.FromBase64String(Envelope(text)["payload"]!.GetValue<string>());
 
+    // "+" written as a JSON escape, as the default System.Text.Json encoder writes it.
+    private const string EscapedPlus = @"\u002B";
+
     [Fact]
     public void Signed_license_round_trips()
     {
@@ -234,19 +237,118 @@ public class LicenseReaderTests
     }
 
     [Fact]
-    public void Unknown_fields_in_payload_and_envelope_are_ignored()
+    public void Unknown_fields_in_the_payload_are_ignored()
     {
         using var key = new TestKey("k1");
         var payload = JsonNode.Parse(PayloadBytes(key.Signer.Sign(TestLicenses.Sample())))!.AsObject();
         payload["futureField"] = new JsonObject { ["nested"] = 1 };
         payload["licensee"]!["country"] = "TR";
-        var envelope = Envelope(key.Signer.SignPayloadBytes(Encoding.UTF8.GetBytes(payload.ToJsonString())));
+
+        var result = key.Reader().Read(key.Signer.SignPayloadBytes(Encoding.UTF8.GetBytes(payload.ToJsonString())));
+
+        result.IsValid.ShouldBeTrue(result.Detail);
+        result.License!.Payload.Licensee.Name.ShouldBe("Örnek Gıda A.Ş.");
+    }
+
+    [Fact]
+    public void Unknown_fields_in_the_envelope_are_rejected()
+    {
+        // The envelope is not signed: an extra field would be stored and shown to paid modules unverified.
+        using var key = new TestKey("k1");
+        var envelope = Envelope(key.Signer.Sign(TestLicenses.Sample()));
         envelope["comment"] = "issued by hand";
+
+        key.Reader().Read(envelope.ToJsonString()).ErrorCode.ShouldBe("invalid_format");
+    }
+
+    [Theory]
+    [InlineData("payload")]
+    [InlineData("signature")]
+    public void Base64_that_is_not_canonical_is_rejected(string field)
+    {
+        using var key = new TestKey("k1");
+        var envelope = Envelope(key.Signer.Sign(TestLicenses.Sample()));
+        var value = envelope[field]!.GetValue<string>();
+
+        // Convert.FromBase64String skips white space; the reader does not accept it.
+        foreach (var whiteSpace in new[] { "\n", " ", "\r\n", "\t" })
+        {
+            envelope[field] = value[..8] + whiteSpace + value[8..];
+            key.Reader().Read(envelope.ToJsonString()).ErrorCode.ShouldBe("invalid_format");
+        }
+    }
+
+    [Fact]
+    public void Base64_with_non_zero_padding_bits_is_rejected()
+    {
+        using var key = new TestKey("k1");
+        var envelope = Envelope(key.Signer.Sign(TestLicenses.Sample()));
+
+        // A 64-byte signature ends in "==": its last character carries 4 unused bits that must be zero.
+        var signature = envelope["signature"]!.GetValue<string>();
+        signature.ShouldEndWith("==");
+        const string alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
+        var last = alphabet.IndexOf(signature[^3], StringComparison.Ordinal);
+        envelope["signature"] = signature[..^3] + alphabet[last | 1] + "==";
+        Convert.FromBase64String(envelope["signature"]!.GetValue<string>()).ShouldBe(Convert.FromBase64String(signature));
+
+        key.Reader().Read(envelope.ToJsonString()).ErrorCode.ShouldBe("invalid_format");
+    }
+
+    [Fact]
+    public void Raw_text_is_the_canonical_envelope_not_the_text_as_read()
+    {
+        using var key = new TestKey("k1");
+        var text = key.Signer.Sign(TestLicenses.Sample());
+        var envelope = Envelope(text);
+        var payload = envelope["payload"]!.GetValue<string>().Replace("+", EscapedPlus, StringComparison.Ordinal);
+        var reshaped =
+            "  {\n  \"signature\" : \"" + envelope["signature"]!.GetValue<string>() + "\",\n" +
+            "  \"payload\": \"" + payload + "\", \"keyId\": \"k1\", \"format\": \"vxlic" + @"\/" + "1\"\n}\n";
+
+        var result = key.Reader().Read(reshaped);
+
+        result.IsValid.ShouldBeTrue(result.Detail);
+        result.License!.RawText.ShouldBe(text);
+        key.Reader().Read(result.License.RawText).License!.RawText.ShouldBe(text);
+    }
+
+    [Fact]
+    public void A_high_s_signature_is_accepted_and_kept_in_low_s_form()
+    {
+        using var key = new TestKey("k1");
+        var text = key.Signer.Sign(TestLicenses.Sample());
+        var envelope = Envelope(text);
+        var signature = Convert.FromBase64String(envelope["signature"]!.GetValue<string>());
+
+        // (r, n - s) verifies as well as (r, s); the signer writes low-S, so this is the high-S twin.
+        var order = new System.Numerics.BigInteger(
+            Convert.FromHexString("FFFFFFFF00000000FFFFFFFFFFFFFFFFBCE6FAADA7179E84F3B9CAC2FC632551"), isUnsigned: true, isBigEndian: true);
+        var s = new System.Numerics.BigInteger(signature.AsSpan(32), isUnsigned: true, isBigEndian: true);
+        (s <= order >> 1).ShouldBeTrue();
+        var high = (order - s).ToByteArray(isUnsigned: true, isBigEndian: true);
+        var twin = signature[..32].Concat(new byte[32 - high.Length]).Concat(high).ToArray();
+        key.Key.VerifyData(PayloadBytes(text), twin, HashAlgorithmName.SHA256, DSASignatureFormat.IeeeP1363FixedFieldConcatenation).ShouldBeTrue();
+        envelope["signature"] = Convert.ToBase64String(twin);
 
         var result = key.Reader().Read(envelope.ToJsonString());
 
         result.IsValid.ShouldBeTrue(result.Detail);
-        result.License!.Payload.Licensee.Name.ShouldBe("Örnek Gıda A.Ş.");
+        result.License!.RawText.ShouldBe(text);
+    }
+
+    [Fact]
+    public void The_signer_always_writes_low_s_signatures()
+    {
+        using var key = new TestKey("k1");
+        var order = new System.Numerics.BigInteger(
+            Convert.FromHexString("FFFFFFFF00000000FFFFFFFFFFFFFFFFBCE6FAADA7179E84F3B9CAC2FC632551"), isUnsigned: true, isBigEndian: true);
+
+        for (var i = 0; i < 32; i++)
+        {
+            var signature = Convert.FromBase64String(Envelope(key.Signer.Sign(TestLicenses.Sample()))["signature"]!.GetValue<string>());
+            new System.Numerics.BigInteger(signature.AsSpan(32), isUnsigned: true, isBigEndian: true).ShouldBeLessThanOrEqualTo(order >> 1);
+        }
     }
 
     [Fact]

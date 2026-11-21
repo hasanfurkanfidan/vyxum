@@ -38,7 +38,11 @@ public sealed class VerifiedLicense
     /// <summary>The verified license content.</summary>
     public LicensePayload Payload { get; }
 
-    /// <summary>The file text as read, for storing it and for re-verification by paid modules.</summary>
+    /// <summary>
+    /// The canonical file text, for storing it and for re-verification by paid modules: the envelope written again from
+    /// the verified values (<c>format</c>, <c>keyId</c>, <c>payload</c>, <c>signature</c>; standard base64; low-S
+    /// signature). It verifies with the same key; for a file written by <see cref="LicenseSigner"/> it equals the file.
+    /// </summary>
     public string RawText { get; }
 }
 

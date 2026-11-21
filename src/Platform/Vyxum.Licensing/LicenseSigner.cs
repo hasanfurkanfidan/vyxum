@@ -24,7 +24,10 @@ public sealed class LicenseSigner
         _keyId = keyId;
     }
 
-    /// <summary>Validates <paramref name="payload"/>, serializes it as camelCase JSON and returns the signed file text.</summary>
+    /// <summary>
+    /// Validates <paramref name="payload"/>, serializes it as camelCase JSON and returns the signed file text, in the
+    /// canonical envelope form the reader stores (the signature in low-S form).
+    /// </summary>
     /// <exception cref="ArgumentException">The payload is invalid, or the file would exceed the size limit.</exception>
     public string Sign(LicensePayload payload)
     {
@@ -42,15 +45,8 @@ public sealed class LicenseSigner
     public string SignPayloadBytes(ReadOnlySpan<byte> payloadUtf8)
     {
         var signature = _privateKey.SignData(payloadUtf8, HashAlgorithmName.SHA256, DSASignatureFormat.IeeeP1363FixedFieldConcatenation);
-        var text = JsonSerializer.Serialize(
-            new LicenseJson.Envelope
-            {
-                Format = LicenseJson.FormatV1,
-                KeyId = _keyId,
-                Payload = Convert.ToBase64String(payloadUtf8),
-                Signature = Convert.ToBase64String(signature),
-            },
-            LicenseJson.Options);
+        EcdsaSignatures.NormalizeLowS(signature);
+        var text = LicenseJson.WriteEnvelope(_keyId, payloadUtf8, signature);
         if (text.Length > LicenseJson.MaxLength)
             throw new ArgumentException($"The license file would be {text.Length} characters; the limit is {LicenseJson.MaxLength}.");
         return text;
