@@ -76,6 +76,9 @@ public sealed class PortScanner
 {
     private const int MaxListenBytes = 4096;
 
+    // Time a port scan gets after its own time limit to stop by itself before it is abandoned.
+    private static readonly TimeSpan AbandonGrace = TimeSpan.FromSeconds(3);
+
     private readonly PortScannerOptions _options;
     private readonly TimeProvider _time;
     private readonly IReadOnlyList<byte[]> _allowedWrites;
@@ -138,7 +141,17 @@ public sealed class PortScanner
             await gate.WaitAsync(cancellationToken).ConfigureAwait(false);
             try
             {
-                await ScanSerialAsync(board, port, cancellationToken).ConfigureAwait(false);
+                // A driver call that ignores cancellation (seen with virtual ports) must not hold up the whole scan.
+                var scan = ScanSerialAsync(board, port, cancellationToken);
+                try
+                {
+                    await scan.WaitAsync(_options.PortTimeout + AbandonGrace, _time, cancellationToken).ConfigureAwait(false);
+                }
+                catch (TimeoutException)
+                {
+                    board.Abandon(port, $"The port stopped responding and was left alone after {(_options.PortTimeout + AbandonGrace).TotalSeconds:0} s.");
+                    _ = scan.ContinueWith(t => _ = t.Exception, CancellationToken.None, TaskContinuationOptions.OnlyOnFaulted, TaskScheduler.Default);
+                }
             }
             finally
             {
@@ -290,6 +303,11 @@ public sealed class PortScanner
 
             return new Attempt(AttemptKind.NoMatch, null, null, heard);
         }
+        catch (Exception ex) when (transport.WriteFailed && ex is IOException or TimeoutException)
+        {
+            // A port that cannot send (for example a Bluetooth port without a connected device) fails at every setting.
+            return Attempt.Failed(AttemptKind.OpenFailed, "Writing to the port failed: " + ex.Message);
+        }
         catch (Exception ex) when (ex is IOException or DeviceConnectionLostException or TimeoutException)
         {
             // The link failed during this attempt (wrong settings can look like that); try the next setting.
@@ -360,6 +378,7 @@ public sealed class PortScanner
         private readonly Lock _lock = new();
         private readonly List<PortScanStatus> _ports = [];
         private readonly Dictionary<string, DiscoveredDevice> _devices = new(StringComparer.OrdinalIgnoreCase);
+        private readonly HashSet<string> _abandoned = new(StringComparer.OrdinalIgnoreCase);
 
         public void Add(string port, PortScanState state, string? detail = null)
         {
@@ -373,8 +392,27 @@ public sealed class PortScanner
         {
             lock (_lock)
             {
+                if (_abandoned.Contains(port))
+                {
+                    return;
+                }
+
                 var index = _ports.FindIndex(p => string.Equals(p.PortName, port, StringComparison.OrdinalIgnoreCase));
                 _ports[index] = new PortScanStatus(_ports[index].PortName, state, detail);
+            }
+
+            Publish();
+        }
+
+        /// <summary>Reports the port as failed; a late result of its scan is ignored.</summary>
+        public void Abandon(string port, string detail)
+        {
+            lock (_lock)
+            {
+                _abandoned.Add(port);
+                _devices.Remove(port);
+                var index = _ports.FindIndex(p => string.Equals(p.PortName, port, StringComparison.OrdinalIgnoreCase));
+                _ports[index] = new PortScanStatus(_ports[index].PortName, PortScanState.Error, detail);
             }
 
             Publish();
@@ -384,6 +422,11 @@ public sealed class PortScanner
         {
             lock (_lock)
             {
+                if (_abandoned.Contains(port))
+                {
+                    return;
+                }
+
                 _devices[port] = device;
             }
 

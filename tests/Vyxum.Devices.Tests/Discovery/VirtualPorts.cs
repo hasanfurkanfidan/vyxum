@@ -54,6 +54,20 @@ internal sealed class VirtualPorts
         return this;
     }
 
+    /// <summary>A port that opens but whose writes never finish and ignore cancellation, like a Bluetooth port without a device.</summary>
+    public VirtualPorts HangingWrite(string port)
+    {
+        _ports[port] = _ => new NoiseTransport(null) { HangWrites = true };
+        return this;
+    }
+
+    /// <summary>A port that opens but whose writes time out, like a Bluetooth port without a device.</summary>
+    public VirtualPorts FailingWrite(string port)
+    {
+        _ports[port] = _ => new NoiseTransport(null) { FailWrites = true };
+        return this;
+    }
+
     public PortScannerOptions Options(Action<PortScannerOptions>? configure = null)
     {
         var options = new PortScannerOptions
@@ -105,6 +119,10 @@ internal sealed class VirtualPorts
 
         public TimeSpan OpenDelay { get; init; }
 
+        public bool HangWrites { get; init; }
+
+        public bool FailWrites { get; init; }
+
         public string Description => "noise";
 
         public Task OpenAsync(CancellationToken cancellationToken)
@@ -121,6 +139,16 @@ internal sealed class VirtualPorts
 
         public ValueTask WriteAsync(ReadOnlyMemory<byte> buffer, CancellationToken cancellationToken)
         {
+            if (FailWrites)
+            {
+                return ValueTask.FromException(new IOException("The serial port failed while writing: The write timed out."));
+            }
+
+            if (HangWrites)
+            {
+                return new ValueTask(new TaskCompletionSource().Task);
+            }
+
             if (answer is not null)
             {
                 _incoming.Writer.TryWrite(answer);

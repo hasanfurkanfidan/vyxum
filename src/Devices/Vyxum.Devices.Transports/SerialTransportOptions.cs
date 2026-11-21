@@ -74,4 +74,18 @@ public sealed record SerialTransportOptions
 
     /// <summary>Raises the RTS line when the port opens (ignored when the handshake uses RTS). Default: true.</summary>
     public bool RtsEnable { get; init; } = true;
+
+    /// <summary>
+    /// How long a write may take before it fails. Some virtual ports (for example Bluetooth serial ports without a
+    /// connected device) accept the open but never complete a write; without a limit the write would hang. Default: 2 seconds.
+    /// </summary>
+    public TimeSpan WriteTimeout
+    {
+        get;
+        init
+        {
+            ArgumentOutOfRangeException.ThrowIfLessThanOrEqual(value, TimeSpan.Zero);
+            field = value;
+        }
+    } = TimeSpan.FromSeconds(2);
 }

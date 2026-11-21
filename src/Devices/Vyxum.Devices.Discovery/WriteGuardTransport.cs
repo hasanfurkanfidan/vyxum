@@ -24,6 +24,9 @@ public sealed class WriteGuardTransport : ITransport
     /// <inheritdoc />
     public string Description => _inner.Description;
 
+    /// <summary>True after a write to the inner transport failed (for example a write timeout).</summary>
+    public bool WriteFailed { get; private set; }
+
     /// <summary>The number of bytes read so far.</summary>
     public long BytesRead => Interlocked.Read(ref _bytesRead);
 
@@ -56,7 +59,20 @@ public sealed class WriteGuardTransport : ITransport
                 $"Device discovery tried to write {buffer.Length} byte(s) that are not on the read-only whitelist; nothing was sent.");
         }
 
-        return _inner.WriteAsync(buffer, cancellationToken);
+        return WriteCoreAsync(buffer, cancellationToken);
+    }
+
+    private async ValueTask WriteCoreAsync(ReadOnlyMemory<byte> buffer, CancellationToken cancellationToken)
+    {
+        try
+        {
+            await _inner.WriteAsync(buffer, cancellationToken).ConfigureAwait(false);
+        }
+        catch (Exception ex) when (ex is not OperationCanceledException)
+        {
+            WriteFailed = true;
+            throw;
+        }
     }
 
     /// <inheritdoc />

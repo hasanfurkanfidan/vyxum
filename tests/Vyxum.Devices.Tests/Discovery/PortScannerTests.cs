@@ -226,6 +226,35 @@ public class PortScannerTests
     }
 
     [Fact]
+    public async Task Port_that_cannot_send_is_an_error_after_one_attempt()
+    {
+        var ports = new VirtualPorts().FailingWrite("COM4");
+
+        var report = await ScanAsync(ports);
+
+        var port = report.Ports.ShouldHaveSingleItem();
+        port.State.ShouldBe(PortScanState.Error);
+        port.Detail.ShouldNotBeNull().ShouldStartWith("Writing to the port failed");
+        ports.Opens.Count.ShouldBe(1);
+    }
+
+    [Fact]
+    public async Task Port_whose_driver_hangs_is_abandoned_and_the_others_are_reported()
+    {
+        var ports = new VirtualPorts().Device("COM3", Ind231()).HangingWrite("COM4");
+        var watch = Stopwatch.StartNew();
+
+        var report = await ScanAsync(ports, configure: o => o.PortTimeout = TimeSpan.FromSeconds(1));
+
+        watch.Stop();
+        watch.Elapsed.ShouldBeLessThan(TimeSpan.FromSeconds(8));
+        report.Ports[0].ShouldBe(new PortScanStatus("COM3", PortScanState.Found));
+        report.Ports[1].State.ShouldBe(PortScanState.Error);
+        report.Ports[1].Detail.ShouldNotBeNull().ShouldContain("stopped responding");
+        report.Devices.ShouldHaveSingleItem().PortName.ShouldBe("COM3");
+    }
+
+    [Fact]
     public async Task Ports_are_scanned_in_parallel_and_progress_is_reported()
     {
         var ports = new VirtualPorts()

@@ -63,11 +63,14 @@ public sealed class PortScannerOptions
     /// <summary>How long opening a port may take before the port is reported as failed. Default: 3 seconds.</summary>
     public TimeSpan OpenTimeout { get; set; } = TimeSpan.FromSeconds(3);
 
-    /// <summary>The longest time spent on one port; after it the port is reported as not found. Default: 40 seconds.</summary>
-    public TimeSpan PortTimeout { get; set; } = TimeSpan.FromSeconds(40);
+    /// <summary>
+    /// The longest time spent on one port; after it the port is reported as not found, and a port whose driver does not
+    /// stop within a few more seconds is abandoned and reported as an error. Default: 25 seconds.
+    /// </summary>
+    public TimeSpan PortTimeout { get; set; } = TimeSpan.FromSeconds(25);
 
-    /// <summary>How many ports are scanned at the same time. Default: 4.</summary>
-    public int MaxParallelPorts { get; set; } = 4;
+    /// <summary>How many ports are scanned at the same time. Default: 8.</summary>
+    public int MaxParallelPorts { get; set; } = 8;
 
     /// <summary>TCP connect timeout of the network probe. Default: 3 seconds.</summary>
     public TimeSpan TcpConnectTimeout { get; set; } = TimeSpan.FromSeconds(3);
