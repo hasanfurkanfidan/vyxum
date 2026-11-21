@@ -67,9 +67,11 @@ public static class PlatformServiceCollectionExtensions
 
         services.TryAddSingleton(TimeProvider.System);
 
-        // Licensing (phase F4). The trusted keys are compiled in and cannot be changed from configuration;
-        // tests replace ILicenseKeyRing in the service collection.
-        services.TryAddSingleton<ILicenseKeyRing>(LicenseKeyRing.Trusted);
+        // Licensing (phase F4). The trusted keys are compiled in and cannot be changed from configuration or by a
+        // module: any ILicenseKeyRing a module registered above is removed. Tests replace it after the platform
+        // (WebApplicationFactory.ConfigureTestServices, or a registration after AddVyxumPlatform).
+        services.RemoveAll<ILicenseKeyRing>();
+        services.AddSingleton<ILicenseKeyRing>(LicenseKeyRing.Trusted);
         services.AddSingleton<LicenseManager>();
         services.AddSingleton<ILicenseState>(provider => provider.GetRequiredService<LicenseManager>());
         services.Configure<OutboxOptions>(configuration.GetSection(OutboxOptions.SectionName));
