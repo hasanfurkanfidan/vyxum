@@ -58,6 +58,12 @@ export interface WeighingProduct {
   packageTare: string | null;
   shelfLifeDays: number | null;
   barcodePrefix: string | null;
+  /** Target net weight in kg, e.g. "0.250"; null when the product has none. */
+  targetWeight: string | null;
+  /** Allowed amount below the target in kg. */
+  lowerTolerance: string | null;
+  /** Allowed amount above the target in kg. */
+  upperTolerance: string | null;
 }
 
 export interface WeighingRecord {
