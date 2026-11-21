@@ -140,3 +140,9 @@ export function amountOf(net: Decimal, unit: string, pricePerKg: Decimal, decima
   const denominator = 1_000_000n * pow10(exact.scale);
   return { units: divideRound(numerator, denominator), scale: decimals };
 }
+
+/** -1, 0 or 1 as `a` is less than, equal to or greater than `b`. */
+export function compare(a: Decimal, b: Decimal): -1 | 0 | 1 {
+  const difference = subtract(a, b).units;
+  return difference < 0n ? -1 : difference > 0n ? 1 : 0;
+}
