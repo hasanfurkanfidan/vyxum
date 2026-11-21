@@ -88,7 +88,7 @@ public sealed class UiEndpointTests : IDisposable
         var en = (await GetStringsAsync(client, "en", null)).GetProperty("strings").EnumerateObject().ToList();
 
         tr.Select(p => p.Name).ShouldBe(en.Select(p => p.Name));
-        tr.ShouldAllBe(p => (p.Name.StartsWith("shell.") || p.Name.StartsWith("setup.") || p.Name.StartsWith("devices.") || p.Name.StartsWith("products.") || p.Name.StartsWith("weighing.")) && !string.IsNullOrWhiteSpace(p.Value.GetString()));
+        tr.ShouldAllBe(p => (p.Name.StartsWith("shell.") || p.Name.StartsWith("setup.") || p.Name.StartsWith("devices.") || p.Name.StartsWith("license.") || p.Name.StartsWith("products.") || p.Name.StartsWith("weighing.")) && !string.IsNullOrWhiteSpace(p.Value.GetString()));
         en.ShouldAllBe(p => !string.IsNullOrWhiteSpace(p.Value.GetString()));
     }
 

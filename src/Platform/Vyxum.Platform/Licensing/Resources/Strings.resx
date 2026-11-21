@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype"><value>text/microsoft-resx</value></resheader>
+  <resheader name="version"><value>2.0</value></resheader>
+  <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+  <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+  <data name="Title" xml:space="preserve"><value>Modules and license</value></data>
+  <data name="Description" xml:space="preserve"><value>Weighing and Products are open source and need no license. Other modules are opened with a license file; adding a module needs no reinstall.</value></data>
+  <data name="SectionLicense" xml:space="preserve"><value>License</value></data>
+  <data name="StatusNone" xml:space="preserve"><value>no license</value></data>
+  <data name="StatusValid" xml:space="preserve"><value>signature verified</value></data>
+  <data name="StatusInvalid" xml:space="preserve"><value>invalid: {0}</value></data>
+  <data name="StatusNotYetValid" xml:space="preserve"><value>not valid yet</value></data>
+  <data name="StatusGrace" xml:space="preserve"><value>expired, {0} days of grace left</value></data>
+  <data name="StatusReadOnly" xml:space="preserve"><value>expired, read-only</value></data>
+  <data name="NoLicenseText" xml:space="preserve"><value>No license is loaded. Weighing and Products work without one.</value></data>
+  <data name="Licensee" xml:space="preserve"><value>License holder</value></data>
+  <data name="Type" xml:space="preserve"><value>License type</value></data>
+  <data name="Validity" xml:space="preserve"><value>Valid until</value></data>
+  <data name="ValidFrom" xml:space="preserve"><value>Valid from</value></data>
+  <data name="Perpetual" xml:space="preserve"><value>no end date</value></data>
+  <data name="Stations" xml:space="preserve"><value>Stations</value></data>
+  <data name="OpenedModules" xml:space="preserve"><value>Opened modules</value></data>
+  <data name="LicenseId" xml:space="preserve"><value>License number</value></data>
+  <data name="TypeTrial" xml:space="preserve"><value>trial</value></data>
+  <data name="TypeSubscription" xml:space="preserve"><value>subscription</value></data>
+  <data name="TypePerpetual" xml:space="preserve"><value>perpetual</value></data>
+  <data name="TypeNfr" xml:space="preserve"><value>demonstration (NFR)</value></data>
+  <data name="ClockBehind" xml:space="preserve"><value>This computer's clock is behind a time Vyxum has already seen. The license term is counted from the latest time seen, so setting the clock back does not extend it.</value></data>
+  <data name="Upload" xml:space="preserve"><value>Upload license file</value></data>
+  <data name="ChooseFile" xml:space="preserve"><value>Choose file</value></data>
+  <data name="FileInput" xml:space="preserve"><value>License file</value></data>
+  <data name="Uploading" xml:space="preserve"><value>Uploading…</value></data>
+  <data name="Uploaded" xml:space="preserve"><value>License loaded.</value></data>
+  <data name="LoadedFor" xml:space="preserve"><value>License loaded for {0}.</value></data>
+  <data name="ReadFailed" xml:space="preserve"><value>The file could not be read.</value></data>
+  <data name="Remove" xml:space="preserve"><value>Remove license</value></data>
+  <data name="RemoveConfirm" xml:space="preserve"><value>Remove the license? Paid modules are locked again; your records are kept.</value></data>
+  <data name="RemoveYes" xml:space="preserve"><value>Remove</value></data>
+  <data name="Cancel" xml:space="preserve"><value>Cancel</value></data>
+  <data name="Removed" xml:space="preserve"><value>License removed.</value></data>
+  <data name="Error.invalid_format" xml:space="preserve"><value>This is not a Vyxum license file.</value></data>
+  <data name="Error.unsupported_format" xml:space="preserve"><value>This license file was made for a newer version of Vyxum. Update Vyxum or ask for a file in the current format.</value></data>
+  <data name="Error.unknown_key" xml:space="preserve"><value>The file was signed with a key this version of Vyxum does not know.</value></data>
+  <data name="Error.invalid_signature" xml:space="preserve"><value>The signature does not match: the file was changed or damaged. Ask for a new file.</value></data>
+  <data name="Error.invalid_payload" xml:space="preserve"><value>The contents of the license file are incomplete or unreadable.</value></data>
+  <data name="Error.too_large" xml:space="preserve"><value>The file is too large to be a license file.</value></data>
+  <data name="Error.no_license" xml:space="preserve"><value>No license is loaded.</value></data>
+  <data name="Error.unknown_device" xml:space="preserve"><value>One of the chosen devices no longer exists. Reload the page and choose again.</value></data>
+  <data name="Error.station_limit_exceeded" xml:space="preserve"><value>The license allows fewer stations than chosen. Clear a device and save again.</value></data>
+  <data name="Error.stations_too_long" xml:space="preserve"><value>Too many devices are chosen to be stored.</value></data>
+  <data name="Error.unknown" xml:space="preserve"><value>The request could not be completed.</value></data>
+  <data name="SectionSystem" xml:space="preserve"><value>This installation</value></data>
+  <data name="SectionModules" xml:space="preserve"><value>Modules</value></data>
+  <data name="ColModule" xml:space="preserve"><value>Module</value></data>
+  <data name="ColKind" xml:space="preserve"><value>Kind</value></data>
+  <data name="ColStatus" xml:space="preserve"><value>Status</value></data>
+  <data name="KindOpen" xml:space="preserve"><value>open source</value></data>
+  <data name="KindPaid" xml:space="preserve"><value>paid</value></data>
+  <data name="ModuleOpen" xml:space="preserve"><value>open</value></data>
+  <data name="ModuleLocked" xml:space="preserve"><value>no license</value></data>
+  <data name="ModuleGrace" xml:space="preserve"><value>grace period</value></data>
+  <data name="ModuleReadOnly" xml:space="preserve"><value>read-only</value></data>
+  <data name="ModuleNotInstalled" xml:space="preserve"><value>not installed</value></data>
+  <data name="Module.weighing" xml:space="preserve"><value>Weighing</value></data>
+  <data name="Module.products" xml:space="preserve"><value>Products</value></data>
+  <data name="Module.labels" xml:space="preserve"><value>Label management</value></data>
+  <data name="Module.users" xml:space="preserve"><value>Users and roles</value></data>
+  <data name="Module.formulation" xml:space="preserve"><value>Formulation</value></data>
+  <data name="StationsTitle" xml:space="preserve"><value>Stations</value></data>
+  <data name="StationsHint" xml:space="preserve"><value>Each licensed station is one device (scale). Choose the devices that may use the paid modules; weighing itself is never limited.</value></data>
+  <data name="StationsNoDevices" xml:space="preserve"><value>No device has been added yet. Add one under Devices.</value></data>
+  <data name="StationsDevices" xml:space="preserve"><value>Devices</value></data>
+  <data name="StationsSave" xml:space="preserve"><value>Save stations</value></data>
+  <data name="StationsSaved" xml:space="preserve"><value>Stations saved.</value></data>
+  <data name="StationsDisabled" xml:space="preserve"><value>off</value></data>
+  <data name="BannerGrace" xml:space="preserve"><value>License expired; paid modules keep working for {0} more days.</value></data>
+  <data name="BannerReadOnly" xml:space="preserve"><value>License term ended; paid modules are read-only.</value></data>
+  <data name="BannerLink" xml:space="preserve"><value>License settings</value></data>
+  <data name="StepTitle" xml:space="preserve"><value>License</value></data>
+  <data name="StepHeading" xml:space="preserve"><value>Do you have a license file?</value></data>
+  <data name="StepDescription" xml:space="preserve"><value>Weighing and Products are free. A license file opens the paid modules; you can also load it later under Settings.</value></data>
+  <data name="OptionFree" xml:space="preserve"><value>Continue free</value></data>
+  <data name="OptionFreeHint" xml:space="preserve"><value>Weighing, Products and Records work without a license.</value></data>
+  <data name="OptionFile" xml:space="preserve"><value>Load a license file</value></data>
+  <data name="OptionFileHint" xml:space="preserve"><value>A file with the extension .vxlic that you received from us.</value></data>
+</root>

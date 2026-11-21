@@ -86,6 +86,7 @@ public static class PlatformServiceCollectionExtensions
         // Setup wizard (GET/POST /api/setup/*): shared settings file, database settings, restart.
         var dataDirectory = DatabaseSettings.GetDataDirectory(configuration);
         services.AddUiStrings(SetupStrings.KeyPrefix, SetupStrings.ResourceManager);
+        services.AddUiStrings(LicenseStrings.KeyPrefix, LicenseStrings.ResourceManager);
         services.AddScoped<IPlatformSettings, PlatformSettings>();
         services.AddSingleton(new VyxumSettingsFile(Path.Combine(dataDirectory, VyxumSettingsFile.FileName)));
         services.AddSingleton(provider => new SetupState(
