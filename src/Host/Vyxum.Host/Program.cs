@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Localization;
 using Microsoft.Extensions.Localization;
 using Vyxum.Host;
 using Vyxum.Platform;
+using Vyxum.Platform.Abstractions;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -12,6 +13,7 @@ builder.Services.Configure<HostOptions>(o => o.ShutdownTimeout = TimeSpan.FromSe
 var catalog = builder.Services.AddVyxumPlatform(builder.Configuration, HostModules.Load(builder.Configuration));
 builder.Services.AddVyxumAgentHub(builder.Configuration);
 builder.Services.AddLocalization(options => options.ResourcesPath = "Resources");
+builder.Services.AddUiStrings(Strings.UiPrefix, Strings.ResourceManager);
 
 var app = builder.Build();
 
@@ -20,6 +22,11 @@ app.UseRequestLocalization(new RequestLocalizationOptions()
     .SetDefaultCulture("tr")
     .AddSupportedCultures(supportedCultures)
     .AddSupportedUICultures(supportedCultures));
+
+// Static files must run before routing: the middleware skips requests that already matched an endpoint, such as the fallback.
+app.UseDefaultFiles();
+app.UseStaticFiles();
+app.UseRouting();
 
 app.MapGet("/health", (DatabaseSettings database) => Results.Ok(new
 {
@@ -35,7 +42,16 @@ app.MapGet("/api/hello", (IStringLocalizer<Strings> strings) => Results.Ok(new
 }));
 
 app.MapVyxumDevices();
+app.MapVyxumUi();
 app.MapVyxumModules();
+
+// The built web UI. Client-side routes fall back to index.html; API, hub and health paths never do.
+app.MapFallbackToFile("{*path:regex(^(?!api(/|$)|hubs(/|$)|health(/|$)).*$)}", "index.html");
+
+if (!File.Exists(Path.Combine(app.Environment.WebRootPath ?? "", "index.html")))
+{
+    app.Logger.LogWarning("The web UI is not built, so the root path returns 404. Run 'npm ci' and 'npm run build' in src/Web/vyxum-web.");
+}
 
 app.Run();
 

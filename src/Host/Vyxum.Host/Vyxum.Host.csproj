@@ -2,6 +2,45 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\Platform\Vyxum.Platform\Vyxum.Platform.csproj" />
+    <ProjectReference Include="..\..\Modules\Products\Vyxum.Modules.Products\Vyxum.Modules.Products.csproj" />
+    <ProjectReference Include="..\..\Modules\Weighing\Vyxum.Modules.Weighing\Vyxum.Modules.Weighing.csproj" />
   </ItemGroup>
+
+  <!-- The web UI is built by Vite into wwwroot. Pass -p:SkipUiBuild=true to skip it (for example in the .NET CI job). -->
+  <PropertyGroup>
+    <WebUiDirectory>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\..\Web\vyxum-web\'))</WebUiDirectory>
+    <!-- wwwroot is produced by the UI build during the build itself, after static web asset globs are evaluated, so it is served and published as plain files. -->
+    <StaticWebAssetsEnabled>false</StaticWebAssetsEnabled>
+    <WebUiIndex>$(MSBuildThisFileDirectory)wwwroot\index.html</WebUiIndex>
+  </PropertyGroup>
+
+  <Target Name="BuildWebUi" BeforeTargets="BeforeBuild" Condition="'$(SkipUiBuild)' != 'true' And !Exists('$(WebUiIndex)')">
+    <Exec Command="npm --version" ConsoleToMSBuild="true" IgnoreExitCode="true" StandardOutputImportance="low" StandardErrorImportance="low">
+      <Output TaskParameter="ExitCode" PropertyName="NpmExitCode" />
+    </Exec>
+    <Message Importance="high" Text="npm was not found. The web UI was not built; install Node.js and run 'npm run build' in src/Web/vyxum-web." Condition="'$(NpmExitCode)' != '0'" />
+    <Exec Command="npm ci" WorkingDirectory="$(WebUiDirectory)" Condition="'$(NpmExitCode)' == '0' And !Exists('$(WebUiDirectory)node_modules')" />
+    <Exec Command="npm run build" WorkingDirectory="$(WebUiDirectory)" Condition="'$(NpmExitCode)' == '0'" />
+    <PropertyGroup>
+      <WebUiBuilt Condition="'$(NpmExitCode)' == '0'">true</WebUiBuilt>
+    </PropertyGroup>
+  </Target>
+
+  <!-- Publishing always rebuilds the UI so the published output carries a fresh frontend. -->
+  <Target Name="PublishWebUi" BeforeTargets="PrepareForPublish" Condition="'$(SkipUiBuild)' != 'true' And '$(WebUiBuilt)' != 'true'">
+    <Exec Command="npm --version" ConsoleToMSBuild="true" IgnoreExitCode="true" StandardOutputImportance="low" StandardErrorImportance="low">
+      <Output TaskParameter="ExitCode" PropertyName="NpmPublishExitCode" />
+    </Exec>
+    <Message Importance="high" Text="npm was not found. The web UI was not built for publish." Condition="'$(NpmPublishExitCode)' != '0'" />
+    <Exec Command="npm ci" WorkingDirectory="$(WebUiDirectory)" Condition="'$(NpmPublishExitCode)' == '0' And !Exists('$(WebUiDirectory)node_modules')" />
+    <Exec Command="npm run build" WorkingDirectory="$(WebUiDirectory)" Condition="'$(NpmPublishExitCode)' == '0'" />
+  </Target>
+
+  <Target Name="IncludeWebUiInPublish" AfterTargets="ComputeResolvedFilesToPublishList">
+    <ItemGroup>
+      <WebUiFile Include="$(MSBuildThisFileDirectory)wwwroot\**" />
+      <ResolvedFileToPublish Include="@(WebUiFile)" RelativePath="wwwroot\%(RecursiveDir)%(Filename)%(Extension)" CopyToPublishDirectory="PreserveNewest" />
+    </ItemGroup>
+  </Target>
 
 </Project>

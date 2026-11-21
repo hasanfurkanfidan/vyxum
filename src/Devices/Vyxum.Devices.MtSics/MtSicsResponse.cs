@@ -29,6 +29,18 @@ public enum MtSicsResponseKind
 
     /// <summary><c>I4 A "..."</c>: the serial number.</summary>
     SerialNumber,
+
+    /// <summary><c>Z A</c>: the zero command was executed.</summary>
+    ZeroDone,
+
+    /// <summary><c>Z I</c>: the zero command cannot be executed now (for example the weight is in motion).</summary>
+    ZeroNotExecutable,
+
+    /// <summary><c>Z +</c>: the weight is above the zero setting range.</summary>
+    ZeroUpperLimit,
+
+    /// <summary><c>Z -</c>: the weight is below the zero setting range.</summary>
+    ZeroLowerLimit,
 }
 
 /// <summary>One parsed MT-SICS response line.</summary>

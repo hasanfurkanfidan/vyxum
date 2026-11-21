@@ -11,20 +11,47 @@ dotnet test
 
 SQL Server tests run when `VYXUM_TEST_SQLSERVER` is set to a connection string without a database name; otherwise they are skipped. See the [README](README.md) for a Docker example. Please run the SQL Server tests before opening a pull request that touches data access.
 
+To build without the web UI, as CI does for the .NET job, use `dotnet build -warnaserror -p:SkipUiBuild=true`. See [Web UI](#web-ui).
+
 ## Rules for changes
 
 - **One change per pull request.** A pull request does one thing and is easy to review. Split unrelated work.
 - **Tests are required.** Every behavior change or bug fix comes with a test. Data access changes must pass on both SQLite and SQL Server.
 - **Build with no warnings.** `dotnet build -warnaserror` must succeed.
-- **Respect the architecture rules** listed in the [README](README.md#architecture-rules). Modules talk only through integration events and reference only `Vyxum.Platform.Abstractions`. The platform does not know any module. Do not write provider-specific SQL.
+- **Respect the dependency rules** below. Do not write provider-specific SQL.
 - **New packages must be license-compatible.** Only MIT, BSD, and Apache-2.0 compatible licenses are accepted. Check the license before adding a NuGet package and mention it in the pull request.
 - **Code is in English:** names, comments, and documentation for developers.
 - **UI strings go in both languages.** Every user-facing string lives in a resource file, in both `Strings.resx` (English) and `Strings.tr.resx` (Turkish). Do not hard-code text in code.
 - **No internet dependencies in the product.** The product must work offline. Do not add CDN links, remote fonts, or calls to external services.
 
+## Dependency rules
+
+The architecture tests in `tests/Vyxum.ArchitectureTests` check these rules, and the [README](README.md#architecture-rules) lists the same rules. A change that breaks a rule fails the build. A new rule needs a new test. The check reads the references in the compiled assemblies, so a project reference that no code uses may not be caught; do not leave unused references in a `.csproj`.
+
+- Modules do not call each other. They communicate only through integration events, delivered via the outbox and inbox.
+- A module references only `Vyxum.Platform.Abstractions` among Vyxum assemblies. It does not reference another module, the host, the platform runtime, the devices or the agent.
+- Each module owns exactly one `ModuleDbContext`, and its table names start with its prefix.
+- The platform knows no module. The platform and `Vyxum.Platform.Abstractions` reference no module assembly and use no module namespace. Abstractions references no other Vyxum assembly.
+- The platform and the host reference no device assembly and not the agent. The host does not reference sample modules.
+- `Vyxum.Devices` references no Vyxum assembly. Protocols, transports and the simulator reference only `Vyxum.Devices`.
+- `Vyxum.Agent` references no platform assembly and not the host.
+
+## Modules
+
+Products and Weighing are built into the host. `HostModules.BuiltIn` in `src/Host/Vyxum.Host/HostModules.cs` lists them, so the host always loads them. A new module needs its project, a project reference from the host, a line in `HostModules.BuiltIn`, and an entry in the module list of the architecture tests. The user-facing description is in the [README](README.md#modules).
+
+## Web UI
+
+The UI is in `src/Web/vyxum-web` (React, TypeScript, Vite). CI uses Node.js 22; use the same version.
+
+- `npm ci` installs the packages. `npm run dev` starts Vite with a proxy to `http://localhost:5000`, so start the host on that port first.
+- `npm run typecheck`, `npm test` and `npm run build` are the checks CI runs. `npm run build` writes to `src/Host/Vyxum.Host/wwwroot`, which is not committed.
+- Put every user-facing string in a module's `Strings.resx` and `Strings.tr.resx`. The UI reads them from `/api/ui/strings`; the code must not contain literal text.
+- Do not add CDN links, remote fonts or calls to external services.
+
 ## Adding a protocol
 
-Each protocol is its own project, `src/Devices/Vyxum.Devices.<Name>`, which references only `Vyxum.Devices`. Implement `IScaleProtocol`. Keep the parser a pure function, and test it with unit tests that include recorded raw lines from a real scale. Add a scenario to `Vyxum.Devices.Simulator` so the protocol runs without hardware. Finally, register the type name in the Agent's configuration factory (`AgentConfiguration`). The protocol must only read the weight; never send commands that tare, zero or change the device.
+Each protocol is its own project, `src/Devices/Vyxum.Devices.<Name>`, which references only `Vyxum.Devices`. Implement `IScaleProtocol`. Keep the parser a pure function, and test it with unit tests that include recorded raw lines from a real scale. Add a scenario to `Vyxum.Devices.Simulator` so the protocol runs without hardware. Finally, register the type name in the Agent's configuration factory (`AgentConfiguration`). The protocol must only read the weight; never send commands that tare, zero or change the device. The only exception is zero on an explicit user request: a protocol may implement `ISupportsZero` and send its zero command once per call, serialized with its read loop.
 
 ## Pull requests
 
@@ -51,6 +78,8 @@ dotnet test
 
 SQL Server testleri, `VYXUM_TEST_SQLSERVER` veritabanı adı içermeyen bir bağlantı dizesi olarak tanımlıysa çalışır; aksi halde atlanır. Docker ile örnek için [README](README.tr.md) dosyasına bakın. Veri erişimine dokunan bir değişiklik göndermeden önce SQL Server testlerini çalıştırın.
 
+Web arayüzünü derlemeden yapılandırmak için `dotnet build -warnaserror -p:SkipUiBuild=true` kullanın; CI .NET işi bunu yapar. Bkz. [Web arayüzü](#web-arayüzü).
+
 ## Değişiklik kuralları
 
 - **Bir çekme isteğinde tek bir değişiklik.** Her çekme isteği tek bir iş yapar ve kolay incelenir. İlgisiz işleri ayırın.
@@ -61,6 +90,31 @@ SQL Server testleri, `VYXUM_TEST_SQLSERVER` veritabanı adı içermeyen bir bağ
 - **Kod İngilizcedir:** ad, yorum ve geliştiriciye dönük belgeler İngilizce yazılır.
 - **Arayüz metinleri iki dilde bulunur.** Kullanıcıya görünen her metin kaynak dosyasındadır: hem `Strings.resx` (İngilizce) hem `Strings.tr.resx` (Türkçe). Metin koda gömülmez.
 - **Ürün internete bağımlı olmaz.** Ürün çevrimdışı çalışmalıdır. CDN bağlantısı, uzak yazı tipi ya da dış servis çağrısı eklemeyin.
+
+## Bağımlılık kuralları
+
+Mimari testler (`tests/Vyxum.ArchitectureTests`) bu kuralları denetler; [README](README.tr.md#mimari-kurallar) aynı kuralları listeler. Bir kuralı bozan değişiklik derlemeyi başarısız kılar. Yeni bir kural için yeni bir test gerekir. Denetim derlenmiş derlemelerdeki başvuruları okur; hiçbir kodun kullanmadığı bir proje başvurusu yakalanmayabilir, bu yüzden .csproj dosyalarında kullanılmayan başvurular bırakmayın.
+
+- Modüller birbirini çağırmaz. Yalnızca outbox ve inbox üzerinden iletilen entegrasyon olaylarıyla konuşurlar.
+- Bir modül, Vyxum derlemeleri arasından yalnızca `Vyxum.Platform.Abstractions` derlemesine başvurur. Başka bir modüle, sunucuya, platform çalışma zamanına, cihazlara ya da agent'a başvurmaz.
+- Her modül tam olarak bir `ModuleDbContext` sahiplenir ve tablo adları kendi önekiyle başlar.
+- Platform hiçbir modülü tanımaz. Platform ve `Vyxum.Platform.Abstractions` hiçbir modül derlemesine başvurmaz ve hiçbir modül ad alanını kullanmaz. Abstractions başka hiçbir Vyxum derlemesine başvurmaz.
+- Platform ve sunucu hiçbir cihaz derlemesine ve agent'a başvurmaz. Sunucu örnek modüllere başvurmaz.
+- `Vyxum.Devices` hiçbir Vyxum derlemesine başvurmaz. Protokoller, taşımalar ve simülatör yalnızca `Vyxum.Devices` derlemesine başvurur.
+- `Vyxum.Agent` hiçbir platform derlemesine ve sunucuya başvurmaz.
+
+## Modüller
+
+Products ve Weighing modülleri sunucuya dahildir. `src/Host/Vyxum.Host/HostModules.cs` içindeki `HostModules.BuiltIn` bunları listeler; sunucu bunları her zaman yükler. Yeni bir modül için projesi, sunucudan bir proje başvurusu, `HostModules.BuiltIn` içinde bir satır ve mimari testlerin modül listesinde bir kayıt gerekir. Kullanıcıya dönük açıklama [README](README.tr.md#modüller) dosyasındadır.
+
+## Web arayüzü
+
+Arayüz `src/Web/vyxum-web` klasöründedir (React, TypeScript, Vite). CI Node.js 22 kullanır; aynı sürümü kullanın.
+
+- `npm ci` paketleri kurar. `npm run dev` Vite'ı `http://localhost:5000` adresine yönlendirmeyle başlatır; bu yüzden sunucuyu önce bu portta başlatın.
+- CI'ın çalıştırdığı kontroller `npm run typecheck`, `npm test` ve `npm run build`dir. `npm run build` çıktısını, commit edilmeyen `src/Host/Vyxum.Host/wwwroot` klasörüne yazar.
+- Kullanıcıya görünen her metni bir modülün `Strings.resx` ve `Strings.tr.resx` dosyalarına koyun. Arayüz bunları `/api/ui/strings` üzerinden okur; kodda düz metin bulunmamalıdır.
+- CDN bağlantısı, uzak yazı tipi ya da dış servis çağrısı eklemeyin.
 
 ## Çekme istekleri
 

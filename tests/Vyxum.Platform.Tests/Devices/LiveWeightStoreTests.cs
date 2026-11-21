@@ -33,6 +33,47 @@ public class LiveWeightStoreTests
     }
 
     [Fact]
+    public void Supported_commands_come_from_the_registration_and_default_to_none()
+    {
+        _store.RegisterAgent("c1", "PC-1", ["a", "b"], new Dictionary<string, IReadOnlyList<string>> { ["a"] = [DeviceCommandNames.Zero] });
+
+        _store.GetDevice("a")!.SupportedCommands.ShouldBe([DeviceCommandNames.Zero]);
+        _store.GetDevice("b")!.SupportedCommands.ShouldBeEmpty();
+        _store.TryGetAgent("a", out var connectionId, out var commands).ShouldBeTrue();
+        connectionId.ShouldBe("c1");
+        commands.ShouldBe([DeviceCommandNames.Zero]);
+    }
+
+    [Fact]
+    public void No_agent_is_found_for_unknown_or_disconnected_devices()
+    {
+        _store.RegisterAgent("c1", "PC-1", ["a"], new Dictionary<string, IReadOnlyList<string>> { ["a"] = [DeviceCommandNames.Zero] });
+
+        _store.TryGetAgent("unknown", out _, out _).ShouldBeFalse();
+        _store.DisconnectAgent("c1");
+        _store.TryGetAgent("a", out _, out var commands).ShouldBeFalse();
+        commands.ShouldBeEmpty();
+        _store.GetDevice("a")!.SupportedCommands.ShouldBe([DeviceCommandNames.Zero]);
+    }
+
+    [Fact]
+    public async Task Registering_again_with_the_same_commands_publishes_no_change()
+    {
+        var commands = new Dictionary<string, IReadOnlyList<string>> { ["s"] = [DeviceCommandNames.Zero] };
+        _store.RegisterAgent("c1", "PC-1", ["s"], commands);
+        using var cts = CancellationTokenSource.CreateLinkedTokenSource(TestContext.Current.CancellationToken);
+        await using var watch = _store.WatchDeviceAsync("s", cts.Token).GetAsyncEnumerator(cts.Token);
+        (await watch.MoveNextAsync()).ShouldBeTrue();
+
+        _store.RegisterAgent("c1", "PC-1", ["s"], new Dictionary<string, IReadOnlyList<string>> { ["s"] = [DeviceCommandNames.Zero] });
+        _store.ReportStatus("c1", "s", Status(DeviceConnectionState.Connected));
+
+        (await watch.MoveNextAsync()).ShouldBeTrue();
+        watch.Current.State.ShouldBe(DeviceConnectionState.Connected);
+        watch.Current.SupportedCommands.ShouldBe([DeviceCommandNames.Zero]);
+    }
+
+    [Fact]
     public void Reading_is_stored_with_receive_time_and_marks_device_connected()
     {
         _store.RegisterAgent("c1", "PC-1", ["s"]);
@@ -132,6 +173,63 @@ public class LiveWeightStoreTests
         await cancel.CancelAsync();
         (await watch.MoveNextAsync()).ShouldBeFalse();
         (await unknownMove).ShouldBeFalse();
+    }
+
+    [Fact]
+    public async Task Device_watch_starts_with_a_waiting_snapshot_for_an_unknown_device()
+    {
+        var ct = TestContext.Current.CancellationToken;
+        await using var watch = _store.WatchDeviceAsync("s", ct).GetAsyncEnumerator(ct);
+
+        (await watch.MoveNextAsync()).ShouldBeTrue();
+
+        watch.Current.ShouldBe(new LiveDevice("s", null, DeviceConnectionState.Disconnected, null, null, default));
+        _store.GetDevice("s").ShouldBeNull();
+    }
+
+    [Fact]
+    public async Task Device_watch_reports_state_and_weight_changes_but_not_identical_readings()
+    {
+        var ct = TestContext.Current.CancellationToken;
+        _store.RegisterAgent("c1", "PC-1", ["s"]);
+        await using var watch = _store.WatchDeviceAsync("s", ct).GetAsyncEnumerator(ct);
+        (await watch.MoveNextAsync()).ShouldBeTrue();
+        watch.Current.State.ShouldBe(DeviceConnectionState.Connecting);
+
+        _store.ReportStatus("c1", "s", Status(DeviceConnectionState.Connecting));
+        _store.ReportStatus("c1", "s", Status(DeviceConnectionState.Disconnected, "port closed"));
+        (await watch.MoveNextAsync()).ShouldBeTrue();
+        watch.Current.State.ShouldBe(DeviceConnectionState.Disconnected);
+        watch.Current.LastError.ShouldBe("port closed");
+
+        _store.ReportReading("c1", "s", Reading(1m));
+        (await watch.MoveNextAsync()).ShouldBeTrue();
+        watch.Current.State.ShouldBe(DeviceConnectionState.Connected);
+        watch.Current.LastWeight.ShouldNotBeNull().Value.ShouldBe(1m);
+
+        _clock.Advance(TimeSpan.FromSeconds(1));
+        _store.ReportReading("c1", "s", Reading(1m));
+        _store.ReportReading("c1", "s", Reading(1m, LiveWeightState.Motion));
+        (await watch.MoveNextAsync()).ShouldBeTrue();
+        watch.Current.LastWeight.ShouldNotBeNull().State.ShouldBe(LiveWeightState.Motion);
+
+        _store.DisconnectAgent("c1");
+        (await watch.MoveNextAsync()).ShouldBeTrue();
+        watch.Current.State.ShouldBe(DeviceConnectionState.Disconnected);
+        watch.Current.LastWeight.ShouldNotBeNull().Value.ShouldBe(1m);
+    }
+
+    [Fact]
+    public async Task Device_watch_ends_when_cancelled()
+    {
+        using var cancel = CancellationTokenSource.CreateLinkedTokenSource(TestContext.Current.CancellationToken);
+        await using var watch = _store.WatchDeviceAsync("s", cancel.Token).GetAsyncEnumerator(cancel.Token);
+        (await watch.MoveNextAsync()).ShouldBeTrue();
+        var next = watch.MoveNextAsync();
+
+        await cancel.CancelAsync();
+
+        (await next).ShouldBeFalse();
     }
 
     [Fact]

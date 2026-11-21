@@ -1,4 +1,6 @@
 using System.Reflection;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata;
 using NetArchTest.Rules;
 using Shouldly;
 using Vyxum.Agent;
@@ -8,6 +10,8 @@ using Vyxum.Devices.MtSics;
 using Vyxum.Devices.Simulator;
 using Vyxum.Devices.ToledoContinuous;
 using Vyxum.Devices.Transports;
+using Vyxum.Modules.Products;
+using Vyxum.Modules.Weighing;
 using Vyxum.Platform;
 using Vyxum.Platform.Abstractions;
 using Vyxum.Samples.Notifications;
@@ -22,6 +26,8 @@ public class ArchitectureTests
     [
         typeof(OrdersModule).Assembly,
         typeof(NotificationsModule).Assembly,
+        typeof(ProductsModule).Assembly,
+        typeof(WeighingModule).Assembly,
     ];
 
     private static readonly Assembly Abstractions = typeof(IModule).Assembly;
@@ -53,6 +59,43 @@ public class ArchitectureTests
         // Guards the other rules against passing on an empty set.
         ModuleAssemblies.Length.ShouldBeGreaterThan(1);
         ModuleAssemblies.ShouldAllBe(a => IsModuleAssembly(a.GetName().Name!));
+        var names = ModuleAssemblies.Select(a => a.GetName().Name!).ToArray();
+        names.ShouldContain("Vyxum.Modules.Products");
+        names.ShouldContain("Vyxum.Modules.Weighing");
+    }
+
+    [Fact]
+    public void Each_module_owns_exactly_one_module_db_context()
+    {
+        foreach (var assembly in ModuleAssemblies)
+        {
+            assembly.GetTypes()
+                .Count(t => t is { IsClass: true, IsAbstract: false } && t.IsSubclassOf(typeof(ModuleDbContext)))
+                .ShouldBe(1, $"{assembly.GetName().Name} must define exactly one ModuleDbContext");
+        }
+    }
+
+    [Fact]
+    public void Module_tables_start_with_their_module_prefix()
+    {
+        // The module tables share one database without schemas, so the prefix is what keeps them apart.
+        AssertTablesPrefixed<ProductsDbContext>();
+        AssertTablesPrefixed<WeighingDbContext>();
+    }
+
+    private static void AssertTablesPrefixed<TContext>() where TContext : ModuleDbContext
+    {
+        var options = new DbContextOptionsBuilder<TContext>().UseSqlite("Data Source=:memory:").Options;
+        using var context = (TContext)Activator.CreateInstance(typeof(TContext), options)!;
+        var prefix = context.TablePrefix + "_";
+        var tables = context.Model.GetEntityTypes()
+            .Select(e => e.GetTableName())
+            .OfType<string>()
+            .ToArray();
+
+        // Positive check first, so that the prefix check cannot pass vacuously.
+        tables.ShouldNotBeEmpty(typeof(TContext).Name);
+        tables.ShouldAllBe(name => name.StartsWith(prefix, StringComparison.Ordinal), $"every table of {typeof(TContext).Name} starts with {prefix}");
     }
 
     [Fact]

@@ -20,4 +20,14 @@ public interface ILiveWeightSource
     /// <paramref name="cancellationToken"/> is cancelled. A slow consumer skips older weights.
     /// </summary>
     IAsyncEnumerable<LiveWeight> WatchAsync(string deviceId, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Yields a snapshot of the device at once and then a new one whenever its connection state,
+    /// last error, agent or weight (value, unit, state, tare, net flag) changes, until
+    /// <paramref name="cancellationToken"/> is cancelled. Repeated identical readings yield nothing.
+    /// A device that is not known yet yields a waiting snapshot (state
+    /// <see cref="DeviceConnectionState.Disconnected"/>, no agent, no weight, default
+    /// <see cref="LiveDevice.LastSeen"/>) until its agent reports it. A slow consumer skips older snapshots.
+    /// </summary>
+    IAsyncEnumerable<LiveDevice> WatchDeviceAsync(string deviceId, CancellationToken cancellationToken = default);
 }

@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype"><value>text/microsoft-resx</value></resheader>
+  <resheader name="version"><value>2.0</value></resheader>
+  <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+  <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+  <data name="NoReading" xml:space="preserve"><value>No reading from the scale yet.</value></data>
+  <data name="DeviceNotConnected" xml:space="preserve"><value>The scale is not connected.</value></data>
+  <data name="NotStable" xml:space="preserve"><value>The weight is not stable. Try again when the scale settles.</value></data>
+  <data name="Overload" xml:space="preserve"><value>Overload: the load is above the scale's capacity.</value></data>
+  <data name="Underload" xml:space="preserve"><value>Underload: the load is below the scale's range.</value></data>
+  <data name="NetTooSmall" xml:space="preserve"><value>The net weight is too small to record.</value></data>
+  <data name="UnknownProduct" xml:space="preserve"><value>The product was not found.</value></data>
+  <data name="InactiveProduct" xml:space="preserve"><value>This product is inactive.</value></data>
+  <data name="UnknownUnit" xml:space="preserve"><value>The scale's unit is unknown, so the tare or the amount cannot be calculated.</value></data>
+  <data name="AlreadyCancelled" xml:space="preserve"><value>This record is already cancelled.</value></data>
+  <data name="CancelReasonRequired" xml:space="preserve"><value>Enter a reason for the cancellation.</value></data>
+  <data name="CancelReasonTooLong" xml:space="preserve"><value>The reason is too long (at most 500 characters).</value></data>
+  <data name="RequestIdRequired" xml:space="preserve"><value>The request has no request id.</value></data>
+  <data name="DeviceIdRequired" xml:space="preserve"><value>Select a scale.</value></data>
+  <data name="DeviceIdTooLong" xml:space="preserve"><value>The scale id is too long (at most 100 characters).</value></data>
+  <data name="InvalidNumber" xml:space="preserve"><value>Enter a valid number, for example 0.012.</value></data>
+  <data name="NegativeNotAllowed" xml:space="preserve"><value>The value cannot be negative.</value></data>
+  <data name="LotTooLong" xml:space="preserve"><value>The lot is too long (at most 64 characters).</value></data>
+  <data name="Title" xml:space="preserve"><value>Weighing</value></data>
+  <data name="Net" xml:space="preserve"><value>Net</value></data>
+  <data name="Gross" xml:space="preserve"><value>Gross</value></data>
+  <data name="Tare" xml:space="preserve"><value>Tare</value></data>
+  <data name="Amount" xml:space="preserve"><value>Amount</value></data>
+  <data name="AmountWithCurrency" xml:space="preserve"><value>Amount ({0})</value></data>
+  <data name="NetWithUnit" xml:space="preserve"><value>Net ({0})</value></data>
+  <data name="PricePerKg" xml:space="preserve"><value>{0} / kg</value></data>
+  <data name="SaveRecord" xml:space="preserve"><value>Save weighing</value></data>
+  <data name="SaveAndPrint" xml:space="preserve"><value>Save and print label</value></data>
+  <data name="TakeTare" xml:space="preserve"><value>Take tare</value></data>
+  <data name="ClearTare" xml:space="preserve"><value>Clear tare</value></data>
+  <data name="Zero" xml:space="preserve"><value>Zero</value></data>
+  <data name="ProductSearch" xml:space="preserve"><value>Product, PLU or name</value></data>
+  <data name="NoProduct" xml:space="preserve"><value>No product</value></data>
+  <data name="Lot" xml:space="preserve"><value>Lot</value></data>
+  <data name="RecentRecords" xml:space="preserve"><value>Recent weighings</value></data>
+  <data name="AllRecords" xml:space="preserve"><value>All records</value></data>
+  <data name="Saved" xml:space="preserve"><value>saved</value></data>
+  <data name="Cancelled" xml:space="preserve"><value>cancelled</value></data>
+  <data name="Device" xml:space="preserve"><value>Scale</value></data>
+  <data name="SelectDevice" xml:space="preserve"><value>Select a scale</value></data>
+  <data name="DeviceConnected" xml:space="preserve"><value>scale connected</value></data>
+  <data name="DeviceDisconnected" xml:space="preserve"><value>scale not connected</value></data>
+  <data name="DeviceConnecting" xml:space="preserve"><value>connecting to the scale</value></data>
+  <data name="StateStable" xml:space="preserve"><value>stable</value></data>
+  <data name="StateMotion" xml:space="preserve"><value>in motion</value></data>
+  <data name="StateOverload" xml:space="preserve"><value>overload</value></data>
+  <data name="StateUnderload" xml:space="preserve"><value>underload</value></data>
+  <data name="Saving" xml:space="preserve"><value>Saving…</value></data>
+  <data name="SaveFailed" xml:space="preserve"><value>The weighing could not be saved.</value></data>
+  <data name="Retrying" xml:space="preserve"><value>Connection lost, retrying…</value></data>
+  <data name="ZeroDone" xml:space="preserve"><value>The scale was zeroed.</value></data>
+  <data name="ZeroNotSupported" xml:space="preserve"><value>This scale cannot be zeroed from here.</value></data>
+  <data name="ZeroRejected" xml:space="preserve"><value>The scale rejected zeroing. Empty the pan and wait until it is stable.</value></data>
+  <data name="ZeroUnavailable" xml:space="preserve"><value>The scale is not reachable, so it cannot be zeroed.</value></data>
+  <data name="RecordsTitle" xml:space="preserve"><value>Weighing records</value></data>
+  <data name="RecordsBreadcrumb" xml:space="preserve"><value>Records</value></data>
+  <data name="Date" xml:space="preserve"><value>Date</value></data>
+  <data name="Time" xml:space="preserve"><value>Time</value></data>
+  <data name="RecordNo" xml:space="preserve"><value>Record no</value></data>
+  <data name="Plu" xml:space="preserve"><value>PLU</value></data>
+  <data name="Product" xml:space="preserve"><value>Product</value></data>
+  <data name="Operator" xml:space="preserve"><value>Operator</value></data>
+  <data name="AllOperators" xml:space="preserve"><value>Everyone</value></data>
+  <data name="Status" xml:space="preserve"><value>Status</value></data>
+  <data name="AllProducts" xml:space="preserve"><value>All products</value></data>
+  <data name="ExportExcel" xml:space="preserve"><value>Export to Excel</value></data>
+  <data name="ValidSummary" xml:space="preserve"><value>{0} valid records, {1} cancelled</value></data>
+  <data name="CancelledNotInTotals" xml:space="preserve"><value>cancelled records are not included in totals</value></data>
+  <data name="Total" xml:space="preserve"><value>Total</value></data>
+  <data name="CancelRecord" xml:space="preserve"><value>Cancel record</value></data>
+  <data name="TargetWeight" xml:space="preserve"><value>Target weight (kg)</value></data>
+  <data name="LowerTolerance" xml:space="preserve"><value>Lower tolerance (kg)</value></data>
+  <data name="UpperTolerance" xml:space="preserve"><value>Upper tolerance (kg)</value></data>
+  <data name="CancelReason" xml:space="preserve"><value>Reason for cancellation</value></data>
+  <data name="CancelConfirm" xml:space="preserve"><value>Cancel record {0}? It stays in the list but is not included in totals.</value></data>
+  <data name="Empty" xml:space="preserve"><value>No records found.</value></data>
+  <data name="DateTime" xml:space="preserve"><value>Date and time</value></data>
+  <data name="Unit" xml:space="preserve"><value>Unit</value></data>
+  <data name="UnitPrice" xml:space="preserve"><value>Unit price</value></data>
+  <data name="Currency" xml:space="preserve"><value>Currency</value></data>
+  <data name="ExportTooLarge" xml:space="preserve"><value>Too many records to export (at most 100000). Narrow the filter.</value></data>
+  <data name="Back" xml:space="preserve"><value>Back</value></data>
+  <data name="LoadMore" xml:space="preserve"><value>Load more</value></data>
+  <data name="LiveWeight" xml:space="preserve"><value>Live weight</value></data>
+  <data name="ProductSelection" xml:space="preserve"><value>Product selection</value></data>
+  <data name="NoRecent" xml:space="preserve"><value>No weighings yet.</value></data>
+</root>

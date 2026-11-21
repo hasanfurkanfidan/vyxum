@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype"><value>text/microsoft-resx</value></resheader>
+  <resheader name="version"><value>2.0</value></resheader>
+  <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+  <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+  <data name="CodeRequired" xml:space="preserve"><value>PLU kodu zorunludur.</value></data>
+  <data name="CodeTaken" xml:space="preserve"><value>Bu PLU kodu başka bir üründe kullanılıyor.</value></data>
+  <data name="CodeTooLong" xml:space="preserve"><value>PLU kodu çok uzun (en çok 32 karakter).</value></data>
+  <data name="NameRequired" xml:space="preserve"><value>Ürün adı zorunludur.</value></data>
+  <data name="NameTooLong" xml:space="preserve"><value>Ürün adı çok uzun (en çok 200 karakter).</value></data>
+  <data name="InvalidNumber" xml:space="preserve"><value>Geçerli bir sayı girin, örneğin 12.50.</value></data>
+  <data name="NegativeNotAllowed" xml:space="preserve"><value>Değer negatif olamaz.</value></data>
+  <data name="BarcodePrefixTooLong" xml:space="preserve"><value>Barkod öneki çok uzun (en çok 16 karakter).</value></data>
+  <data name="IngredientsTooLong" xml:space="preserve"><value>İçindekiler çok uzun (en çok 4000 karakter).</value></data>
+  <data name="Title" xml:space="preserve"><value>Ürün kartları</value></data>
+  <data name="Breadcrumb" xml:space="preserve"><value>Ürünler</value></data>
+  <data name="CountSuffix" xml:space="preserve"><value>{0} ürün</value></data>
+  <data name="AddProduct" xml:space="preserve"><value>Ürün ekle</value></data>
+  <data name="Code" xml:space="preserve"><value>PLU</value></data>
+  <data name="Product" xml:space="preserve"><value>Ürün</value></data>
+  <data name="UnitPricePerKg" xml:space="preserve"><value>Birim fiyat (kg başına)</value></data>
+  <data name="PackageTare" xml:space="preserve"><value>Ambalaj darası (kg)</value></data>
+  <data name="TargetWeight" xml:space="preserve"><value>Hedef ağırlık (kg)</value></data>
+  <data name="LowerTolerance" xml:space="preserve"><value>Alt tolerans (kg)</value></data>
+  <data name="UpperTolerance" xml:space="preserve"><value>Üst tolerans (kg)</value></data>
+  <data name="ToleranceHint" xml:space="preserve"><value>Hedefin altında ve üstünde kabul edilen miktarlar, örneğin 0,250 için 0,005 ve 0,010</value></data>
+  <data name="ToleranceNeedsTarget" xml:space="preserve"><value>Tolerans girmeden önce hedef ağırlığı girin.</value></data>
+  <data name="ShelfLife" xml:space="preserve"><value>Raf ömrü (gün)</value></data>
+  <data name="Days" xml:space="preserve"><value>{0} gün</value></data>
+  <data name="BarcodePrefix" xml:space="preserve"><value>Barkod öneki</value></data>
+  <data name="Ingredients" xml:space="preserve"><value>İçindekiler</value></data>
+  <data name="IngredientsHint" xml:space="preserve"><value>Alerjenleri yıldızla işaretle</value></data>
+  <data name="Name" xml:space="preserve"><value>Ürün adı</value></data>
+  <data name="Save" xml:space="preserve"><value>Kaydet</value></data>
+  <data name="Deactivate" xml:space="preserve"><value>Ürünü pasifleştir</value></data>
+  <data name="Activate" xml:space="preserve"><value>Ürünü etkinleştir</value></data>
+  <data name="ShowInactive" xml:space="preserve"><value>Pasif ürünleri göster</value></data>
+  <data name="Inactive" xml:space="preserve"><value>Pasif</value></data>
+  <data name="Saved" xml:space="preserve"><value>Kaydedildi</value></data>
+  <data name="NewProduct" xml:space="preserve"><value>Yeni ürün</value></data>
+  <data name="Empty" xml:space="preserve"><value>Henüz ürün yok</value></data>
+  <data name="SearchPlaceholder" xml:space="preserve"><value>PLU ya da ad</value></data>
+</root>

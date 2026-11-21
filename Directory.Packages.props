@@ -7,6 +7,9 @@
 
   <ItemGroup>
     <!-- Persistence (EF Core 10 line) -->
+    <!-- Excel export (MIT) -->
+    <PackageVersion Include="DocumentFormat.OpenXml" Version="3.5.1" />
+
     <PackageVersion Include="Microsoft.EntityFrameworkCore" Version="10.0.14" />
     <PackageVersion Include="Microsoft.EntityFrameworkCore.Relational" Version="10.0.14" />
     <PackageVersion Include="Microsoft.EntityFrameworkCore.Sqlite" Version="10.0.14" />

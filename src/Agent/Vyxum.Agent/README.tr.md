@@ -17,7 +17,7 @@ dotnet run --project src/Agent/Vyxum.Agent
 `appsettings.json` yerine başka bir ayar dosyası kullanmak için `--settings` verilir:
 
 ```
-dotnet run --project src/Agent/Vyxum.Agent -- --settings src/Agent/Vyxum.Agent/appsettings.Ind231.example.json
+dotnet run --project src/Agent/Vyxum.Agent -- --settings appsettings.Ind231.example.json
 ```
 
 Her ayar komut satırından da verilebilir, örneğin `--Vyxum:Agent:ServerUrl http://localhost:8080`.
@@ -61,8 +61,8 @@ Her cihazın bir `Id`, bir `Transport` (taşıma) ve bir `Protocol` ayarı vard�
   - `simulator`: `Simulator` altında `Kind` (`MtSics`, `ToledoContinuous`, `Replay`), `Weight`, `Unit`, `State`,
     `Interval`, `RecordingPath` (kayıttan oynatma).
 - `Protocol.Type`:
-  - `mt-sics`: `Command` (`SI`, `S` ya da `SIR`), `PollInterval` (200 ms), `ResponseTimeout` (1 sn), `RetriesOnError`,
-    `MaxConsecutiveTimeouts`, `Terminator`.
+  - `mt-sics`: `Command` (`SI`, `S` ya da `SIR`), `PollInterval` (200 ms), `ResponseTimeout` (1 sn), `ZeroTimeout` (3 sn),
+    `RetriesOnError`, `MaxConsecutiveTimeouts`, `Terminator`.
   - `toledo-continuous`: `ChecksumEnabled`, `InactivityTimeout` (3 sn), `MaxConsecutiveInvalidFrames`.
   - `generic-ascii`: `Pattern` (zorunlu, `weight` grubu olan bir düzenli ifade), `StablePattern`, `MotionPattern`,
     `OverloadPattern`, `UnderloadPattern`, `NetPattern`, `DecimalSeparator`, `ThousandsSeparator`, `DefaultUnit`,
@@ -70,9 +70,15 @@ Her cihazın bir `Id`, bir `Transport` (taşıma) ve bir `Protocol` ayarı vard�
 
 `appsettings.Ind231.example.json`, COM3'e bağlı bir METTLER TOLEDO IND231 örneğidir (9600 8N1, MT-SICS, `SI` komutu).
 
-## Güvenlik: yalnızca okuma komutları
+## Güvenlik: okuma komutları ve istek üzerine sıfırlama
 
-Agent yalnızca ağırlığı okur. MT-SICS ile yalnızca `S`, `SI` ya da `SIR` gönderir; başka her komut (dara `T`, sıfırlama
-`Z`, açılış durumuna dönüş `@`, ayar komutları) açılışta reddedilir. Toledo Continuous yalnızca dinler.
+Agent ağırlığı okur. MT-SICS ile ayarlanan okuma komutunu (`S`, `SI` ya da `SIR`) gönderir; yalnızca bir kullanıcı web
+uygulamasında "Sıfırla" tuşuna bastığında, o basış için tam bir kez `Z` gönderir. Başka hiçbir komut gönderilmez: dara
+(`T`, `TI`, `TA`), anında sıfırlama (`ZI`), açılış durumuna dönüş (`@`) ve ayar komutları kodda engellenir; `Command`
+yalnızca okuma komutlarını kabul eder (başka bir değer açılışta reddedilir). `Z`, aynı bağlantıda iki okuma komutunun
+arasında gönderilir. Terazi `ES` ya da `ET` (yürütülmedi) yanıtı verirse komut, diğer komutlar gibi yeniden gönderilir;
+`ZeroTimeout` içinde yanıt gelmezse yeniden gönderilmez, çünkü terazi sıfırlamış olabilir. Agent kaydolurken hangi
+cihazların sıfırlamayı desteklediğini bildirir. Toledo Continuous yalnızca dinler ve sıfırlamayı desteklemez;
+`generic-ascii` de desteklemez.
 `generic-ascii` içinde `RequestCommand` serbest metindir, çünkü her marka kendi komutunu kullanır: buraya yalnızca
 ağırlığı okuyan ya da yazdıran bir komut yazılır; dara alan, sıfırlayan ya da cihazı değiştiren bir komut asla yazılmaz.

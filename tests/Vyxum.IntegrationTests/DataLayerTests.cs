@@ -70,4 +70,43 @@ public class DataLayerTests
             (await notifications.Notifications.CountAsync(Ct)).ShouldBe(1);
         }
     }
+
+    [Fact]
+    public async Task Sqlite_module_connections_use_synchronous_full_even_from_the_pool()
+    {
+        await using var database = Databases.CreateOrSkip(DatabaseProvider.Sqlite);
+        await using var host = await TestModuleHost.StartAsync(database, new OrdersModule());
+
+        await using (var scope = host.CreateScope())
+        {
+            var db = scope.ServiceProvider.GetRequiredService<OrdersDbContext>();
+            await db.Database.OpenConnectionAsync(Ct);
+            (await ReadSynchronousAsync(db)).ShouldBe(2);
+
+            // The setting lives on the connection, which the pool keeps; the next open must restore it.
+            await db.Database.ExecuteSqlRawAsync("PRAGMA synchronous=OFF;", Ct);
+            (await ReadSynchronousAsync(db)).ShouldBe(0);
+            await db.Database.CloseConnectionAsync();
+        }
+
+        await using (var scope = host.CreateScope())
+        {
+            var db = scope.ServiceProvider.GetRequiredService<OrdersDbContext>();
+            await db.Database.OpenConnectionAsync(Ct);
+            (await ReadSynchronousAsync(db)).ShouldBe(2);
+
+            // The synchronous open path does the same.
+            await db.Database.ExecuteSqlRawAsync("PRAGMA synchronous=OFF;", Ct);
+            await db.Database.CloseConnectionAsync();
+            db.Database.OpenConnection();
+            (await ReadSynchronousAsync(db)).ShouldBe(2);
+        }
+    }
+
+    private static async Task<long> ReadSynchronousAsync(DbContext db)
+    {
+        await using var command = db.Database.GetDbConnection().CreateCommand();
+        command.CommandText = "PRAGMA synchronous;";
+        return (long)(await command.ExecuteScalarAsync(Ct))!;
+    }
 }

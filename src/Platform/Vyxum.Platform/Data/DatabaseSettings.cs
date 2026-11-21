@@ -74,7 +74,10 @@ public sealed record DatabaseSettings(DatabaseProvider Provider, string Connecti
             : Path.GetFullPath("data");
     }
 
-    /// <summary>Configures <paramref name="options"/> for this provider and connection string.</summary>
+    /// <summary>
+    /// Configures <paramref name="options"/> for this provider and connection string. SQLite
+    /// connections run with <c>PRAGMA synchronous=FULL</c>.
+    /// </summary>
     public void Configure(DbContextOptionsBuilder options)
     {
         ArgumentNullException.ThrowIfNull(options);
@@ -82,7 +85,7 @@ public sealed record DatabaseSettings(DatabaseProvider Provider, string Connecti
         switch (Provider)
         {
             case DatabaseProvider.Sqlite:
-                options.UseSqlite(ConnectionString);
+                options.UseSqlite(ConnectionString).AddInterceptors(SqliteDurabilityInterceptor.Instance);
                 break;
             case DatabaseProvider.SqlServer:
                 options.UseSqlServer(ConnectionString);

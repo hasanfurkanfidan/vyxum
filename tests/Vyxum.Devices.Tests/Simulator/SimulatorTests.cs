@@ -176,17 +176,76 @@ public class SimulatorTests
     }
 
     [Fact]
-    public async Task Simulator_records_tare_zero_and_reset_when_they_are_sent()
+    public async Task Simulator_records_tare_immediate_zero_and_reset_when_they_are_sent()
     {
         var device = new MtSicsScaleSimulator(new FixedWeightSource(572m), "C1");
         await using var transport = new SimulatedTransport(device);
         await transport.OpenAsync(Ct);
 
-        await transport.WriteAsync(Encoding.ASCII.GetBytes("T\r\nZ\r\n@\r\nI4\r\nSI\r\n"), Ct);
-        await ReadLinesAsync(transport, 5);
+        await transport.WriteAsync(Encoding.ASCII.GetBytes("T\r\nZI\r\n@\r\nZ\r\nI4\r\nSI\r\n"), Ct);
+        await ReadLinesAsync(transport, 6);
 
-        device.ForbiddenCommands.ShouldBe(["T", "Z", "@"]);
-        device.ReceivedCommands.ShouldBe(["T", "Z", "@", "I4", "SI"]);
+        device.ForbiddenCommands.ShouldBe(["T", "ZI", "@"]);
+        device.ReceivedCommands.ShouldBe(["T", "ZI", "@", "Z", "I4", "SI"]);
+    }
+
+    [Fact]
+    public async Task Z_zeroes_the_simulator_so_later_weights_are_relative_to_it()
+    {
+        var device = new MtSicsScaleSimulator(new FixedWeightSource(1.250m, "kg"));
+        await using var transport = new SimulatedTransport(device);
+        await transport.OpenAsync(Ct);
+
+        await transport.WriteAsync(Encoding.ASCII.GetBytes("SI\r\nZ\r\nSI\r\n"), Ct);
+        var lines = await ReadLinesAsync(transport, 3);
+
+        lines.ShouldBe(["S S      1.250 kg", "Z A", "S S      0.000 kg"]);
+        device.ZeroOffset.ShouldBe(1.250m);
+        device.ZeroCommandCount.ShouldBe(1);
+        device.ForbiddenCommands.ShouldBeEmpty();
+    }
+
+    [Theory]
+    [InlineData(WeightState.Motion, "Z I")]
+    [InlineData(WeightState.Overload, "Z +")]
+    [InlineData(WeightState.Underload, "Z -")]
+    public async Task Z_is_refused_while_the_weight_is_not_stable_or_out_of_range(WeightState state, string expected)
+    {
+        var device = new MtSicsScaleSimulator(new FixedWeightSource(572m, "g", state));
+        await using var transport = new SimulatedTransport(device);
+        await transport.OpenAsync(Ct);
+
+        await transport.WriteAsync(Encoding.ASCII.GetBytes("Z\r\n"), Ct);
+        var lines = await ReadLinesAsync(transport, 1);
+
+        lines.ShouldBe([expected]);
+        device.ZeroOffset.ShouldBe(0m);
+    }
+
+    [Fact]
+    public async Task Protocol_zero_on_the_simulator_makes_the_next_reading_zero()
+    {
+        var device = new MtSicsScaleSimulator(new FixedWeightSource(572m));
+        await using var transport = new SimulatedTransport(device);
+        var protocol = new MtSicsProtocol(FastMtSics);
+        using var cts = CancellationTokenSource.CreateLinkedTokenSource(Ct);
+        cts.CancelAfter(TimeSpan.FromSeconds(15));
+        await transport.OpenAsync(cts.Token);
+        await using var readings = protocol.ReadAsync(transport, cts.Token).GetAsyncEnumerator(cts.Token);
+
+        (await readings.MoveNextAsync()).ShouldBeTrue();
+        readings.Current.Value.ShouldBe(572m);
+        var zero = protocol.ZeroAsync(cts.Token);
+        decimal? value = null;
+        while (!zero.IsCompleted || value != 0m)
+        {
+            (await readings.MoveNextAsync()).ShouldBeTrue();
+            value = readings.Current.Value;
+        }
+
+        (await zero).ShouldBe(ZeroResult.Done);
+        device.ZeroCommandCount.ShouldBe(1);
+        device.ForbiddenCommands.ShouldBeEmpty();
     }
 
     [Fact]

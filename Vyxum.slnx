@@ -14,6 +14,10 @@
   <Folder Name="/src/Host/">
     <Project Path="src/Host/Vyxum.Host/Vyxum.Host.csproj" />
   </Folder>
+  <Folder Name="/src/Modules/">
+    <Project Path="src/Modules/Products/Vyxum.Modules.Products/Vyxum.Modules.Products.csproj" />
+    <Project Path="src/Modules/Weighing/Vyxum.Modules.Weighing/Vyxum.Modules.Weighing.csproj" />
+  </Folder>
   <Folder Name="/src/Platform/">
     <Project Path="src/Platform/Vyxum.Platform.Abstractions/Vyxum.Platform.Abstractions.csproj" />
     <Project Path="src/Platform/Vyxum.Platform.Testing/Vyxum.Platform.Testing.csproj" />
@@ -23,6 +27,7 @@
     <Project Path="tests/Vyxum.ArchitectureTests/Vyxum.ArchitectureTests.csproj" />
     <Project Path="tests/Vyxum.Devices.Tests/Vyxum.Devices.Tests.csproj" />
     <Project Path="tests/Vyxum.IntegrationTests/Vyxum.IntegrationTests.csproj" />
+    <Project Path="tests/Vyxum.Modules.Tests/Vyxum.Modules.Tests.csproj" />
     <Project Path="tests/Vyxum.Platform.Tests/Vyxum.Platform.Tests.csproj" />
   </Folder>
   <Folder Name="/tests/SampleModules/">

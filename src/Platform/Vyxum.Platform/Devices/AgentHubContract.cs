@@ -21,13 +21,32 @@ public static class AgentHubContract
 
     /// <summary>Hub method: <c>ReportStatus(string deviceId, AgentDeviceStatus status)</c>.</summary>
     public const string ReportStatus = "ReportStatus";
+
+    /// <summary>
+    /// Client method invoked with a result: <c>AgentCommandResult Zero(string deviceId, TimeSpan timeout)</c>.
+    /// The agent sends the zero command to the device at most once and answers within <c>timeout</c>.
+    /// </summary>
+    public const string Zero = "Zero";
 }
 
 /// <summary>Sent by an agent after connecting.</summary>
 /// <param name="AgentName">A name for the agent, usually the computer name.</param>
 /// <param name="Version">The agent version.</param>
 /// <param name="DeviceIds">The devices the agent serves.</param>
-public sealed record AgentRegistration(string AgentName, string? Version, IReadOnlyList<string> DeviceIds);
+/// <param name="DeviceCommands">
+/// For each device id, the commands it supports (see <see cref="DeviceCommandNames"/>); null from an agent that does
+/// not report them, which means none.
+/// </param>
+public sealed record AgentRegistration(
+    string AgentName,
+    string? Version,
+    IReadOnlyList<string> DeviceIds,
+    IReadOnlyDictionary<string, IReadOnlyList<string>>? DeviceCommands = null);
+
+/// <summary>The answer of an agent to a device command.</summary>
+/// <param name="Result">The outcome.</param>
+/// <param name="Detail">A short English explanation for logs; null when there is nothing to add.</param>
+public sealed record AgentCommandResult(DeviceCommandOutcome Result, string? Detail = null);
 
 /// <summary>One weight read by an agent.</summary>
 /// <param name="Value">The weight as transmitted. Null for overload and underload.</param>

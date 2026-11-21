@@ -1,4 +1,6 @@
 using System.Reflection;
+using Vyxum.Modules.Products;
+using Vyxum.Modules.Weighing;
 
 namespace Vyxum.Host;
 
@@ -8,8 +10,12 @@ public static class HostModules
     /// <summary>Configuration section: a list of assembly names to load modules from, e.g. <c>Vyxum:Modules:0</c>.</summary>
     public const string ConfigurationKey = "Vyxum:Modules";
 
-    /// <summary>Assemblies that are always loaded. Empty in F0: real modules arrive in later phases.</summary>
-    public static IReadOnlyList<Assembly> BuiltIn { get; } = [];
+    /// <summary>Open-core module assemblies that are always loaded. Adding a module is one line here plus a project reference.</summary>
+    public static IReadOnlyList<Assembly> BuiltIn { get; } =
+    [
+        typeof(ProductsModule).Assembly,
+        typeof(WeighingModule).Assembly,
+    ];
 
     /// <summary>The built-in assemblies plus the assemblies named in configuration.</summary>
     public static IReadOnlyList<Assembly> Load(IConfiguration configuration)
