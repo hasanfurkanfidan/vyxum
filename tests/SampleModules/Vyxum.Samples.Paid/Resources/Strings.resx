@@ -10,4 +10,6 @@
   <data name="Add" xml:space="preserve"><value>Add entry</value></data>
   <data name="LoadFailed" xml:space="preserve"><value>The entries could not be loaded.</value></data>
   <data name="ModuleName" xml:space="preserve"><value>Paid sample</value></data>
+  <data name="PreviewDescription" xml:space="preserve"><value>Keeps a list of entries and adds one for every placed order.
+A sample of a paid module.</value></data>
 </root>

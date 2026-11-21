@@ -2,6 +2,7 @@ using System.Globalization;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Routing;
+using Microsoft.Extensions.Configuration;
 
 namespace Vyxum.Platform;
 
@@ -14,12 +15,20 @@ public static class UiEndpointExtensions
     /// <summary>Path of the loaded modules endpoint.</summary>
     public const string ModulesPath = "/api/ui/modules";
 
+    /// <summary>Configuration key of the contact e-mail address shown in the trial license request (written by the installer or the reseller).</summary>
+    public const string ContactEmailKey = "Vyxum:Contact:Email";
+
+    /// <summary>Configuration key of the contact web address shown in the trial license request.</summary>
+    public const string ContactUrlKey = "Vyxum:Contact:Url";
+
     /// <summary>
     /// Maps <c>GET /api/ui/strings</c>, which returns <c>{ culture, strings: { "prefix.Key": "text" } }</c>
     /// in the request's UI culture (set by request localization), and <c>GET /api/ui/modules</c>, which
     /// returns <c>{ modules: [{ id, version, requiresLicense, name, provides, requires, optional, license, ui }], capabilities: ["..."], companyName,
     /// license: { status, licensee, graceDaysLeft } }</c>; <c>companyName</c> is the name entered in the setup wizard, or
-    /// null.
+    /// null. <c>contact</c> is <c>{ email, url }</c> from the configuration keys <see cref="ContactEmailKey"/> and
+    /// <see cref="ContactUrlKey"/> (either may be null). A module's <c>preview</c> is <c>{ description, imageUrl }</c> for a
+    /// module that declares a <see cref="Abstractions.ModulePreview"/> (locked or not), otherwise null.
     /// </summary>
     /// <remarks>
     /// A module's <c>license</c> is <c>free</c>, <c>licensed</c>, <c>grace</c>, <c>readOnly</c> or <c>locked</c>; the shell
@@ -41,7 +50,7 @@ public static class UiEndpointExtensions
             return Results.Json(new UiStringsResponse(culture.Name, catalog.GetStrings(culture)), DeviceEndpointExtensions.JsonOptions);
         });
 
-        endpoints.MapGet(ModulesPath, async (ModuleCatalog catalog, CapabilityRegistry registry, IPlatformSettings settings, LicenseManager licenses, ModuleDisplayNames names, CancellationToken cancellationToken) =>
+        endpoints.MapGet(ModulesPath, async (ModuleCatalog catalog, CapabilityRegistry registry, IPlatformSettings settings, LicenseManager licenses, ModuleDisplayNames names, IConfiguration configuration, CancellationToken cancellationToken) =>
         {
             var snapshot = licenses.GetSnapshot();
             var culture = CultureInfo.CurrentUICulture;
@@ -55,7 +64,8 @@ public static class UiEndpointExtensions
                     m.Manifest.Requires.Select(c => c.Id).ToList(),
                     m.Manifest.Optional.Select(c => c.Id).ToList(),
                     LicenseText.Of(snapshot.GetModuleStatus(m.Manifest.Id)),
-                    UiOf(m.Manifest, snapshot.GetModuleStatus(m.Manifest.Id))))
+                    UiOf(m.Manifest, snapshot.GetModuleStatus(m.Manifest.Id)),
+                    PreviewOf(m.Manifest, names, culture)))
                 .ToList();
             var capabilities = registry.Available(snapshot.GetModuleStatus);
             var companyName = await settings.GetAsync(PlatformSettingKeys.CompanyName, cancellationToken);
@@ -63,11 +73,20 @@ public static class UiEndpointExtensions
                 LicenseText.Of(snapshot.Status),
                 snapshot.License?.Payload.Licensee.Name,
                 snapshot.Evaluation?.GraceDaysLeft);
-            return Results.Json(new UiModulesResponse(modules, capabilities, companyName, license), DeviceEndpointExtensions.JsonOptions);
+            var contact = new UiContact(NullIfBlank(configuration[ContactEmailKey]), NullIfBlank(configuration[ContactUrlKey]));
+            return Results.Json(new UiModulesResponse(modules, capabilities, companyName, license, contact), DeviceEndpointExtensions.JsonOptions);
         });
 
         return endpoints;
     }
+
+    private static string? NullIfBlank(string? value) => string.IsNullOrWhiteSpace(value) ? null : value.Trim();
+
+    // The preview is offered locked or not: it is a static sample the module declared on purpose.
+    private static UiModulePreview? PreviewOf(Abstractions.ModuleManifest manifest, ModuleDisplayNames names, CultureInfo culture) =>
+        manifest.Preview is { } preview
+            ? new UiModulePreview(names.ResolveDescription(manifest, culture) ?? string.Empty, ModuleUiEndpointExtensions.PreviewUrlOf(manifest.Id, preview.Image))
+            : null;
 
     // The screens of a locked module are not offered: the shell does not try to load them.
     private static UiModuleScreens? UiOf(Abstractions.ModuleManifest manifest, Abstractions.ModuleLicenseState state) =>
@@ -86,7 +105,12 @@ public static class UiEndpointExtensions
         IReadOnlyList<string> Requires,
         IReadOnlyList<string> Optional,
         string License,
-        UiModuleScreens? Ui);
+        UiModuleScreens? Ui,
+        UiModulePreview? Preview);
+
+    internal sealed record UiModulePreview(string Description, string ImageUrl);
+
+    internal sealed record UiContact(string? Email, string? Url);
 
     internal sealed record UiModuleScreens(string Entry, int SdkVersion);
 
@@ -96,5 +120,6 @@ public static class UiEndpointExtensions
         IReadOnlyList<UiModule> Modules,
         IReadOnlyList<string> Capabilities,
         string? CompanyName,
-        UiLicense License);
+        UiLicense License,
+        UiContact Contact);
 }

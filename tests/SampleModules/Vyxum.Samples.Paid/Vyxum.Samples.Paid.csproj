@@ -7,6 +7,8 @@
   <ItemGroup>
     <!-- The module's screens (ModuleUi): a hand-written ES module, embedded under the logical name prefix vyxum-ui/. -->
     <EmbeddedResource Include="ui\**\*" LogicalName="vyxum-ui/%(RecursiveDir)%(Filename)%(Extension)" />
+    <!-- The preview shown while the module is locked (ModulePreview): embedded under vyxum-preview/. -->
+    <EmbeddedResource Include="preview\**\*" LogicalName="vyxum-preview/%(RecursiveDir)%(Filename)%(Extension)" />
   </ItemGroup>
 
 </Project>

@@ -189,4 +189,20 @@ public class ModuleValidatorTests
             "Module 'samples.screens' declares the UI entry 'index.js', but its assembly has no embedded resource 'vyxum-ui/index.js'.",
         ]);
     }
+
+    [Fact]
+    public void Preview_image_must_be_an_embedded_preview_resource()
+    {
+        var module = new TestModule(new ModuleManifest
+        {
+            Id = "samples.preview",
+            Version = new Version(1, 0),
+            Preview = new ModulePreview { DescriptionKey = "samples.Preview", Image = "screen.svg" },
+        });
+
+        Problems(module).ShouldBe(
+        [
+            "Module 'samples.preview' declares the preview image 'screen.svg', but its assembly has no embedded resource 'vyxum-preview/screen.svg'.",
+        ]);
+    }
 }

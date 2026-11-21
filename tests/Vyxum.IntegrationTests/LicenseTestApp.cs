@@ -94,7 +94,8 @@ internal sealed class LicenseTestApp : IAsyncDisposable
     /// False removes <see cref="LicenseMaintenanceService"/>, so that the latest seen time is written only when the test
     /// calls <see cref="PersistAsync"/>.
     /// </param>
-    public LicenseTestApp(TestDatabase database, TestLicenseIssuer issuer, TestClock? clock = null, bool maintenance = true)
+    /// <param name="settings">Extra configuration values.</param>
+    public LicenseTestApp(TestDatabase database, TestLicenseIssuer issuer, TestClock? clock = null, bool maintenance = true, IReadOnlyDictionary<string, string>? settings = null)
     {
         Clock = clock ?? new TestClock();
         var dataDirectory = database.DataDirectory;
@@ -107,6 +108,10 @@ internal sealed class LicenseTestApp : IAsyncDisposable
             builder.UseSetting("Vyxum:Modules:1", "Vyxum.Samples.Notifications");
             builder.UseSetting("Vyxum:Modules:2", "Vyxum.Samples.Paid");
             builder.UseSetting($"{OutboxOptions.SectionName}:PollingInterval", "01:00:00");
+            foreach (var (key, value) in settings ?? new Dictionary<string, string>())
+            {
+                builder.UseSetting(key, value);
+            }
             builder.ConfigureTestServices(services =>
             {
                 services.AddSingleton<TimeProvider>(Clock);

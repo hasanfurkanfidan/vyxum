@@ -40,4 +40,10 @@ public sealed class ModuleManifest
 
     /// <summary>The module's screens, embedded in its assembly, or null when the module has none.</summary>
     public ModuleUi? Ui { get; init; }
+
+    /// <summary>
+    /// What the shell shows while the module is locked (a description and a sample image), or null for none. See
+    /// <see cref="ModulePreview"/>.
+    /// </summary>
+    public ModulePreview? Preview { get; init; }
 }

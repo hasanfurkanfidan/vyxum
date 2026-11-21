@@ -32,6 +32,7 @@ public sealed class PaidModule : IModule
         Optional = ["samples.orders"],
         RequiresLicense = true,
         Ui = new ModuleUi { Entry = "index.js", SdkVersion = 1 },
+        Preview = new ModulePreview { DescriptionKey = StringsPrefix + ".PreviewDescription", Image = "screen.svg" },
     };
 
     /// <summary>Prefix of the module's UI strings (<c>Resources/Strings.resx</c>).</summary>

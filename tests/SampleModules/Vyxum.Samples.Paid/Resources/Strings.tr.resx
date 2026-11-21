@@ -10,4 +10,6 @@
   <data name="Add" xml:space="preserve"><value>Kayıt ekle</value></data>
   <data name="LoadFailed" xml:space="preserve"><value>Kayıtlar yüklenemedi.</value></data>
   <data name="ModuleName" xml:space="preserve"><value>Ücretli örnek</value></data>
+  <data name="PreviewDescription" xml:space="preserve"><value>Kayıtların listesini tutar, verilen her sipariş için bir kayıt ekler.
+Ücretli bir modül örneği.</value></data>
 </root>

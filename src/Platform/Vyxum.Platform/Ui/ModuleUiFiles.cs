@@ -15,6 +15,7 @@ namespace Vyxum.Platform;
 public sealed class ModuleUiFiles
 {
     private readonly Dictionary<string, ModuleUiAssembly> _modules = new(StringComparer.Ordinal);
+    private readonly Dictionary<string, ModuleUiAssembly> _previews = new(StringComparer.Ordinal);
 
     /// <summary>Indexes the front end files of every module in <paramref name="catalog"/> that declares a <see cref="ModuleUi"/>.</summary>
     public ModuleUiFiles(ModuleCatalog catalog)
@@ -22,7 +23,12 @@ public sealed class ModuleUiFiles
         ArgumentNullException.ThrowIfNull(catalog);
         foreach (var module in catalog.Modules.Where(m => m.Manifest.Ui is not null))
         {
-            _modules[module.Manifest.Id] = new ModuleUiAssembly(module.Module.GetType().Assembly);
+            _modules[module.Manifest.Id] = new ModuleUiAssembly(module.Module.GetType().Assembly, ModuleUi.ResourcePrefix);
+        }
+
+        foreach (var module in catalog.Modules.Where(m => m.Manifest.Preview is not null))
+        {
+            _previews[module.Manifest.Id] = new ModuleUiAssembly(module.Module.GetType().Assembly, ModulePreview.ResourcePrefix);
         }
     }
 
@@ -33,8 +39,23 @@ public sealed class ModuleUiFiles
     public ModuleUiFile? Find(string moduleId, string path) =>
         _modules.TryGetValue(moduleId, out var module) ? module.Find(path) : null;
 
+    /// <summary>True when the module with <paramref name="moduleId"/> is loaded and declares a preview.</summary>
+    public bool HasPreview(string moduleId) => _previews.ContainsKey(moduleId);
+
+    /// <summary>
+    /// The file at <paramref name="path"/> of the module's preview (<see cref="ModulePreview.ResourcePrefix"/>), or null.
+    /// Looks only at preview resources, never at the front end files.
+    /// </summary>
+    public ModuleUiFile? FindPreview(string moduleId, string path) =>
+        _previews.TryGetValue(moduleId, out var module) ? module.Find(path) : null;
+
     /// <summary>Paths (relative to <see cref="ModuleUi.ResourcePrefix"/>, with <c>/</c>) of the front end files in <paramref name="assembly"/>.</summary>
-    public static IReadOnlyDictionary<string, string> Index(Assembly assembly)
+    public static IReadOnlyDictionary<string, string> Index(Assembly assembly) => Index(assembly, ModuleUi.ResourcePrefix);
+
+    /// <summary>Paths (relative to <see cref="ModulePreview.ResourcePrefix"/>, with <c>/</c>) of the preview files in <paramref name="assembly"/>.</summary>
+    public static IReadOnlyDictionary<string, string> IndexPreview(Assembly assembly) => Index(assembly, ModulePreview.ResourcePrefix);
+
+    private static Dictionary<string, string> Index(Assembly assembly, string prefix)
     {
         ArgumentNullException.ThrowIfNull(assembly);
 
@@ -43,18 +64,18 @@ public sealed class ModuleUiFiles
         foreach (var name in assembly.GetManifestResourceNames())
         {
             var normalized = name.Replace('\\', '/');
-            if (normalized.StartsWith(ModuleUi.ResourcePrefix, StringComparison.Ordinal) && normalized.Length > ModuleUi.ResourcePrefix.Length)
+            if (normalized.StartsWith(prefix, StringComparison.Ordinal) && normalized.Length > prefix.Length)
             {
-                result[normalized[ModuleUi.ResourcePrefix.Length..]] = name;
+                result[normalized[prefix.Length..]] = name;
             }
         }
 
         return result;
     }
 
-    private sealed class ModuleUiAssembly(Assembly assembly)
+    private sealed class ModuleUiAssembly(Assembly assembly, string prefix)
     {
-        private readonly IReadOnlyDictionary<string, string> _resources = Index(assembly);
+        private readonly IReadOnlyDictionary<string, string> _resources = Index(assembly, prefix);
         private readonly Dictionary<string, ModuleUiFile> _files = new(StringComparer.Ordinal);
         private readonly Lock _lock = new();
 

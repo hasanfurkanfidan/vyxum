@@ -25,9 +25,32 @@ public static class ModuleUiEndpointExtensions
     {
         ArgumentNullException.ThrowIfNull(endpoints);
 
+        // The literal "preview" segment makes this route win over the catch-all below.
+        endpoints.MapMethods(PathPrefix + "/{moduleId}/" + PreviewSegment + "/{file}", [HttpMethods.Get, HttpMethods.Head], ServePreview)
+            .ExcludeFromDescription();
         endpoints.MapMethods(PathPrefix + "/{moduleId}/{**path}", [HttpMethods.Get, HttpMethods.Head], Serve)
             .ExcludeFromDescription();
         return endpoints;
+    }
+
+    /// <summary>Path segment of the preview files: <c>/modules/{moduleId}/preview/{file}</c>.</summary>
+    public const string PreviewSegment = "preview";
+
+    /// <summary>The address of a file of a module's preview (<see cref="Abstractions.ModulePreview"/>).</summary>
+    public static string PreviewUrlOf(string moduleId, string file) => $"{PathPrefix}/{moduleId}/{PreviewSegment}/{file}";
+
+    // The sample image of a locked module is public by design: no license check, only files embedded as preview.
+    private static async Task ServePreview(HttpContext context, string moduleId, string file)
+    {
+        var files = context.RequestServices.GetRequiredService<ModuleUiFiles>();
+        var found = files.HasPreview(moduleId) && IsSafe(file) ? files.FindPreview(moduleId, file) : null;
+        if (found is null)
+        {
+            context.Response.StatusCode = StatusCodes.Status404NotFound;
+            return;
+        }
+
+        await WriteAsync(context, found);
     }
 
     private static async Task Serve(HttpContext context, string moduleId, string? path)
@@ -58,6 +81,11 @@ public static class ModuleUiEndpointExtensions
             return;
         }
 
+        await WriteAsync(context, file);
+    }
+
+    private static async Task WriteAsync(HttpContext context, ModuleUiFile file)
+    {
         var headers = context.Response.Headers;
         headers.CacheControl = "no-cache";
         headers.ETag = file.ETag;

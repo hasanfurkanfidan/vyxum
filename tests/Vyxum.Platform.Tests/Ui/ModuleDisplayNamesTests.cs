@@ -39,4 +39,31 @@ public class ModuleDisplayNamesTests
 
         await Create("demo.Title", out _).StartAsync(CancellationToken.None);
     }
+
+    [Fact]
+    public async Task Preview_description_is_resolved_and_a_missing_key_fails_at_startup()
+    {
+        ModuleManifest Manifest(string key) => new()
+        {
+            Id = "demo",
+            Version = new Version(1, 0),
+            Preview = new ModulePreview { DescriptionKey = key, Image = "screen.svg" },
+        };
+
+        var good = Manifest("demo.Title");
+        var catalog = new ModuleCatalog([new ModuleDescriptor(new TestModule(good))]);
+        var names = new ModuleDisplayNames(catalog, new UiStringCatalog([new UiStringSource("demo", Strings)]));
+        names.ResolveDescription(good, CultureInfo.GetCultureInfo("tr")).ShouldBe("Ürünler");
+        await names.StartAsync(CancellationToken.None);
+
+        var bad = Manifest("demo.PreviewTypo");
+        var badNames = new ModuleDisplayNames(
+            new ModuleCatalog([new ModuleDescriptor(new TestModule(bad))]),
+            new UiStringCatalog([new UiStringSource("demo", Strings)]));
+        var error = await Should.ThrowAsync<InvalidOperationException>(() => badNames.StartAsync(CancellationToken.None));
+        error.Message.ShouldContain("demo.PreviewTypo");
+
+        var none = new ModuleManifest { Id = "plain", Version = new Version(1, 0) };
+        names.ResolveDescription(none, CultureInfo.GetCultureInfo("tr")).ShouldBeNull();
+    }
 }
