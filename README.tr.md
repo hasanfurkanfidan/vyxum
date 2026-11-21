@@ -232,7 +232,7 @@ Mimari testlerin kontrol edebildiği kurallar bu testlerle denetlenir.
 
 ## Katkıda bulunma
 
-Bkz. [CONTRIBUTING.md](CONTRIBUTING.md).
+Bkz. [CONTRIBUTING.md](CONTRIBUTING.md). Kodda yeniyseniz [geliştirici rehberiyle](docs/developer/README.md#türkçe) başlayın (Türkçe ve İngilizce).
 
 ## Lisans
 

@@ -230,7 +230,7 @@ These rules are enforced by the architecture tests where they can be checked mec
 
 ## Contributing
 
-See [CONTRIBUTING.md](CONTRIBUTING.md).
+See [CONTRIBUTING.md](CONTRIBUTING.md). New to the code? Start with the [developer guide](docs/developer/README.md) (English and Türkçe).
 
 ## License
 
