@@ -29,4 +29,10 @@
   <data name="Connecting" xml:space="preserve"><value>bağlanıyor</value></data>
   <data name="Disconnected" xml:space="preserve"><value>bağlı değil</value></data>
   <data name="NoDevice" xml:space="preserve"><value>Bağlı terazi yok</value></data>
+  <data name="ModuleLicenseRequired" xml:space="preserve"><value>Bu modül için lisans gerekiyor.</value></data>
+  <data name="ModuleLicenseRequiredHint" xml:space="preserve"><value>Bu modülü içeren bir lisans dosyası yükleyin.</value></data>
+  <data name="ModuleLicenseSettings" xml:space="preserve"><value>Lisans ayarlarını aç</value></data>
+  <data name="ModuleLoadFailed" xml:space="preserve"><value>Bu modülün ekranları yüklenemedi.</value></data>
+  <data name="ModuleIncompatible" xml:space="preserve"><value>Bu modül Vyxum'un daha yeni bir sürümünü gerektiriyor.</value></data>
+  <data name="ModuleScreenFailed" xml:space="preserve"><value>Bu ekranda bir hata oluştu.</value></data>
 </root>

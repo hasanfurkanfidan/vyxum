@@ -1,6 +1,6 @@
 // Test double for the host API: answers fetch calls from a route table.
 import { vi } from 'vitest';
-import type { UiModules } from '../lib/api';
+import type { UiModule, UiModules } from '../lib/api';
 import type { SetupStatus } from '../lib/setup';
 import { readCultureCookie } from '../lib/culture';
 
@@ -16,6 +16,12 @@ export function jsonResponse(body: unknown, status = 200): Response {
 /** Sample strings per culture, as the host would merge them from the resource files. */
 export const sampleStrings: Record<'tr' | 'en', Record<string, string>> = {
   tr: {
+    'shell.ModuleLicenseRequired': 'Bu modül için lisans gerekiyor.',
+    'shell.ModuleLicenseRequiredHint': 'Bu modülü içeren bir lisans dosyası yükleyin.',
+    'shell.ModuleLicenseSettings': 'Lisans ayarlarını aç',
+    'shell.ModuleLoadFailed': 'Bu modülün ekranları yüklenemedi.',
+    'shell.ModuleIncompatible': "Bu modül Vyxum'un daha yeni bir sürümünü gerektiriyor.",
+    'shell.ModuleScreenFailed': 'Bu ekranda bir hata oluştu.',
     'shell.AppName': 'vyxum',
     'shell.Core': 'Çekirdek',
     'shell.Modules': 'Modüller',
@@ -296,6 +302,12 @@ export const sampleStrings: Record<'tr' | 'en', Record<string, string>> = {
     'devices.DiscoveryFailed': 'Arama tamamlanamadı. Yeniden deneyin.',
   },
   en: {
+    'shell.ModuleLicenseRequired': 'This module needs a license.',
+    'shell.ModuleLicenseRequiredHint': 'Load a license file that includes this module.',
+    'shell.ModuleLicenseSettings': 'Open license settings',
+    'shell.ModuleLoadFailed': "This module's screens could not be loaded.",
+    'shell.ModuleIncompatible': 'This module needs a newer version of Vyxum.',
+    'shell.ModuleScreenFailed': 'An error occurred on this screen.',
     'shell.AppName': 'vyxum',
     'shell.Core': 'Core',
     'shell.Modules': 'Modules',
@@ -579,6 +591,8 @@ export const sampleStrings: Record<'tr' | 'en', Record<string, string>> = {
 
 export interface FakeApiOptions {
   modules?: string[];
+  /** Full module entries (license state, screens), added after `modules`. */
+  moduleList?: UiModule[];
   capabilities?: string[];
   /** Company name returned with the module list. */
   companyName?: string | null;
@@ -602,7 +616,7 @@ export function setupStatus(change: Partial<SetupStatus> = {}): SetupStatus {
 /** Replaces global fetch. `/api/ui/strings` answers in the language of the culture cookie. */
 export function installFakeApi(options: FakeApiOptions = {}) {
   const modules: UiModules = {
-    modules: (options.modules ?? ['weighing', 'products']).map((id) => ({ id, version: '1.0.0' })),
+    modules: [...(options.modules ?? ['weighing', 'products']).map((id) => ({ id, version: '1.0.0' })), ...(options.moduleList ?? [])],
     capabilities: options.capabilities ?? [],
     ...(options.companyName !== undefined ? { companyName: options.companyName } : {}),
   };

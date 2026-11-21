@@ -29,4 +29,10 @@
   <data name="Connecting" xml:space="preserve"><value>connecting</value></data>
   <data name="Disconnected" xml:space="preserve"><value>disconnected</value></data>
   <data name="NoDevice" xml:space="preserve"><value>No scale connected</value></data>
+  <data name="ModuleLicenseRequired" xml:space="preserve"><value>This module needs a license.</value></data>
+  <data name="ModuleLicenseRequiredHint" xml:space="preserve"><value>Load a license file that includes this module.</value></data>
+  <data name="ModuleLicenseSettings" xml:space="preserve"><value>Open license settings</value></data>
+  <data name="ModuleLoadFailed" xml:space="preserve"><value>This module's screens could not be loaded.</value></data>
+  <data name="ModuleIncompatible" xml:space="preserve"><value>This module needs a newer version of Vyxum.</value></data>
+  <data name="ModuleScreenFailed" xml:space="preserve"><value>An error occurred on this screen.</value></data>
 </root>

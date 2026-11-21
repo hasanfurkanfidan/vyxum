@@ -4,6 +4,9 @@ import { I18nProvider } from './i18n/I18nProvider';
 import { ProductsPage } from './pages/ProductsPage';
 import { RecordsPage } from './pages/RecordsPage';
 import { WeighingPage } from './pages/WeighingPage';
+import type { ModuleImporter } from './shell/moduleLoader';
+import { ModuleScreen } from './shell/ModuleScreen';
+import { ModuleUiProvider } from './shell/ModuleUiProvider';
 import { ModulesProvider, useModules } from './shell/ModulesProvider';
 import { routes } from './shell/navigation';
 import { SetupGate } from './shell/SetupGate';
@@ -13,12 +16,17 @@ import { SetupWizard } from './pages/setup/SetupWizard';
 import { AboutPage } from './pages/settings/AboutPage';
 import { DevicesPage } from './pages/settings/DevicesPage';
 
-/** Strings, module list and setup status. The router is supplied by the caller (BrowserRouter or MemoryRouter). */
-export function AppProviders({ children }: { children: ReactNode }) {
+/**
+ * Strings, module list, module screens and setup status. The router is supplied by the caller (BrowserRouter or
+ * MemoryRouter). Tests pass `moduleImporter` instead of importing module screens from the server.
+ */
+export function AppProviders({ children, moduleImporter }: { children: ReactNode; moduleImporter?: ModuleImporter }) {
   return (
     <I18nProvider>
       <ModulesProvider>
-        <SetupProvider>{children}</SetupProvider>
+        <ModuleUiProvider {...(moduleImporter ? { importer: moduleImporter } : {})}>
+          <SetupProvider>{children}</SetupProvider>
+        </ModuleUiProvider>
       </ModulesProvider>
     </I18nProvider>
   );
@@ -73,6 +81,7 @@ function MainScreens() {
         />
         <Route path={routes.settingsDevices} element={<DevicesPage />} />
         <Route path={routes.settingsAbout} element={<AboutPage />} />
+        <Route path={routes.module} element={<ModuleScreen />} />
         <Route path="*" element={<Navigate to={routes.weighing} replace />} />
       </Routes>
     </Shell>

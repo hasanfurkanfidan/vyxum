@@ -214,6 +214,19 @@ export interface UiStrings {
 export interface UiModule {
   id: string;
   version: string;
+  /** Whether the module works only with a license. Older hosts leave it out. */
+  requiresLicense?: boolean;
+  /** `free`, `licensed`, `grace`, `readOnly` or `locked`. Older hosts leave it out (free). */
+  license?: 'free' | 'licensed' | 'grace' | 'readOnly' | 'locked';
+  /** The module's screens, when it has some and may load them (not locked); otherwise null or absent. */
+  ui?: UiModuleScreens | null;
+}
+
+export interface UiModuleScreens {
+  /** URL of the entry ES module, e.g. `/modules/samples.paid/index.js`. */
+  entry: string;
+  /** SDK version the screens were built against. */
+  sdkVersion: number;
 }
 
 export interface UiModules {

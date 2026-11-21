@@ -11,5 +11,5 @@
     "noEmit": true,
     "types": []
   },
-  "include": ["vite.config.ts"]
+  "include": ["vite.config.ts", "vite-plugin-vyxum-shared.ts", "src/sdk/contract.ts"]
 }

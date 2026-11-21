@@ -2,12 +2,14 @@ import { NavLink } from 'react-router-dom';
 import { useT } from '../i18n/I18nProvider';
 import { LanguageSwitch } from './LanguageSwitch';
 import { useModules } from './ModulesProvider';
-import { visibleNavGroups } from './navigation';
+import { useModuleUi } from './ModuleUiProvider';
+import { navGroups, visibleNavGroups, withModuleNav } from './navigation';
 
 export function Sidebar() {
   const t = useT();
   const { hasModule, companyName } = useModules();
-  const groups = visibleNavGroups(hasModule);
+  const { navItems } = useModuleUi();
+  const groups = visibleNavGroups(hasModule, withModuleNav(navGroups, navItems));
 
   return (
     <nav className="sidebar" aria-label={t('shell.AppName')}>

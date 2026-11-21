@@ -29,7 +29,17 @@ export const routes = {
   /** Settings screens of the platform. */
   settingsDevices: '/settings/devices',
   settingsAbout: '/settings/about',
+  /** Modules and license settings (the page itself comes with the license screens). */
+  settingsLicense: '/settings/license',
+  /** Screens of separately built modules: `/m/{moduleId}/...`. */
+  module: '/m/:moduleId/*',
 } as const;
+
+/** Address of a module screen: `/m/{moduleId}` plus the module's own relative path. */
+export function modulePath(moduleId: string, path = ''): string {
+  const relative = path.replace(/^\/+/, '');
+  return relative ? `/m/${moduleId}/${relative}` : `/m/${moduleId}`;
+}
 
 export const navGroups: readonly NavGroup[] = [
   {
@@ -41,7 +51,7 @@ export const navGroups: readonly NavGroup[] = [
       { labelKey: 'shell.Products', path: routes.products, module: 'products' },
     ],
   },
-  // Screens of separately developed modules are added in a later phase.
+  // Screens of separately built modules register their entries at run time (see withModuleNav).
   { id: 'modules', labelKey: 'shell.Modules', items: [] },
   { id: 'system', labelKey: 'shell.System', items: [] },
   {
@@ -59,4 +69,17 @@ export function visibleNavGroups(hasModule: (id: string) => boolean, groups: rea
   return groups
     .map((group) => ({ ...group, items: group.items.filter((item) => item.module === undefined || hasModule(item.module)) }))
     .filter((group) => group.items.length > 0);
+}
+
+/** A menu entry a module registered, with the group it goes in. */
+export interface ModuleNavItem extends NavItem {
+  group: NavGroupId;
+}
+
+/** The groups with the entries modules registered appended to their group. */
+export function withModuleNav(groups: readonly NavGroup[], items: readonly ModuleNavItem[]): NavGroup[] {
+  return groups.map((group) => {
+    const added = items.filter((item) => item.group === group.id).map(({ group: _group, ...item }) => item);
+    return added.length > 0 ? { ...group, items: [...group.items, ...added] } : group;
+  });
 }

@@ -1,0 +1,87 @@
+import { Component, type ErrorInfo, type ReactNode } from 'react';
+import { Link, Navigate, Route, Routes, useParams } from 'react-router-dom';
+import { useT } from '../i18n/I18nProvider';
+import { useModules } from './ModulesProvider';
+import { useModuleUi } from './ModuleUiProvider';
+import { routes } from './navigation';
+
+/** Placeholder of a module screen whose module has no license; links to the license settings. */
+export function ModuleLicenseRequired() {
+  const t = useT();
+  return (
+    <div className="status" role="status">
+      <p className="status__text">{t('shell.ModuleLicenseRequired')}</p>
+      <p className="status__text">{t('shell.ModuleLicenseRequiredHint')}</p>
+      <Link className="button button--primary" to={routes.settingsLicense}>
+        {t('shell.ModuleLicenseSettings')}
+      </Link>
+    </div>
+  );
+}
+
+function ModuleProblem({ textKey }: { textKey: string }) {
+  const t = useT();
+  return (
+    <div className="status" role="alert">
+      <p className="status__text">{t(textKey)}</p>
+    </div>
+  );
+}
+
+interface BoundaryState {
+  failed: boolean;
+}
+
+/** Keeps an error in a module's screen inside that screen; the shell and the menu keep working. */
+export class ModuleErrorBoundary extends Component<{ moduleId: string; children: ReactNode }, BoundaryState> {
+  override state: BoundaryState = { failed: false };
+
+  static getDerivedStateFromError(): BoundaryState {
+    return { failed: true };
+  }
+
+  override componentDidCatch(error: unknown, info: ErrorInfo) {
+    console.error(`A screen of module '${this.props.moduleId}' failed.`, error, info.componentStack);
+  }
+
+  override render() {
+    return this.state.failed ? <ModuleProblem textKey="shell.ModuleScreenFailed" /> : this.props.children;
+  }
+}
+
+/** Route `/m/:moduleId/*`: the screens a module registered, or why they are not available. */
+export function ModuleScreen() {
+  const { moduleId = '' } = useParams();
+  const { modules, hasCapability } = useModules();
+  const moduleUi = useModuleUi();
+  const module = modules.find((m) => m.id === moduleId);
+
+  if (!module) return <Navigate to={routes.weighing} replace />;
+  if (module.license === 'locked') return <ModuleLicenseRequired />;
+  if (!module.ui) return <Navigate to={routes.weighing} replace />;
+
+  const result = moduleUi.get(moduleId);
+  if (!result) return <div className="status" role="status" />;
+  if (result.status !== 'loaded') {
+    return <ModuleProblem textKey={result.status === 'incompatible' ? 'shell.ModuleIncompatible' : 'shell.ModuleLoadFailed'} />;
+  }
+
+  return (
+    <Routes>
+      {result.routes
+        .filter((route) => route.capability === undefined || hasCapability(route.capability))
+        .map((route) => {
+          const Screen = route.component;
+          const element = (
+            <ModuleErrorBoundary moduleId={moduleId}>{Screen ? <Screen /> : route.element}</ModuleErrorBoundary>
+          );
+          return route.path === '' ? (
+            <Route key="" index element={element} />
+          ) : (
+            <Route key={route.path} path={route.path} element={element} />
+          );
+        })}
+      <Route path="*" element={<Navigate to={routes.weighing} replace />} />
+    </Routes>
+  );
+}
