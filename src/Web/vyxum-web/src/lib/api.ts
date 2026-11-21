@@ -156,8 +156,35 @@ export function apiDelete<T>(path: string, options?: RequestOptions): Promise<T>
 
 /** GET that returns the raw body as a Blob, for file downloads such as the Excel export. */
 export async function apiBlob(path: string, options: RequestOptions = {}): Promise<Blob> {
+  return (await apiFile(path, options)).blob;
+}
+
+/** File name from a Content-Disposition header (`filename*=UTF-8''...` wins over `filename="..."`), or undefined. */
+export function fileNameFromDisposition(header: string | null): string | undefined {
+  if (!header) return undefined;
+  const encoded = /filename\*\s*=\s*(?:[\w-]+)?'[^']*'([^;]+)/i.exec(header);
+  if (encoded?.[1]) {
+    try {
+      return decodeURIComponent(encoded[1].trim());
+    } catch {
+      // Fall through to the plain form.
+    }
+  }
+  const plain = /filename\s*=\s*(?:"([^"]*)"|([^;]+))/i.exec(header);
+  const name = (plain?.[1] ?? plain?.[2])?.trim();
+  return name ? name : undefined;
+}
+
+export interface DownloadedFile {
+  blob: Blob;
+  /** Name from Content-Disposition, if the server sent one. */
+  fileName: string | undefined;
+}
+
+/** GET that returns a file with the name the server suggested. */
+export async function apiFile(path: string, options: RequestOptions = {}): Promise<DownloadedFile> {
   const response = await send('GET', path, undefined, { ...options, headers: { Accept: '*/*', ...options.headers } });
-  return response.blob();
+  return { blob: await response.blob(), fileName: fileNameFromDisposition(response.headers.get('content-disposition')) };
 }
 
 /** Builds `path?a=1&b=2`, skipping undefined, null and empty values. */

@@ -1,0 +1,84 @@
+/* Records screen (design source: BKayitlar): filter row, table with struck-through cancelled rows, totals. */
+.records__filters {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 12px 16px;
+}
+
+.records__lot {
+  width: 160px;
+}
+
+.records__scroll {
+  overflow-x: auto;
+  border-top: var(--rule-section);
+}
+
+.records__table {
+  min-width: 820px;
+}
+
+.records__table th:first-child,
+.records__table td:first-child {
+  padding-left: 0;
+}
+
+.records__row--cancelled td:not(.records__status):not(.records__action) {
+  text-decoration: line-through;
+  color: var(--color-warning-text);
+}
+
+.records__row--cancelled .records__status {
+  text-decoration: line-through;
+}
+
+.records__cancel {
+  min-height: 34px;
+  padding: 0 10px;
+  font-size: var(--text-small);
+}
+
+.records__dialog-row td {
+  padding: 0;
+}
+
+.records__dialog {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  max-width: 520px;
+  padding: 14px 0 16px;
+}
+
+.records__dialog-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.records__total td {
+  border-top: var(--rule-section);
+  font-weight: 500;
+}
+
+.records__total .records__note {
+  text-align: right;
+  font-family: var(--font-ui);
+  font-size: var(--text-label);
+  font-weight: 400;
+}
+
+.records__more {
+  display: flex;
+  justify-content: center;
+}
+
+.records__sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
