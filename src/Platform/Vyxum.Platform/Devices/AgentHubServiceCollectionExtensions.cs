@@ -33,6 +33,7 @@ public static class AgentHubServiceCollectionExtensions
             provider.GetRequiredService<AgentDeviceAssignments>(),
             provider.GetRequiredService<Microsoft.AspNetCore.SignalR.IHubContext<AgentHub>>(),
             provider.GetRequiredService<TimeProvider>(),
+            provider.GetRequiredService<LicenseManager>(),
             provider.GetRequiredService<Microsoft.Extensions.Logging.ILogger<DeviceConfigService>>()));
         services.AddHostedService<DeviceConfigLoader>();
         services.AddUiStrings(DeviceStrings.KeyPrefix, DeviceStrings.ResourceManager);

@@ -116,6 +116,7 @@ public sealed partial class DeviceConfigService
     private readonly AgentDeviceAssignments _assignments;
     private readonly IHubContext<AgentHub> _hub;
     private readonly TimeProvider _time;
+    private readonly LicenseManager _licenses;
     private readonly ILogger<DeviceConfigService> _logger;
 
     internal DeviceConfigService(
@@ -124,6 +125,7 @@ public sealed partial class DeviceConfigService
         AgentDeviceAssignments assignments,
         IHubContext<AgentHub> hub,
         TimeProvider time,
+        LicenseManager licenses,
         ILogger<DeviceConfigService> logger)
     {
         _db = db;
@@ -131,6 +133,7 @@ public sealed partial class DeviceConfigService
         _assignments = assignments;
         _hub = hub;
         _time = time;
+        _licenses = licenses;
         _logger = logger;
     }
 
@@ -215,7 +218,7 @@ public sealed partial class DeviceConfigService
         return DeviceConfigResult.Ok(ToDto(device));
     }
 
-    /// <summary>Deletes a device. Returns false when the id is unknown.</summary>
+    /// <summary>Deletes a device and drops it from the licensed stations. Returns false when the id is unknown.</summary>
     public async Task<bool> DeleteAsync(string id, CancellationToken cancellationToken = default)
     {
         var device = await _db.Set<DeviceConfig>().SingleOrDefaultAsync(d => d.Id == id, cancellationToken);
@@ -225,7 +228,9 @@ public sealed partial class DeviceConfigService
         }
 
         _db.Remove(device);
+        await LicenseStations.RemoveDeviceAsync(_db, id, _time.GetUtcNow().UtcDateTime, cancellationToken);
         await _db.SaveChangesAsync(cancellationToken);
+        _licenses.Invalidate();
         await ChangedAsync(cancellationToken);
         return true;
     }

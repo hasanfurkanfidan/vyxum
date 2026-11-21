@@ -17,9 +17,18 @@ public static class UiEndpointExtensions
     /// <summary>
     /// Maps <c>GET /api/ui/strings</c>, which returns <c>{ culture, strings: { "prefix.Key": "text" } }</c>
     /// in the request's UI culture (set by request localization), and <c>GET /api/ui/modules</c>, which
-    /// returns <c>{ modules: [{ id, version }], capabilities: ["..."], companyName }</c>; <c>companyName</c>
-    /// is the name entered in the setup wizard, or null.
+    /// returns <c>{ modules: [{ id, version, requiresLicense, license }], capabilities: ["..."], companyName,
+    /// license: { status, licensee, graceDaysLeft } }</c>; <c>companyName</c> is the name entered in the setup wizard, or
+    /// null.
     /// </summary>
+    /// <remarks>
+    /// A module's <c>license</c> is <c>free</c>, <c>licensed</c>, <c>grace</c>, <c>readOnly</c> or <c>locked</c>; the shell
+    /// shows a module's screens by this field. <c>capabilities</c> still lists what every loaded module provides, locked
+    /// ones included: the module is loaded and its capabilities are fixed at startup (<see cref="Abstractions.ICapabilityRegistry"/>),
+    /// so capabilities say what is installed, not what is licensed. The top-level <c>license.status</c> is <c>none</c>,
+    /// <c>invalid</c>, <c>notYetValid</c>, <c>valid</c>, <c>grace</c> or <c>readOnly</c>; <c>licensee</c> is the licensee's
+    /// name of a license that verifies.
+    /// </remarks>
     public static IEndpointRouteBuilder MapVyxumUi(this IEndpointRouteBuilder endpoints)
     {
         ArgumentNullException.ThrowIfNull(endpoints);
@@ -30,10 +39,15 @@ public static class UiEndpointExtensions
             return Results.Json(new UiStringsResponse(culture.Name, catalog.GetStrings(culture)), DeviceEndpointExtensions.JsonOptions);
         });
 
-        endpoints.MapGet(ModulesPath, async (ModuleCatalog catalog, IPlatformSettings settings, CancellationToken cancellationToken) =>
+        endpoints.MapGet(ModulesPath, async (ModuleCatalog catalog, IPlatformSettings settings, LicenseManager licenses, CancellationToken cancellationToken) =>
         {
+            var snapshot = licenses.GetSnapshot();
             var modules = catalog.Modules
-                .Select(m => new UiModule(m.Manifest.Id, m.Manifest.Version.ToString()))
+                .Select(m => new UiModule(
+                    m.Manifest.Id,
+                    m.Manifest.Version.ToString(),
+                    m.Manifest.RequiresLicense,
+                    LicenseText.Of(snapshot.GetModuleStatus(m.Manifest.Id))))
                 .ToList();
             var capabilities = catalog.Modules
                 .SelectMany(m => m.Manifest.Provides)
@@ -42,7 +56,11 @@ public static class UiEndpointExtensions
                 .Order(StringComparer.Ordinal)
                 .ToList();
             var companyName = await settings.GetAsync(PlatformSettingKeys.CompanyName, cancellationToken);
-            return Results.Json(new UiModulesResponse(modules, capabilities, companyName), DeviceEndpointExtensions.JsonOptions);
+            var license = new UiLicense(
+                LicenseText.Of(snapshot.Status),
+                snapshot.License?.Payload.Licensee.Name,
+                snapshot.Evaluation?.GraceDaysLeft);
+            return Results.Json(new UiModulesResponse(modules, capabilities, companyName, license), DeviceEndpointExtensions.JsonOptions);
         });
 
         return endpoints;
@@ -50,7 +68,13 @@ public static class UiEndpointExtensions
 
     internal sealed record UiStringsResponse(string Culture, IReadOnlyDictionary<string, string> Strings);
 
-    internal sealed record UiModule(string Id, string Version);
+    internal sealed record UiModule(string Id, string Version, bool RequiresLicense, string License);
 
-    internal sealed record UiModulesResponse(IReadOnlyList<UiModule> Modules, IReadOnlyList<string> Capabilities, string? CompanyName);
+    internal sealed record UiLicense(string Status, string? Licensee, int? GraceDaysLeft);
+
+    internal sealed record UiModulesResponse(
+        IReadOnlyList<UiModule> Modules,
+        IReadOnlyList<string> Capabilities,
+        string? CompanyName,
+        UiLicense License);
 }

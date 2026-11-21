@@ -40,5 +40,6 @@
   <Folder Name="/tests/SampleModules/">
     <Project Path="tests/SampleModules/Vyxum.Samples.Notifications/Vyxum.Samples.Notifications.csproj" />
     <Project Path="tests/SampleModules/Vyxum.Samples.Orders/Vyxum.Samples.Orders.csproj" />
+    <Project Path="tests/SampleModules/Vyxum.Samples.Paid/Vyxum.Samples.Paid.csproj" />
   </Folder>
 </Solution>

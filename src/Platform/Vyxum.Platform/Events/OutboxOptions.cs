@@ -17,4 +17,10 @@ public sealed class OutboxOptions
 
     /// <summary>Upper limit of the retry delay. Default 5 min.</summary>
     public TimeSpan RetryMaxDelay { get; set; } = TimeSpan.FromMinutes(5);
+
+    /// <summary>
+    /// How long a message waits before it is tried again when a handler's module has no license. Default 5 min.
+    /// Waiting messages are released at once when the license changes in this process.
+    /// </summary>
+    public TimeSpan LicenseWaitDelay { get; set; } = TimeSpan.FromMinutes(5);
 }

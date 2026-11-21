@@ -3,6 +3,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Hosting;
+using Vyxum.Licensing;
 using Vyxum.Platform.Abstractions;
 
 namespace Vyxum.Platform;
@@ -64,6 +65,12 @@ public static class PlatformServiceCollectionExtensions
         services.AddHostedService<ModuleDatabaseInitializerService>();
 
         services.TryAddSingleton(TimeProvider.System);
+
+        // Licensing (phase F4). The trusted keys are compiled in and cannot be changed from configuration;
+        // tests replace ILicenseKeyRing in the service collection.
+        services.TryAddSingleton<ILicenseKeyRing>(LicenseKeyRing.Trusted);
+        services.AddSingleton<LicenseManager>();
+        services.AddSingleton<ILicenseState>(provider => provider.GetRequiredService<LicenseManager>());
         services.Configure<OutboxOptions>(configuration.GetSection(OutboxOptions.SectionName));
         services.AddSingleton<OutboxDispatcher>();
         services.AddHostedService<OutboxDispatcherService>();

@@ -2,6 +2,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Vyxum.Platform.Abstractions\Vyxum.Platform.Abstractions.csproj" />
+    <ProjectReference Include="..\Vyxum.Licensing\Vyxum.Licensing.csproj" />
   </ItemGroup>
 
   <ItemGroup>

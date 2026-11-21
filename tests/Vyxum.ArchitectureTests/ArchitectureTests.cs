@@ -18,6 +18,7 @@ using Vyxum.Platform;
 using Vyxum.Platform.Abstractions;
 using Vyxum.Samples.Notifications;
 using Vyxum.Samples.Orders;
+using Vyxum.Samples.Paid;
 using Xunit;
 
 namespace Vyxum.ArchitectureTests;
@@ -28,6 +29,7 @@ public class ArchitectureTests
     [
         typeof(OrdersModule).Assembly,
         typeof(NotificationsModule).Assembly,
+        typeof(PaidModule).Assembly,
         typeof(ProductsModule).Assembly,
         typeof(WeighingModule).Assembly,
     ];
@@ -85,6 +87,7 @@ public class ArchitectureTests
         // The module tables share one database without schemas, so the prefix is what keeps them apart.
         AssertTablesPrefixed<ProductsDbContext>();
         AssertTablesPrefixed<WeighingDbContext>();
+        AssertTablesPrefixed<PaidDbContext>();
     }
 
     private static void AssertTablesPrefixed<TContext>() where TContext : ModuleDbContext

@@ -60,6 +60,7 @@ app.MapGet("/api/hello", (IStringLocalizer<Strings> strings) => Results.Ok(new
 app.MapVyxumDevices();
 app.MapVyxumUi();
 app.MapVyxumSetup();
+app.MapVyxumLicense();
 app.MapVyxumModules();
 
 // The built web UI. Client-side routes fall back to index.html; API, hub and health paths never do.

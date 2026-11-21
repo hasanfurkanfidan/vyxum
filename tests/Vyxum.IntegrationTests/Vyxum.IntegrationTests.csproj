@@ -18,6 +18,7 @@
     <ProjectReference Include="..\..\src\Devices\Vyxum.Devices.Simulator\Vyxum.Devices.Simulator.csproj" />
     <ProjectReference Include="..\SampleModules\Vyxum.Samples.Orders\Vyxum.Samples.Orders.csproj" />
     <ProjectReference Include="..\SampleModules\Vyxum.Samples.Notifications\Vyxum.Samples.Notifications.csproj" />
+    <ProjectReference Include="..\SampleModules\Vyxum.Samples.Paid\Vyxum.Samples.Paid.csproj" />
   </ItemGroup>
 
 </Project>

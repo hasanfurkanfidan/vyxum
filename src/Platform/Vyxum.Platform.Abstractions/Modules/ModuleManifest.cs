@@ -23,4 +23,11 @@ public sealed class ModuleManifest
     /// An event name and version can be published by only one module.
     /// </summary>
     public IReadOnlyList<Type> Publishes { get; init; } = [];
+
+    /// <summary>
+    /// Whether the module works only with a license that names its <see cref="Id"/>. Default false (a free module).
+    /// Without such a license the platform answers the module's endpoints with 403 and holds its integration event
+    /// handlers; the module reads the details through <see cref="ILicenseState"/>.
+    /// </summary>
+    public bool RequiresLicense { get; init; }
 }
