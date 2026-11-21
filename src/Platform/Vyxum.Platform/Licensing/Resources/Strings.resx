@@ -50,6 +50,14 @@
   <data name="Error.station_limit_exceeded" xml:space="preserve"><value>The license allows fewer stations than chosen. Clear a device and save again.</value></data>
   <data name="Error.stations_too_long" xml:space="preserve"><value>Too many devices are chosen to be stored.</value></data>
   <data name="Error.unknown" xml:space="preserve"><value>The request could not be completed.</value></data>
+  <data name="ReplaceTitle" xml:space="preserve"><value>Replace license</value></data>
+  <data name="ReplaceConfirm" xml:space="preserve"><value>A license that works is loaded now. The new file replaces it; if the file has ended or has not started yet, paid modules become read-only or locked. Continue?</value></data>
+  <data name="ReplaceYes" xml:space="preserve"><value>Replace</value></data>
+  <data name="UploadedReadOnly" xml:space="preserve"><value>The file was loaded, but the license has ended and its grace period is over: paid modules are read-only. Load a current license file.</value></data>
+  <data name="UploadedNotYetValid" xml:space="preserve"><value>The file was loaded, but the license starts on {0}: paid modules stay locked until then.</value></data>
+  <data name="UploadedGrace" xml:space="preserve"><value>The file was loaded, but the license has ended: {0} days of grace are left, then paid modules become read-only. Load a current license file.</value></data>
+  <data name="Error.license_required" xml:space="preserve"><value>This action needs a valid license. The license state was refreshed.</value></data>
+  <data name="Error.license_read_only" xml:space="preserve"><value>The license has ended, so the module is read-only and cannot change records. The license state was refreshed.</value></data>
   <data name="SectionSystem" xml:space="preserve"><value>This installation</value></data>
   <data name="SectionModules" xml:space="preserve"><value>Modules</value></data>
   <data name="ColModule" xml:space="preserve"><value>Module</value></data>

@@ -1,5 +1,6 @@
 import { useId, useState } from 'react';
 import { LicenseUpload } from '../../components/license/LicenseUpload';
+import { UploadResult } from '../../components/license/UploadResult';
 import { useT } from '../../i18n/I18nProvider';
 import type { LicenseState } from '../../lib/license';
 import { StepLayout } from './StepLayout';
@@ -53,15 +54,7 @@ export function LicenseStep({ onDone }: LicenseStepProps) {
           {choice === 'file' ? (
             <div className="license-option__body">
               <LicenseUpload buttonKey="license.ChooseFile" onUploaded={setLoaded} />
-              {loaded?.licensee ? (
-                <p className="license-block__ok" role="status">
-                  {t('license.LoadedFor').replace('{0}', loaded.licensee.name)}
-                </p>
-              ) : loaded ? (
-                <p className="license-block__ok" role="status">
-                  {t('license.Uploaded')}
-                </p>
-              ) : null}
+              {loaded ? <UploadResult state={loaded} /> : null}
             </div>
           ) : null}
         </div>

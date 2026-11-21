@@ -1,7 +1,7 @@
 import { render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { MemoryRouter } from 'react-router-dom';
-import { beforeEach, describe, expect, it } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { App, AppProviders } from '../../App';
 import { licenseErrorCodes, type LicenseState } from '../../lib/license';
 import type { DeviceConfig } from '../../lib/devices';
@@ -351,5 +351,112 @@ describe('station choice', () => {
 
     expect(await within(section).findByRole('alert')).toHaveTextContent(sampleStrings.tr['license.Error.station_limit_exceeded']!);
     await waitFor(() => expect(within(section).queryByText('İstasyonlar kaydedildi.')).not.toBeInTheDocument());
+  });
+});
+
+describe('replacing a license that works', () => {
+  it('asks first, sends nothing when cancelled and replaces after the confirmation', async () => {
+    const fetchMock = installPageApi({
+      routes: { 'POST /api/license': () => jsonResponse(licenseState({ status: 'readOnly', valid: false, validUntil: '2026-01-31' })) },
+    });
+    const user = userEvent.setup();
+    renderApp();
+
+    await screen.findByText('imza doğrulandı');
+    await upload(user);
+    const dialog = await screen.findByRole('dialog', { name: 'Lisansı değiştir' });
+    expect(callsTo(fetchMock, 'POST /api/license')).toBe(0);
+    await user.click(within(dialog).getByRole('button', { name: 'Vazgeç' }));
+    expect(screen.queryByRole('dialog', { name: 'Lisansı değiştir' })).not.toBeInTheDocument();
+    expect(callsTo(fetchMock, 'POST /api/license')).toBe(0);
+
+    await upload(user);
+    await user.click(within(await screen.findByRole('dialog', { name: 'Lisansı değiştir' })).getByRole('button', { name: 'Değiştir' }));
+    expect(await screen.findByRole('alert')).toHaveTextContent(sampleStrings.tr['license.UploadedReadOnly']!);
+    expect(callsTo(fetchMock, 'POST /api/license')).toBe(1);
+    expect(screen.queryByText(/^Lisans yüklendi/)).not.toBeInTheDocument();
+  });
+
+  it('does not ask when there is no working license', async () => {
+    installPageApi({ license: noLicenseState(), routes: { 'POST /api/license': () => jsonResponse(licenseState()) } });
+    const user = userEvent.setup();
+    renderApp();
+    await screen.findByText('Lisans yüklenmedi. Tartım ve Ürünler lisanssız çalışır.');
+    await upload(user);
+    expect(await screen.findByText('Lisans yüklendi: Örnek Kuruyemiş A.Ş.')).toBeInTheDocument();
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+  });
+});
+
+describe('warnings after an upload', () => {
+  it('warns about a license that is not valid yet, with its start date', async () => {
+    installPageApi({
+      license: noLicenseState(),
+      routes: { 'POST /api/license': () => jsonResponse(licenseState({ status: 'notYetValid', valid: false, validFrom: '2027-03-01' })) },
+    });
+    const user = userEvent.setup();
+    renderApp();
+    await screen.findByText('Lisans yüklenmedi. Tartım ve Ürünler lisanssız çalışır.');
+    await upload(user);
+    expect(await screen.findByRole('alert')).toHaveTextContent('01.03.2027');
+  });
+
+  it('warns about a license in its grace period, with the days left', async () => {
+    installPageApi({
+      license: noLicenseState(),
+      routes: { 'POST /api/license': () => jsonResponse(licenseState({ status: 'grace', valid: false, graceDaysLeft: 9 })) },
+    });
+    const user = userEvent.setup();
+    renderApp();
+    await screen.findByText('Lisans yüklenmedi. Tartım ve Ürünler lisanssız çalışır.');
+    await upload(user);
+    expect(await screen.findByRole('alert')).toHaveTextContent('9 gün');
+  });
+});
+
+describe('license removal when the follow-up fails', () => {
+  it('shows the license as removed even if reading it again fails', async () => {
+    vi.spyOn(console, 'error').mockImplementation(() => {});
+    let removed = false;
+    installPageApi({
+      routes: {
+        'GET /api/license': () => (removed ? Promise.reject(new TypeError('Failed to fetch')) : jsonResponse(licenseState())),
+        'DELETE /api/license': () => {
+          removed = true;
+          return new Response(null, { status: 204 });
+        },
+      },
+    });
+    const user = userEvent.setup();
+    renderApp();
+
+    await user.click(await screen.findByRole('button', { name: 'Lisansı kaldır' }));
+    await user.click(within(screen.getByRole('dialog')).getByRole('button', { name: 'Kaldır' }));
+
+    expect(await screen.findByText('Lisans kaldırıldı.')).toBeInTheDocument();
+    expect(screen.getByText('Lisans yüklenmedi. Tartım ve Ürünler lisanssız çalışır.')).toBeInTheDocument();
+    expect(screen.queryByRole('alert')).not.toBeInTheDocument();
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+  });
+});
+
+describe('station choice after a new license', () => {
+  it('follows the stations of the newly loaded license', async () => {
+    installPageApi({
+      routes: { 'POST /api/license': () => jsonResponse(licenseState({ licenseId: 'LIC-2026-0002', stations: ['scale-3'] })) },
+    });
+    const user = userEvent.setup();
+    renderApp();
+
+    const section = await screen.findByRole('region', { name: 'İstasyonlar' });
+    const first = await within(section).findByRole('checkbox', { name: 'Peynir terazisi' });
+    expect(first).toBeChecked();
+
+    await upload(user);
+    await user.click(within(await screen.findByRole('dialog', { name: 'Lisansı değiştir' })).getByRole('button', { name: 'Değiştir' }));
+
+    await waitFor(() => expect(within(section).getByRole('checkbox', { name: 'Peynir terazisi' })).not.toBeChecked());
+    expect(within(section).getByRole('checkbox', { name: 'Kantar terazisi' })).toBeChecked();
+    expect(within(section).getByLabelText('İstasyon')).toHaveTextContent('1 / 3');
   });
 });

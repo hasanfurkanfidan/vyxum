@@ -43,6 +43,8 @@ export const licenseErrorCodes = [
   'unknown_device',
   'station_limit_exceeded',
   'stations_too_long',
+  'license_required',
+  'license_read_only',
 ] as const;
 
 /** Resource key of the message for an error code (a code without a message of its own gets the general one). */
@@ -81,4 +83,26 @@ export function deleteLicense(): Promise<void> {
 
 export function saveStations(deviceIds: readonly string[]): Promise<LicenseState> {
   return apiPut<LicenseState>('/api/license/stations', { deviceIds });
+}
+
+/** True when a license is stored that works now (valid, or in its grace period): replacing it needs a confirmation. */
+export function isWorkingLicense(status: LicenseStatus): boolean {
+  return status === 'valid' || status === 'grace';
+}
+
+/**
+ * Resource key of the warning to show after an upload whose result is not a plain valid license (a file that has
+ * ended, is in its grace period, or starts later), or null for a valid one.
+ */
+export function uploadWarningKey(status: LicenseStatus): string | null {
+  switch (status) {
+    case 'readOnly':
+      return 'license.UploadedReadOnly';
+    case 'notYetValid':
+      return 'license.UploadedNotYetValid';
+    case 'grace':
+      return 'license.UploadedGrace';
+    default:
+      return null;
+  }
 }

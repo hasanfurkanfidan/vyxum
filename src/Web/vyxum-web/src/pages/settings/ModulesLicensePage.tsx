@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useState, type ReactNode } from 'react';
 import { LicenseUpload } from '../../components/license/LicenseUpload';
+import { UploadResult } from '../../components/license/UploadResult';
 import { useCulture, useT } from '../../i18n/I18nProvider';
 import type { UiModule } from '../../lib/api';
 import { NetworkError } from '../../lib/api';
@@ -23,6 +24,27 @@ import '../../styles/license.css';
 /** Replaces `{0}`, `{1}`, ... in a translated text. */
 function fill(text: string, ...values: (string | number)[]): string {
   return values.reduce<string>((result, value, index) => result.replace(`{${index}}`, String(value)), text);
+}
+
+/** What the license looks like once it is removed; the next fetch replaces it with the server's answer. */
+function noLicenseState(current: LicenseState): LicenseState {
+  return {
+    ...current,
+    hasLicense: false,
+    valid: false,
+    status: 'none',
+    error: null,
+    licenseId: null,
+    type: null,
+    licensee: null,
+    validFrom: null,
+    validUntil: null,
+    graceEndsOn: null,
+    graceDaysLeft: null,
+    stationLimit: 0,
+    stations: [],
+    modules: [],
+  };
 }
 
 interface ModuleRow {
@@ -65,7 +87,7 @@ export function ModulesLicensePage() {
   const [setup, setSetup] = useState<SetupStatus | null>(null);
   const [failed, setFailed] = useState(false);
   const [tick, setTick] = useState(0);
-  const [message, setMessage] = useState<string | null>(null);
+  const [message, setMessage] = useState<{ kind: 'uploaded'; state: LicenseState } | { kind: 'removed' } | null>(null);
   const [confirmRemove, setConfirmRemove] = useState(false);
   const [removing, setRemoving] = useState(false);
   const [removeError, setRemoveError] = useState<string | null>(null);
@@ -89,28 +111,33 @@ export function ModulesLicensePage() {
 
   const rows = useMemo(() => moduleRows(modules, license), [modules, license]);
 
-  const uploaded = useCallback(
-    (state: LicenseState) => {
-      setLicense(state);
-      setConfirmRemove(false);
-      setMessage(state.licensee ? fill(t('license.LoadedFor'), state.licensee.name) : t('license.Uploaded'));
-    },
-    [t],
-  );
+  const uploaded = useCallback((state: LicenseState) => {
+    setLicense(state);
+    setConfirmRemove(false);
+    setMessage({ kind: 'uploaded', state });
+  }, []);
 
   const remove = async () => {
     setRemoving(true);
     setRemoveError(null);
     try {
       await deleteLicense();
-      setLicense(await getLicense());
-      await reload();
-      setConfirmRemove(false);
-      setMessage(t('license.Removed'));
     } catch (error) {
       setRemoveError(licenseFailureKey(error));
+      setRemoving(false);
+      return;
     }
+    // The license is gone; what follows only refreshes the screen, so a failure there is not an error of the removal.
+    setLicense((current) => (current ? noLicenseState(current) : current));
+    setConfirmRemove(false);
+    setMessage({ kind: 'removed' });
     setRemoving(false);
+    try {
+      setLicense(await getLicense());
+    } catch (error) {
+      console.error('Reloading the license after the removal failed.', error);
+    }
+    await reload();
   };
 
   const header = <PageHeader eyebrow={t('setup.Settings')} title={t('license.Title')} />;
@@ -181,9 +208,10 @@ export function ModulesLicensePage() {
             </dl>
           ) : null}
           {license.clockBehind ? <p className="license-block__notice">{t('license.ClockBehind')}</p> : null}
-          {message ? (
+          {message?.kind === 'uploaded' ? <UploadResult state={message.state} /> : null}
+          {message?.kind === 'removed' ? (
             <p className="license-block__ok" role="status">
-              {message}
+              {t('license.Removed')}
             </p>
           ) : null}
 

@@ -18,6 +18,11 @@ export function StationsSection({ license, onSaved }: StationsSectionProps) {
   const [devices, setDevices] = useState<DeviceConfig[] | null>(null);
   const [failed, setFailed] = useState(false);
   const [chosen, setChosen] = useState<ReadonlySet<string>>(() => new Set(license.stations));
+  // The choice follows the server's list again when a new license is loaded or the list changes elsewhere.
+  const serverStations = license.stations.join(',');
+  useEffect(() => {
+    setChosen(new Set(serverStations === '' ? [] : serverStations.split(',')));
+  }, [license.licenseId, license.stationLimit, serverStations]);
   const [busy, setBusy] = useState(false);
   const [errorKey, setErrorKey] = useState<string | null>(null);
   const [saved, setSaved] = useState(false);
