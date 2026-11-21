@@ -48,7 +48,7 @@ public sealed class HostTests : IDisposable
         json.RootElement.GetProperty("status").GetString().ShouldBe("ok");
         json.RootElement.GetProperty("database").GetString().ShouldBe("Sqlite");
         json.RootElement.GetProperty("modules").EnumerateArray().Select(m => m.GetProperty("id").GetString())
-            .ShouldBe(["products", "samples.notifications", "samples.orders"], ignoreOrder: true);
+            .ShouldBe(["products", "samples.notifications", "samples.orders", "weighing"], ignoreOrder: true);
         body.ShouldNotContain(_dataDirectory);
         File.Exists(Path.Combine(_dataDirectory, DatabaseSettings.DefaultSqliteFileName)).ShouldBeTrue();
     }
@@ -65,7 +65,7 @@ public sealed class HostTests : IDisposable
         response.StatusCode.ShouldBe(HttpStatusCode.OK);
         using var json = JsonDocument.Parse(await response.Content.ReadAsStringAsync(ct));
         json.RootElement.GetProperty("modules").EnumerateArray().Select(m => m.GetProperty("id").GetString())
-            .ShouldBe(["products"]);
+            .ShouldBe(["products", "weighing"], ignoreOrder: true);
     }
 
     [Theory]

@@ -1,5 +1,6 @@
 using System.Reflection;
 using Vyxum.Modules.Products;
+using Vyxum.Modules.Weighing;
 
 namespace Vyxum.Host;
 
@@ -13,6 +14,7 @@ public static class HostModules
     public static IReadOnlyList<Assembly> BuiltIn { get; } =
     [
         typeof(ProductsModule).Assembly,
+        typeof(WeighingModule).Assembly,
     ];
 
     /// <summary>The built-in assemblies plus the assemblies named in configuration.</summary>

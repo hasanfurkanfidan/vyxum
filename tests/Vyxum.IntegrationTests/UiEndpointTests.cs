@@ -88,7 +88,7 @@ public sealed class UiEndpointTests : IDisposable
         var en = (await GetStringsAsync(client, "en", null)).GetProperty("strings").EnumerateObject().ToList();
 
         tr.Select(p => p.Name).ShouldBe(en.Select(p => p.Name));
-        tr.ShouldAllBe(p => (p.Name.StartsWith("shell.") || p.Name.StartsWith("products.")) && !string.IsNullOrWhiteSpace(p.Value.GetString()));
+        tr.ShouldAllBe(p => (p.Name.StartsWith("shell.") || p.Name.StartsWith("products.") || p.Name.StartsWith("weighing.")) && !string.IsNullOrWhiteSpace(p.Value.GetString()));
         en.ShouldAllBe(p => !string.IsNullOrWhiteSpace(p.Value.GetString()));
     }
 
@@ -104,13 +104,13 @@ public sealed class UiEndpointTests : IDisposable
         var modules = json.RootElement.GetProperty("modules").EnumerateArray()
             .Select(m => (m.GetProperty("id").GetString(), m.GetProperty("version").GetString()))
             .ToList();
-        modules.ShouldBe([("products", "1.0"), ("samples.notifications", "1.0"), ("samples.orders", "1.0")]);
+        modules.ShouldBe([("products", "1.0"), ("samples.notifications", "1.0"), ("samples.orders", "1.0"), ("weighing", "1.0")]);
         json.RootElement.GetProperty("capabilities").EnumerateArray().Select(c => c.GetString())
-            .ShouldBe(["products.catalog", "samples.orders"], ignoreOrder: true);
+            .ShouldBe(["products.catalog", "samples.orders", "weighing.records"], ignoreOrder: true);
     }
 
     [Fact]
-    public async Task Modules_endpoint_lists_the_built_in_products_module()
+    public async Task Modules_endpoint_lists_the_built_in_modules()
     {
         var ct = TestContext.Current.CancellationToken;
         await using var factory = CreateFactory();
@@ -119,8 +119,8 @@ public sealed class UiEndpointTests : IDisposable
         using var json = JsonDocument.Parse(await client.GetStringAsync(UiEndpointExtensions.ModulesPath, ct));
 
         json.RootElement.GetProperty("modules").EnumerateArray().Select(m => m.GetProperty("id").GetString())
-            .ShouldBe(["products"]);
+            .ShouldBe(["products", "weighing"]);
         json.RootElement.GetProperty("capabilities").EnumerateArray().Select(c => c.GetString())
-            .ShouldBe(["products.catalog"]);
+            .ShouldBe(["products.catalog", "weighing.records"]);
     }
 }

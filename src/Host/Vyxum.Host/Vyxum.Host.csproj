@@ -3,6 +3,7 @@
   <ItemGroup>
     <ProjectReference Include="..\..\Platform\Vyxum.Platform\Vyxum.Platform.csproj" />
     <ProjectReference Include="..\..\Modules\Products\Vyxum.Modules.Products\Vyxum.Modules.Products.csproj" />
+    <ProjectReference Include="..\..\Modules\Weighing\Vyxum.Modules.Weighing\Vyxum.Modules.Weighing.csproj" />
   </ItemGroup>
 
   <!-- The web UI is built by Vite into wwwroot. Pass -p:SkipUiBuild=true to skip it (for example in the .NET CI job). -->
