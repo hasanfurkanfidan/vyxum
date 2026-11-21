@@ -1,5 +1,16 @@
 <Solution>
   <Folder Name="/src/" />
+  <Folder Name="/src/Agent/">
+    <Project Path="src/Agent/Vyxum.Agent/Vyxum.Agent.csproj" />
+  </Folder>
+  <Folder Name="/src/Devices/">
+    <Project Path="src/Devices/Vyxum.Devices/Vyxum.Devices.csproj" />
+    <Project Path="src/Devices/Vyxum.Devices.GenericAscii/Vyxum.Devices.GenericAscii.csproj" />
+    <Project Path="src/Devices/Vyxum.Devices.MtSics/Vyxum.Devices.MtSics.csproj" />
+    <Project Path="src/Devices/Vyxum.Devices.Simulator/Vyxum.Devices.Simulator.csproj" />
+    <Project Path="src/Devices/Vyxum.Devices.ToledoContinuous/Vyxum.Devices.ToledoContinuous.csproj" />
+    <Project Path="src/Devices/Vyxum.Devices.Transports/Vyxum.Devices.Transports.csproj" />
+  </Folder>
   <Folder Name="/src/Host/">
     <Project Path="src/Host/Vyxum.Host/Vyxum.Host.csproj" />
   </Folder>
@@ -10,6 +21,7 @@
   </Folder>
   <Folder Name="/tests/">
     <Project Path="tests/Vyxum.ArchitectureTests/Vyxum.ArchitectureTests.csproj" />
+    <Project Path="tests/Vyxum.Devices.Tests/Vyxum.Devices.Tests.csproj" />
     <Project Path="tests/Vyxum.IntegrationTests/Vyxum.IntegrationTests.csproj" />
     <Project Path="tests/Vyxum.Platform.Tests/Vyxum.Platform.Tests.csproj" />
   </Folder>

@@ -8,11 +8,14 @@
     <PackageReference Include="xunit.v3" />
     <PackageReference Include="Shouldly" />
     <PackageReference Include="Microsoft.AspNetCore.Mvc.Testing" />
+    <PackageReference Include="Microsoft.AspNetCore.SignalR.Client" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\..\src\Platform\Vyxum.Platform.Testing\Vyxum.Platform.Testing.csproj" />
     <ProjectReference Include="..\..\src\Host\Vyxum.Host\Vyxum.Host.csproj" />
+    <ProjectReference Include="..\..\src\Agent\Vyxum.Agent\Vyxum.Agent.csproj" />
+    <ProjectReference Include="..\..\src\Devices\Vyxum.Devices.Simulator\Vyxum.Devices.Simulator.csproj" />
     <ProjectReference Include="..\SampleModules\Vyxum.Samples.Orders\Vyxum.Samples.Orders.csproj" />
     <ProjectReference Include="..\SampleModules\Vyxum.Samples.Notifications\Vyxum.Samples.Notifications.csproj" />
   </ItemGroup>

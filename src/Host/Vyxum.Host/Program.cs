@@ -6,7 +6,11 @@ using Vyxum.Platform;
 
 var builder = WebApplication.CreateBuilder(args);
 
+// Do not wait the default 30 seconds for open agent WebSockets when the host shuts down.
+builder.Services.Configure<HostOptions>(o => o.ShutdownTimeout = TimeSpan.FromSeconds(5));
+
 var catalog = builder.Services.AddVyxumPlatform(builder.Configuration, HostModules.Load(builder.Configuration));
+builder.Services.AddVyxumAgentHub(builder.Configuration);
 builder.Services.AddLocalization(options => options.ResourcesPath = "Resources");
 
 var app = builder.Build();
@@ -30,6 +34,7 @@ app.MapGet("/api/hello", (IStringLocalizer<Strings> strings) => Results.Ok(new
     culture = CultureInfo.CurrentUICulture.Name,
 }));
 
+app.MapVyxumDevices();
 app.MapVyxumModules();
 
 app.Run();

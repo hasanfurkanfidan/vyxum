@@ -22,6 +22,7 @@ Build settings in `Directory.Build.props`: `Nullable`, `ImplicitUsings`, `TreatW
 
 - Modules never call each other. They communicate only through integration events, delivered via the outbox and inbox.
 - Modules reference only `Vyxum.Platform.Abstractions` among Vyxum assemblies.
+- Device assemblies: `Vyxum.Devices` references no Vyxum assembly; protocols, transports and the simulator reference only `Vyxum.Devices`; `Vyxum.Platform`, `Vyxum.Platform.Abstractions` and the host reference no `Vyxum.Devices*` assembly and no `Vyxum.Agent`; `Vyxum.Agent` references no `Vyxum.Platform*` assembly and not the host.
 - The platform (`Vyxum.Platform`, `Vyxum.Platform.Abstractions`) never references a module assembly and knows no specific module.
 - No module is mandatory. A missing optional capability must not break a module; it checks `ICapabilityRegistry`.
 - The platform knows no scale brand. It knows only the "weight read" event.

@@ -68,6 +68,34 @@ curl -H "Accept-Language: en" http://127.0.0.1:5199/api/hello
 
 The host supports `tr` (default) and `en`.
 
+## Devices
+
+A scale is read in two parts. A **transport** moves bytes over a serial port or TCP. A **protocol** understands the bytes the scale sends. Any transport works with any protocol.
+
+| Project | Contents |
+|---|---|
+| `src/Devices/Vyxum.Devices` | Contracts (`ITransport`, `IScaleProtocol`), frame reader and device runner |
+| `src/Devices/Vyxum.Devices.Transports` | Serial port and TCP transports |
+| `src/Devices/Vyxum.Devices.MtSics` | MT-SICS protocol |
+| `src/Devices/Vyxum.Devices.ToledoContinuous` | Toledo continuous output protocol |
+| `src/Devices/Vyxum.Devices.GenericAscii` | Rule-based protocol for other ASCII output |
+| `src/Devices/Vyxum.Devices.Simulator` | Simulated scales over memory or TCP, and replay of recorded lines |
+
+Supported transports are serial and TCP. Supported protocols are MT-SICS, Toledo Continuous and generic ASCII.
+
+The drivers only read the weight. The MT-SICS driver sends only `S`, `SI` and `SIR`. Toledo Continuous is listen-only. Generic ASCII sends only the request command you configure, which must only read the weight.
+
+[Vyxum Agent](src/Agent/Vyxum.Agent/README.md) runs on the computer the scale is connected to. It reads the devices and sends the live weight to the web host.
+
+To run the host and an agent with the simulator on one computer, use two terminals:
+
+```bash
+dotnet run --project src/Host/Vyxum.Host --urls http://localhost:5000
+dotnet run --project src/Agent/Vyxum.Agent
+```
+
+Then open http://localhost:5000/api/devices. The agent's shipped settings use a simulated MT-SICS scale (572 g), so no hardware is needed.
+
 ## Configuration
 
 Keys are read from `appsettings.json`, environment variables (for example `Vyxum__Database__Provider`) or command-line arguments.

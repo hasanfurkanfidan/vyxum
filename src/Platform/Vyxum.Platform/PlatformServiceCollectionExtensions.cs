@@ -59,6 +59,10 @@ public static class PlatformServiceCollectionExtensions
         services.Configure<OutboxOptions>(configuration.GetSection(OutboxOptions.SectionName));
         services.AddSingleton<OutboxDispatcher>();
         services.AddHostedService<OutboxDispatcherService>();
+
+        // Always available, so modules can depend on it; it stays empty until an agent connects (AddVyxumAgentHub).
+        services.AddSingleton<LiveWeightStore>();
+        services.AddSingleton<ILiveWeightSource>(provider => provider.GetRequiredService<LiveWeightStore>());
         return catalog;
     }
 }

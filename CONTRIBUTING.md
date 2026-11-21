@@ -22,11 +22,19 @@ SQL Server tests run when `VYXUM_TEST_SQLSERVER` is set to a connection string w
 - **UI strings go in both languages.** Every user-facing string lives in a resource file, in both `Strings.resx` (English) and `Strings.tr.resx` (Turkish). Do not hard-code text in code.
 - **No internet dependencies in the product.** The product must work offline. Do not add CDN links, remote fonts, or calls to external services.
 
+## Adding a protocol
+
+Each protocol is its own project, `src/Devices/Vyxum.Devices.<Name>`, which references only `Vyxum.Devices`. Implement `IScaleProtocol`. Keep the parser a pure function, and test it with unit tests that include recorded raw lines from a real scale. Add a scenario to `Vyxum.Devices.Simulator` so the protocol runs without hardware. Finally, register the type name in the Agent's configuration factory (`AgentConfiguration`). The protocol must only read the weight; never send commands that tare, zero or change the device.
+
 ## Pull requests
 
 - Describe what changed and why.
 - List how you tested it.
 - Keep commits focused. Each working step is its own commit with an English, imperative message.
+
+## Yeni protokol ekleme
+
+Her protokol kendi projesinde, `src/Devices/Vyxum.Devices.<Ad>` içinde yer alır ve yalnızca `Vyxum.Devices` derlemesine başvurur. `IScaleProtocol` arayüzünü uygulayın. Ayrıştırıcıyı saf bir fonksiyon olarak tutun ve gerçek bir teraziden alınmış ham satırları içeren birim testleriyle test edin. Protokolün donanımsız çalışması için `Vyxum.Devices.Simulator` içine bir senaryo ekleyin. Son olarak tür adını Agent'ın yapılandırma fabrikasına (`AgentConfiguration`) kaydedin. Protokol yalnızca ağırlığı okumalıdır; cihazı dara alan, sıfırlayan ya da değiştiren komutlar göndermeyin.
 
 ---
 

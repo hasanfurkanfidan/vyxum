@@ -1,0 +1,17 @@
+# Raw response lines of an IND231 (MT-SICS, 9600 8N1, CR LF), recorded 2026-11-21 (see cihaz/ind231-ham.md).
+# Lines 1-2 answer SI and S. Line 3 is the ES the device sent to the first command of a new session.
+# The load on the scale was about 572 to 573 g. One line per row; lines starting with # are comments.
+S S        572 g
+S S        572 g
+ES
+S S        573 g
+S S        573 g
+S S        573 g
+S S        573 g
+S S        573 g
+S S        573 g
+S S        573 g
+S S        573 g
+S S        573 g
+S S        573 g
+S S        573 g
