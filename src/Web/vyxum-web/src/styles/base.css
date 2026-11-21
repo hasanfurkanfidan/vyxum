@@ -186,6 +186,28 @@ button:disabled {
   font-family: var(--font-mono);
 }
 
+/* Field hint, validation message and multi-line input */
+.field__hint {
+  font-size: var(--text-label);
+  color: var(--color-ink-muted);
+}
+
+.field__error {
+  font-size: var(--text-label);
+  color: var(--color-warning-text);
+}
+
+.input[aria-invalid='true'] {
+  border-color: var(--color-warning);
+}
+
+.input--area {
+  height: auto;
+  padding: 10px;
+  line-height: 1.4;
+  resize: vertical;
+}
+
 /* Tables */
 .table {
   width: 100%;
