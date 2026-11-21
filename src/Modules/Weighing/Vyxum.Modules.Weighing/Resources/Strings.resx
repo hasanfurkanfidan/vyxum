@@ -82,4 +82,6 @@
   <data name="UnitPrice" xml:space="preserve"><value>Unit price</value></data>
   <data name="Currency" xml:space="preserve"><value>Currency</value></data>
   <data name="ExportTooLarge" xml:space="preserve"><value>Too many records to export (at most 100000). Narrow the filter.</value></data>
+  <data name="Back" xml:space="preserve"><value>Back</value></data>
+  <data name="LoadMore" xml:space="preserve"><value>Load more</value></data>
 </root>
