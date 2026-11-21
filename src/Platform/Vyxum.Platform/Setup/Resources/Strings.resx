@@ -37,7 +37,7 @@
   <data name="DatabaseNameRequired" xml:space="preserve"><value>The connection string must name a database (Database=…).</value></data>
   <data name="SettingsNotSaved" xml:space="preserve"><value>The setting could not be saved.</value></data>
   <data name="Restarting" xml:space="preserve"><value>Restarting Vyxum…</value></data>
-  <data name="RestartingDescription" xml:space="preserve"><value>This takes a few seconds. The page reloads by itself.</value></data>
+  <data name="RestartingDescription" xml:space="preserve"><value>This takes a few seconds. Setup continues by itself.</value></data>
   <data name="RestartManual" xml:space="preserve"><value>The setting is saved. Restart Vyxum for it to take effect.</value></data>
   <data name="CompanyTitle" xml:space="preserve"><value>Company</value></data>
   <data name="CompanyDescription" xml:space="preserve"><value>The company name appears on screens and reports.</value></data>
@@ -49,4 +49,11 @@
   <data name="GoToWeighing" xml:space="preserve"><value>Go to weighing</value></data>
   <data name="LocalOnly" xml:space="preserve"><value>Setup can only be done on the computer where Vyxum is installed.</value></data>
   <data name="AlreadyCompleted" xml:space="preserve"><value>Setup is already complete. Change settings on the Settings screen.</value></data>
+  <data name="Version" xml:space="preserve"><value>Version {0}</value></data>
+  <data name="StepDone" xml:space="preserve"><value>done</value></data>
+  <data name="StepCurrent" xml:space="preserve"><value>current</value></data>
+  <data name="PrivacyNote" xml:space="preserve"><value>No data leaves this computer during setup.</value></data>
+  <data name="ProductsTitle" xml:space="preserve"><value>First products</value></data>
+  <data name="ProductsDescription" xml:space="preserve"><value>Add the products you will choose when weighing. You can also add them later on the Products screen.</value></data>
+  <data name="ProductsAdded" xml:space="preserve"><value>Added products</value></data>
 </root>

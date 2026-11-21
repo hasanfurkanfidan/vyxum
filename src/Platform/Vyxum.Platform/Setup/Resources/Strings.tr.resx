@@ -37,7 +37,7 @@
   <data name="DatabaseNameRequired" xml:space="preserve"><value>Bağlantı dizesinde veritabanı adı olmalı (Database=…).</value></data>
   <data name="SettingsNotSaved" xml:space="preserve"><value>Ayar kaydedilemedi.</value></data>
   <data name="Restarting" xml:space="preserve"><value>Vyxum yeniden başlatılıyor…</value></data>
-  <data name="RestartingDescription" xml:space="preserve"><value>Bu birkaç saniye sürer. Sayfa kendiliğinden yenilenir.</value></data>
+  <data name="RestartingDescription" xml:space="preserve"><value>Bu birkaç saniye sürer. Kurulum kendiliğinden devam eder.</value></data>
   <data name="RestartManual" xml:space="preserve"><value>Ayar kaydedildi. Geçerli olması için Vyxum'u yeniden başlatın.</value></data>
   <data name="CompanyTitle" xml:space="preserve"><value>Firma bilgisi</value></data>
   <data name="CompanyDescription" xml:space="preserve"><value>Firma adı ekranlarda ve raporlarda görünür.</value></data>
@@ -49,4 +49,11 @@
   <data name="GoToWeighing" xml:space="preserve"><value>Tartıma geç</value></data>
   <data name="LocalOnly" xml:space="preserve"><value>Kurulum yalnızca Vyxum'un kurulu olduğu bilgisayardan yapılabilir.</value></data>
   <data name="AlreadyCompleted" xml:space="preserve"><value>Kurulum zaten tamamlandı. Ayarları Ayarlar ekranından değiştirin.</value></data>
+  <data name="Version" xml:space="preserve"><value>Sürüm {0}</value></data>
+  <data name="StepDone" xml:space="preserve"><value>tamamlandı</value></data>
+  <data name="StepCurrent" xml:space="preserve"><value>şimdi</value></data>
+  <data name="PrivacyNote" xml:space="preserve"><value>Kurulum sırasında hiçbir veri bu bilgisayardan dışarı gönderilmez.</value></data>
+  <data name="ProductsTitle" xml:space="preserve"><value>İlk ürünler</value></data>
+  <data name="ProductsDescription" xml:space="preserve"><value>Tartımda seçeceğiniz ürünleri ekleyin. Sonra Ürünler ekranından da ekleyebilirsiniz.</value></data>
+  <data name="ProductsAdded" xml:space="preserve"><value>Eklenen ürünler</value></data>
 </root>
