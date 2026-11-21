@@ -74,6 +74,7 @@ public static class PlatformServiceCollectionExtensions
         services.AddSingleton<ILicenseKeyRing>(LicenseKeyRing.Trusted);
         services.AddSingleton<LicenseManager>();
         services.AddSingleton<ILicenseState>(provider => provider.GetRequiredService<LicenseManager>());
+        services.AddHostedService<LicenseMaintenanceService>();
         services.Configure<OutboxOptions>(configuration.GetSection(OutboxOptions.SectionName));
         services.AddSingleton<OutboxDispatcher>();
         services.AddHostedService<OutboxDispatcherService>();

@@ -5,7 +5,9 @@ using System.Text.Json;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.AspNetCore.TestHost;
 using Microsoft.Data.Sqlite;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 using Vyxum.Licensing;
 using Vyxum.Platform;
 using Vyxum.Platform.Testing;
@@ -85,7 +87,14 @@ internal sealed class LicenseTestApp : IAsyncDisposable
 {
     private readonly WebApplicationFactory<Program> _factory;
 
-    public LicenseTestApp(TestDatabase database, TestLicenseIssuer issuer, TestClock? clock = null)
+    /// <param name="database">The test database.</param>
+    /// <param name="issuer">The issuer whose key is trusted.</param>
+    /// <param name="clock">The clock; a new one when null.</param>
+    /// <param name="maintenance">
+    /// False removes <see cref="LicenseMaintenanceService"/>, so that the latest seen time is written only when the test
+    /// calls <see cref="PersistAsync"/>.
+    /// </param>
+    public LicenseTestApp(TestDatabase database, TestLicenseIssuer issuer, TestClock? clock = null, bool maintenance = true)
     {
         Clock = clock ?? new TestClock();
         var dataDirectory = database.DataDirectory;
@@ -102,6 +111,13 @@ internal sealed class LicenseTestApp : IAsyncDisposable
             {
                 services.AddSingleton<TimeProvider>(Clock);
                 services.AddSingleton<ILicenseKeyRing>(issuer.KeyRing);
+                if (!maintenance)
+                {
+                    foreach (var service in services.Where(d => d.ServiceType == typeof(IHostedService) && d.ImplementationType == typeof(LicenseMaintenanceService)).ToList())
+                    {
+                        services.Remove(service);
+                    }
+                }
             });
         });
         Client = _factory.CreateClient();
@@ -153,6 +169,21 @@ internal sealed class LicenseTestApp : IAsyncDisposable
         var json = $$"""{ "id": "{{id}}", "transport": { "type": "simulator" }, "protocol": { "type": "mt-sics" }, "isEnabled": {{(enabled ? "true" : "false")}} }""";
         var (status, _) = await SendAsync(HttpMethod.Post, DeviceEndpointExtensions.ConfigPath, json);
         Assert.Equal(201, status);
+    }
+
+    public LicenseManager Licenses => Services.GetRequiredService<LicenseManager>();
+
+    /// <summary>Writes the latest seen time as the maintenance service does.</summary>
+    public Task PersistAsync() => Licenses.PersistLastSeenAsync(TestContext.Current.CancellationToken);
+
+    /// <summary>The stored latest seen time of <paramref name="licenseId"/>, or null.</summary>
+    public async Task<DateTimeOffset?> StoredLastSeenAsync(string licenseId = "lic-1")
+    {
+        await using var scope = Services.CreateAsyncScope();
+        var key = LicenseManager.LastSeenKey(licenseId);
+        var value = await scope.ServiceProvider.GetRequiredService<PlatformDbContext>().Settings.AsNoTracking()
+            .Where(s => s.Key == key).Select(s => s.Value).FirstOrDefaultAsync(TestContext.Current.CancellationToken);
+        return value is null ? null : DateTimeOffset.Parse(value, System.Globalization.CultureInfo.InvariantCulture);
     }
 
     public Task<int> DispatchAsync() =>

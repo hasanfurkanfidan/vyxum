@@ -98,6 +98,11 @@ public interface ILicenseState
     /// </summary>
     ModuleLicenseState GetModuleStatus(string moduleId);
 
-    /// <summary>Whether device <paramref name="deviceId"/> is one of the licensed stations of a license that verifies.</summary>
+    /// <summary>
+    /// Whether device <paramref name="deviceId"/> is one of the licensed stations and the license is in force
+    /// (<see cref="LicenseCondition.Valid"/> or <see cref="LicenseCondition.Grace"/>). False without a license, with an
+    /// invalid file, before the license starts (<see cref="LicenseCondition.NotYetValid"/>) and after the grace period
+    /// (<see cref="LicenseCondition.ReadOnly"/>), even when the device is still in <see cref="LicensedStations"/>.
+    /// </summary>
     bool IsStationLicensed(string deviceId);
 }

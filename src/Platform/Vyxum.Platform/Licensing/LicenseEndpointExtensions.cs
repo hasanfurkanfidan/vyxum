@@ -83,6 +83,7 @@ public static class LicenseEndpointExtensions
         await SetAsync(db, PlatformSettingKeys.LicenseStations, stationsJson, now, cancellationToken);
         await db.SaveChangesAsync(cancellationToken);
         licenses.Invalidate();
+        licenses.RequestPersist();
         return Current(licenses, catalog);
     }
 
@@ -213,6 +214,11 @@ public static class LicenseEndpointExtensions
 /// <param name="GraceEndsOn">Last day of the grace period; null for a perpetual license.</param>
 /// <param name="GraceDaysLeft">During the grace period: days left, counting today.</param>
 /// <param name="ClockBehind">True when the computer's clock is more than a day behind a time already seen for this license.</param>
+/// <param name="ClockAhead">
+/// True when the clock is more than two days ahead of the latest time seen for this license and has not stayed there
+/// for six hours yet: the jump is not stored until then (a wrong clock reading does not end the license for good).
+/// Also true for that time after the computer was off for more than two days.
+/// </param>
 /// <param name="StationLimit">Number of licensed stations; 0 without a valid license.</param>
 /// <param name="Stations">The device ids chosen as licensed stations.</param>
 /// <param name="Modules">The modules in the license and the installed modules that require one, ordered by id.</param>
@@ -229,6 +235,7 @@ internal sealed record LicenseResponse(
     DateOnly? GraceEndsOn,
     int? GraceDaysLeft,
     bool ClockBehind,
+    bool ClockAhead,
     int StationLimit,
     IReadOnlyList<string> Stations,
     IReadOnlyList<LicenseResponse.ModuleInfo> Modules)
@@ -262,6 +269,7 @@ internal sealed record LicenseResponse(
             snapshot.Evaluation?.GraceEndsOn,
             snapshot.Evaluation?.GraceDaysLeft,
             snapshot.ClockBehind,
+            snapshot.ClockAhead,
             snapshot.StationLimit,
             snapshot.Stations,
             modules);

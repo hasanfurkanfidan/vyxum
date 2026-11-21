@@ -23,10 +23,18 @@ namespace Vyxum.Platform;
 /// <see cref="CacheDuration"/>; a single instance (the normal installation) always sees its own changes immediately.
 /// </para>
 /// <para>
-/// The latest seen time is kept per license id (key <see cref="PlatformSettingKeys.LicenseLastSeenPrefix"/>) and written
-/// when it has moved forward by at least <see cref="LastSeenWriteInterval"/>, to keep database writes rare. In memory it
-/// never goes back. A clock set far ahead once therefore ends that license early; the support path is a newly issued
-/// license, which has a new id.
+/// Reading never writes. <see cref="GetSnapshot"/> (and so every <see cref="ILicenseState"/> member) only reads a few
+/// small rows, so it is safe on any thread, also inside a module's open write transaction. The latest seen time is
+/// written by <see cref="LicenseMaintenanceService"/> alone (<see cref="PersistLastSeenAsync"/>): about once an hour,
+/// after an upload and at shutdown. It is kept per license id (key <see cref="PlatformSettingKeys.LicenseLastSeenPrefix"/>).
+/// </para>
+/// <para>
+/// Clock rule: the evaluation uses <c>max(now, latest seen)</c>. The latest seen time moves forward with the clock, but
+/// a jump of more than <see cref="ForwardJumpTolerance"/> past it is not accepted at once: while it lasts
+/// <see cref="LicenseSnapshot.ClockAhead"/> is set and the evaluation still uses the (later) clock, and only when the
+/// clock has stayed that far ahead for <see cref="ForwardJumpConfirmation"/> of process time (monotonic, not the wall
+/// clock) is the new time accepted and later persisted. So one wrong reading of the clock (a bad battery, a wrong
+/// time server) does not end a license for good; a clock that really moved on is accepted after a few hours.
 /// </para>
 /// <para>
 /// Loading uses synchronous database calls on purpose: it reads a few small rows at most once a minute, and it lets
@@ -38,11 +46,14 @@ public sealed partial class LicenseManager : ILicenseState
     /// <summary>How long an evaluation is reused.</summary>
     public static readonly TimeSpan CacheDuration = TimeSpan.FromMinutes(1);
 
-    /// <summary>The smallest forward move of the latest seen time that is written to the database.</summary>
-    public static readonly TimeSpan LastSeenWriteInterval = TimeSpan.FromHours(1);
-
     /// <summary>How far the clock may be behind the latest seen time before <see cref="LicenseSnapshot.ClockBehind"/> is set.</summary>
     public static readonly TimeSpan ClockBehindTolerance = TimeSpan.FromDays(1);
+
+    /// <summary>The largest forward move of the clock past the latest seen time that is accepted at once.</summary>
+    public static readonly TimeSpan ForwardJumpTolerance = TimeSpan.FromDays(2);
+
+    /// <summary>How long (process time) a larger forward jump must be observed before it is accepted.</summary>
+    public static readonly TimeSpan ForwardJumpConfirmation = TimeSpan.FromHours(6);
 
     private readonly IServiceScopeFactory _scopeFactory;
     private readonly LicenseEvaluator _evaluator;
@@ -50,7 +61,10 @@ public sealed partial class LicenseManager : ILicenseState
     private readonly LicenseSnapshot.ModuleSet _modules;
     private readonly ILogger<LicenseManager> _logger;
     private readonly Lock _refreshLock = new();
-    private readonly ConcurrentDictionary<string, DateTimeOffset> _seen = new(StringComparer.Ordinal);
+    private readonly SemaphoreSlim _persistRequested = new(0, 1);
+
+    // Per license id; every field is read and written under _refreshLock.
+    private readonly ConcurrentDictionary<string, SeenTime> _seen = new(StringComparer.Ordinal);
     private LicenseSnapshot? _snapshot;
     private string? _lastSignature;
     private long _generation;
@@ -79,8 +93,15 @@ public sealed partial class LicenseManager : ILicenseState
     }
 
     /// <summary>
+    /// Raised after what the license allows may have changed: an upload, a removal, a station change, or a new
+    /// evaluation with a different result. Handlers run on the caller's thread and must be quick; read the new state
+    /// through this manager.
+    /// </summary>
+    internal event Action? Changed;
+
+    /// <summary>
     /// A number that changes whenever what the license allows may have changed (an upload, a removal, a station change,
-    /// or a re-evaluation with a different result). The outbox dispatcher uses it to release held events.
+    /// or a re-evaluation with a different result).
     /// </summary>
     public long Version => Interlocked.Read(ref _version);
 
@@ -129,7 +150,7 @@ public sealed partial class LicenseManager : ILicenseState
         return GetSnapshot().IsStationLicensed(deviceId);
     }
 
-    /// <summary>The current evaluation, from the cache when it is still fresh.</summary>
+    /// <summary>The current evaluation, from the cache when it is still fresh. Reads only; never writes.</summary>
     internal LicenseSnapshot GetSnapshot()
     {
         var current = Volatile.Read(ref _snapshot);
@@ -138,6 +159,8 @@ public sealed partial class LicenseManager : ILicenseState
             return current;
         }
 
+        var changed = false;
+        LicenseSnapshot fresh;
         lock (_refreshLock)
         {
             var now = _time.GetUtcNow();
@@ -148,7 +171,7 @@ public sealed partial class LicenseManager : ILicenseState
             }
 
             var generation = Interlocked.Read(ref _generation);
-            var fresh = Load(now);
+            fresh = Load(now);
 
             // A change made while loading (Invalidate) makes this result possibly stale: return it, do not keep it.
             if (Interlocked.Read(ref _generation) == generation)
@@ -160,14 +183,20 @@ public sealed partial class LicenseManager : ILicenseState
             {
                 _lastSignature = fresh.Signature;
                 Interlocked.Increment(ref _version);
+                changed = true;
                 if (fresh.Status == LicenseCondition.Invalid)
                 {
                     LogStoredLicenseInvalid(_logger, fresh.ErrorCode);
                 }
             }
-
-            return fresh;
         }
+
+        if (changed)
+        {
+            RaiseChanged();
+        }
+
+        return fresh;
     }
 
     /// <summary>Forgets the cached evaluation; call after changing the stored license or stations.</summary>
@@ -176,11 +205,103 @@ public sealed partial class LicenseManager : ILicenseState
         Interlocked.Increment(ref _generation);
         Volatile.Write(ref _snapshot, null);
         Interlocked.Increment(ref _version);
+        RaiseChanged();
+    }
+
+    /// <summary>Asks <see cref="LicenseMaintenanceService"/> to persist the latest seen time soon (after an upload).</summary>
+    internal void RequestPersist()
+    {
+        if (_persistRequested.CurrentCount == 0)
+        {
+            try
+            {
+                _persistRequested.Release();
+            }
+            catch (SemaphoreFullException)
+            {
+                // Already requested.
+            }
+        }
+    }
+
+    /// <summary>Waits until <see cref="RequestPersist"/> is called or <paramref name="timeout"/> passes; true when requested.</summary>
+    internal Task<bool> WaitForPersistRequestAsync(TimeSpan timeout, CancellationToken cancellationToken) =>
+        _persistRequested.WaitAsync(timeout, cancellationToken);
+
+    /// <summary>
+    /// Writes the accepted latest seen time of every license this process has evaluated, where it is later than the
+    /// stored one. Called only by <see cref="LicenseMaintenanceService"/> (and tests), never from a request or a handler.
+    /// </summary>
+    internal async Task PersistLastSeenAsync(CancellationToken cancellationToken)
+    {
+        foreach (var (licenseId, seen) in _seen)
+        {
+            DateTimeOffset? accepted, stored;
+            lock (_refreshLock)
+            {
+                accepted = seen.Accepted;
+                stored = seen.Stored;
+            }
+
+            if (accepted is null || (stored is not null && accepted <= stored))
+            {
+                continue;
+            }
+
+            var key = LastSeenKey(licenseId);
+            await using var scope = _scopeFactory.CreateAsyncScope();
+            var db = scope.ServiceProvider.GetRequiredService<PlatformDbContext>();
+            var row = await db.Settings.FirstOrDefaultAsync(s => s.Key == key, cancellationToken);
+            var current = ParseInstant(row?.Value);
+            if (current is null || current < accepted)
+            {
+                var value = accepted.Value.UtcDateTime.ToString("O", CultureInfo.InvariantCulture);
+                var now = _time.GetUtcNow().UtcDateTime;
+                if (row is null)
+                {
+                    db.Settings.Add(new PlatformSetting { Key = key, Value = value, UpdatedAt = now });
+                }
+                else
+                {
+                    row.Value = value;
+                    row.UpdatedAt = now;
+                }
+
+                try
+                {
+                    await db.SaveChangesAsync(cancellationToken);
+                    current = accepted;
+                }
+                catch (DbUpdateException exception)
+                {
+                    // Another application instance wrote it at the same moment; the next run tries again.
+                    LogLastSeenNotSaved(_logger, exception.Message);
+                    continue;
+                }
+            }
+
+            lock (_refreshLock)
+            {
+                seen.Stored = Later(seen.Stored, current);
+            }
+        }
     }
 
     /// <summary>The settings key of the latest seen time of license <paramref name="licenseId"/>.</summary>
     internal static string LastSeenKey(string licenseId) =>
         PlatformSettingKeys.LicenseLastSeenPrefix + Convert.ToHexStringLower(SHA256.HashData(Encoding.UTF8.GetBytes(licenseId)));
+
+    private void RaiseChanged()
+    {
+        try
+        {
+            Changed?.Invoke();
+        }
+        catch (Exception exception)
+        {
+            LogChangedHandlerFailed(_logger, exception);
+        }
+    }
 
     private bool IsFresh(LicenseSnapshot snapshot, DateTimeOffset now) =>
         now >= snapshot.ComputedAt
@@ -213,47 +334,51 @@ public sealed partial class LicenseManager : ILicenseState
         var license = read.License!;
         var licenseId = license.Payload.LicenseId;
         var key = LastSeenKey(licenseId);
-        var row = db.Settings.FirstOrDefault(s => s.Key == key);
-        var storedSeen = ParseInstant(row?.Value);
-        var lastSeen = Later(storedSeen, _seen.TryGetValue(licenseId, out var inMemory) ? inMemory : null);
+        var storedSeen = ParseInstant(db.Settings.AsNoTracking().Where(s => s.Key == key).Select(s => s.Value).FirstOrDefault());
 
-        var evaluation = _evaluator.Evaluate(license, lastSeen);
-        _seen.AddOrUpdate(licenseId, evaluation.LastSeen, (_, old) => old > evaluation.LastSeen ? old : evaluation.LastSeen);
-        if (storedSeen is null || evaluation.LastSeen - storedSeen.Value >= LastSeenWriteInterval)
-        {
-            WriteLastSeen(db, row, key, evaluation.LastSeen, now);
-        }
+        var seen = _seen.GetOrAdd(licenseId, _ => new SeenTime());
+        seen.Stored = Later(seen.Stored, storedSeen);
+        var clockAhead = Observe(seen, now);
 
+        var evaluation = _evaluator.Evaluate(license, seen.Accepted);
         var stations = LicenseStations.Effective(
             LicenseStations.Parse(stored.GetValueOrDefault(PlatformSettingKeys.LicenseStations)),
             db.Set<DeviceConfig>().AsNoTracking().Select(d => d.Id).ToHashSet(StringComparer.Ordinal),
             license.Payload.Stations);
-        var clockBehind = now < evaluation.LastSeen - ClockBehindTolerance;
-        return LicenseSnapshot.Verified(_modules, evaluation, clockBehind, stations, date, now);
+        var clockBehind = seen.Accepted is { } accepted && now < accepted - ClockBehindTolerance;
+        return LicenseSnapshot.Verified(_modules, evaluation, clockBehind, clockAhead, stations, date, now);
     }
 
-    private void WriteLastSeen(PlatformDbContext db, PlatformSetting? row, string key, DateTimeOffset lastSeen, DateTimeOffset now)
+    /// <summary>
+    /// Applies the clock rule (see the remarks) to <paramref name="seen"/> at <paramref name="now"/> and returns whether
+    /// the clock is ahead by an unconfirmed jump. Called under <see cref="_refreshLock"/>.
+    /// </summary>
+    private bool Observe(SeenTime seen, DateTimeOffset now)
     {
-        var value = lastSeen.UtcDateTime.ToString("O", CultureInfo.InvariantCulture);
-        if (row is null)
+        var latest = Later(seen.Accepted, seen.Stored);
+        seen.Accepted = latest;
+        if (latest is null || now - latest.Value <= ForwardJumpTolerance)
         {
-            db.Settings.Add(new PlatformSetting { Key = key, Value = value, UpdatedAt = now.UtcDateTime });
-        }
-        else
-        {
-            row.Value = value;
-            row.UpdatedAt = now.UtcDateTime;
+            // First sight, the clock moving on normally, or the clock behind (the latest seen time stays).
+            if (latest is null || now > latest.Value)
+            {
+                seen.Accepted = now;
+            }
+
+            seen.JumpObservedSince = null;
+            return false;
         }
 
-        try
+        seen.JumpObservedSince ??= _time.GetTimestamp();
+        if (_time.GetElapsedTime(seen.JumpObservedSince.Value) >= ForwardJumpConfirmation)
         {
-            db.SaveChanges();
+            LogForwardJumpAccepted(_logger, latest.Value, now);
+            seen.Accepted = now;
+            seen.JumpObservedSince = null;
+            return false;
         }
-        catch (DbUpdateException exception)
-        {
-            // Another application instance wrote it at the same moment; the in-memory value still protects this one.
-            LogLastSeenNotSaved(_logger, exception.Message);
-        }
+
+        return true;
     }
 
     private static DateTimeOffset? ParseInstant(string? text) =>
@@ -269,4 +394,23 @@ public sealed partial class LicenseManager : ILicenseState
 
     [LoggerMessage(Level = LogLevel.Warning, Message = "The latest seen license time could not be saved: {Error}")]
     private static partial void LogLastSeenNotSaved(ILogger logger, string error);
+
+    [LoggerMessage(Level = LogLevel.Warning, Message = "The clock moved from {LatestSeen:O} to {Now:O} and stayed there; the new time is accepted for the license.")]
+    private static partial void LogForwardJumpAccepted(ILogger logger, DateTimeOffset latestSeen, DateTimeOffset now);
+
+    [LoggerMessage(Level = LogLevel.Error, Message = "A license change handler failed.")]
+    private static partial void LogChangedHandlerFailed(ILogger logger, Exception exception);
+
+    /// <summary>The latest seen time of one license, as this process knows it.</summary>
+    private sealed class SeenTime
+    {
+        /// <summary>The value in the database, as last read or written.</summary>
+        public DateTimeOffset? Stored { get; set; }
+
+        /// <summary>The latest accepted time: never goes back; persisted by <see cref="PersistLastSeenAsync"/>.</summary>
+        public DateTimeOffset? Accepted { get; set; }
+
+        /// <summary>Monotonic timestamp of the first observation of the current unconfirmed forward jump.</summary>
+        public long? JumpObservedSince { get; set; }
+    }
 }

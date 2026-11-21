@@ -15,6 +15,7 @@ internal sealed class LicenseSnapshot
         string? errorCode,
         LicenseEvaluation? evaluation,
         bool clockBehind,
+        bool clockAhead,
         IReadOnlyList<string> stations,
         DateOnly computedForDate,
         DateTimeOffset computedAt)
@@ -24,6 +25,7 @@ internal sealed class LicenseSnapshot
         ErrorCode = errorCode;
         Evaluation = evaluation;
         ClockBehind = clockBehind;
+        ClockAhead = clockAhead;
         Stations = stations;
         _stations = new HashSet<string>(stations, StringComparer.Ordinal);
         ComputedForDate = computedForDate;
@@ -47,6 +49,12 @@ internal sealed class LicenseSnapshot
 
     /// <summary>True when the clock is more than a day behind the latest time seen for this license.</summary>
     public bool ClockBehind { get; }
+
+    /// <summary>
+    /// True while the clock is more than <see cref="LicenseManager.ForwardJumpTolerance"/> ahead of the latest time seen
+    /// for this license and the jump is not yet confirmed (see <see cref="LicenseManager"/>, clock rule).
+    /// </summary>
+    public bool ClockAhead { get; }
 
     /// <summary>Licensed station (device) ids: stored choice, limited to existing devices and the station limit.</summary>
     public IReadOnlyList<string> Stations { get; }
@@ -78,22 +86,27 @@ internal sealed class LicenseSnapshot
         };
     }
 
-    /// <summary>Whether <paramref name="deviceId"/> is a licensed station of a license that verifies.</summary>
-    public bool IsStationLicensed(string deviceId) => License is not null && _stations.Contains(deviceId);
+    /// <summary>
+    /// Whether <paramref name="deviceId"/> is a licensed station of a license that is in force: valid or in its grace
+    /// period. Not yet valid and read-only licenses license no station.
+    /// </summary>
+    public bool IsStationLicensed(string deviceId) =>
+        Status is LicenseCondition.Valid or LicenseCondition.Grace && _stations.Contains(deviceId);
 
     /// <summary>A snapshot without a stored file.</summary>
     public static LicenseSnapshot None(ModuleSet modules, DateOnly date, DateTimeOffset at) =>
-        new(modules, LicenseCondition.None, null, null, false, [], date, at);
+        new(modules, LicenseCondition.None, null, null, false, false, [], date, at);
 
     /// <summary>A snapshot of a stored file that does not verify.</summary>
     public static LicenseSnapshot Invalid(ModuleSet modules, string errorCode, DateOnly date, DateTimeOffset at) =>
-        new(modules, LicenseCondition.Invalid, errorCode, null, false, [], date, at);
+        new(modules, LicenseCondition.Invalid, errorCode, null, false, false, [], date, at);
 
     /// <summary>A snapshot of a verified, evaluated license.</summary>
     public static LicenseSnapshot Verified(
         ModuleSet modules,
         LicenseEvaluation evaluation,
         bool clockBehind,
+        bool clockAhead,
         IReadOnlyList<string> stations,
         DateOnly date,
         DateTimeOffset at)
@@ -106,7 +119,7 @@ internal sealed class LicenseSnapshot
             LicenseStatus.ReadOnly => LicenseCondition.ReadOnly,
             _ => throw new InvalidOperationException($"Unknown license status {evaluation.Status}."),
         };
-        return new LicenseSnapshot(modules, status, null, evaluation, clockBehind, stations, date, at);
+        return new LicenseSnapshot(modules, status, null, evaluation, clockBehind, clockAhead, stations, date, at);
     }
 
     /// <summary>A short text that changes whenever what the license allows changes; see <see cref="LicenseManager.Version"/>.</summary>

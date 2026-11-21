@@ -217,14 +217,22 @@ public sealed class LicenseApiTests : IDisposable
     {
         await using var database = Databases.CreateOrSkip(provider);
         var clock = new TestClock();
-        await using (var app = Start(database, clock))
+        await using (var app = new LicenseTestApp(database, _issuer, clock, maintenance: false))
         {
             await ShouldUploadAsync(app, _issuer.Sign(TestLicenseIssuer.Payload(validUntil: TestLicenseIssuer.Today.AddDays(1), graceDays: 5)));
+
+            // Ten days ahead is a forward jump: it counts at once, and it is accepted after six hours of process time.
             clock.Advance(TimeSpan.FromDays(10));
-            (await app.GetLicenseAsync()).Body.GetProperty("status").GetString().ShouldBe("readOnly");
+            var (_, license) = await app.GetLicenseAsync();
+            license.GetProperty("status").GetString().ShouldBe("readOnly");
+            license.GetProperty("clockAhead").GetBoolean().ShouldBeTrue();
+            clock.Elapse(LicenseManager.ForwardJumpConfirmation);
+            license = (await app.GetLicenseAsync()).Body;
+            license.GetProperty("clockAhead").GetBoolean().ShouldBeFalse();
+            await app.PersistAsync();
 
             clock.Advance(TimeSpan.FromDays(-10));
-            var (_, license) = await app.GetLicenseAsync();
+            license = (await app.GetLicenseAsync()).Body;
             license.GetProperty("status").GetString().ShouldBe("readOnly");
             license.GetProperty("clockBehind").GetBoolean().ShouldBeTrue();
             ShouldBeProblem(await PostEntryAsync(app), 403, "license_read_only");
