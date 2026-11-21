@@ -164,7 +164,7 @@ begin
     if FileExists(DataDir + '\vyxum' + Ext) then
     begin
       Target := BackupDir + '\vyxum-' + Stamp + '-before-setup-' + OldVersion + Ext;
-      if not FileCopy(DataDir + '\vyxum' + Ext, Target, False) then
+      if not CopyFile(DataDir + '\vyxum' + Ext, Target, False) then
         Log('Backup of vyxum' + Ext + ' failed.');
     end;
   end;
