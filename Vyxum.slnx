@@ -1,0 +1,20 @@
+<Solution>
+  <Folder Name="/src/" />
+  <Folder Name="/src/Host/">
+    <Project Path="src/Host/Vyxum.Host/Vyxum.Host.csproj" />
+  </Folder>
+  <Folder Name="/src/Platform/">
+    <Project Path="src/Platform/Vyxum.Platform.Abstractions/Vyxum.Platform.Abstractions.csproj" />
+    <Project Path="src/Platform/Vyxum.Platform.Testing/Vyxum.Platform.Testing.csproj" />
+    <Project Path="src/Platform/Vyxum.Platform/Vyxum.Platform.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/Vyxum.ArchitectureTests/Vyxum.ArchitectureTests.csproj" />
+    <Project Path="tests/Vyxum.IntegrationTests/Vyxum.IntegrationTests.csproj" />
+    <Project Path="tests/Vyxum.Platform.Tests/Vyxum.Platform.Tests.csproj" />
+  </Folder>
+  <Folder Name="/tests/SampleModules/">
+    <Project Path="tests/SampleModules/Vyxum.Samples.Notifications/Vyxum.Samples.Notifications.csproj" />
+    <Project Path="tests/SampleModules/Vyxum.Samples.Orders/Vyxum.Samples.Orders.csproj" />
+  </Folder>
+</Solution>

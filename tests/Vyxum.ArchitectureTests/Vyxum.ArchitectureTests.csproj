@@ -1,0 +1,21 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="xunit.v3" />
+    <PackageReference Include="Shouldly" />
+    <PackageReference Include="NetArchTest.Rules" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\Platform\Vyxum.Platform\Vyxum.Platform.csproj" />
+    <ProjectReference Include="..\..\src\Platform\Vyxum.Platform.Abstractions\Vyxum.Platform.Abstractions.csproj" />
+    <ProjectReference Include="..\SampleModules\Vyxum.Samples.Orders\Vyxum.Samples.Orders.csproj" />
+    <ProjectReference Include="..\SampleModules\Vyxum.Samples.Notifications\Vyxum.Samples.Notifications.csproj" />
+    <ProjectReference Include="..\..\src\Host\Vyxum.Host\Vyxum.Host.csproj" />
+  </ItemGroup>
+
+</Project>

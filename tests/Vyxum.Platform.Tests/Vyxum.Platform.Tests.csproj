@@ -1,0 +1,17 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="xunit.v3" />
+    <PackageReference Include="Shouldly" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\Platform\Vyxum.Platform\Vyxum.Platform.csproj" />
+    <ProjectReference Include="..\..\src\Platform\Vyxum.Platform.Testing\Vyxum.Platform.Testing.csproj" />
+  </ItemGroup>
+
+</Project>
