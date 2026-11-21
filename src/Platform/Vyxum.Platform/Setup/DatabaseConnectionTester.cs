@@ -52,7 +52,7 @@ internal static partial class DatabaseConnectionTester
         {
             LogTestFailed(logger, exception.Number);
             var code = LoginFailed.Contains(exception.Number) ? "DbLoginFailed"
-                : ServerNotFound.Contains(exception.Number) ? "DbServerNotFound"
+                : ServerNotFound.Contains(exception.Number) || IsNetworkFailure(exception) ? "DbServerNotFound"
                 : "DbUnknownError";
             return new DatabaseTestResult(false, SetupStrings.Code(code), null);
         }
@@ -66,6 +66,23 @@ internal static partial class DatabaseConnectionTester
             LogTestError(logger, exception.GetType().Name);
             return new DatabaseTestResult(false, SetupStrings.Code("DbUnknownError"), null);
         }
+    }
+
+    /// <summary>
+    /// On Linux and macOS the managed network layer reports an unreachable server with error number 0 and the
+    /// socket error as an inner exception, instead of the Windows network error numbers.
+    /// </summary>
+    private static bool IsNetworkFailure(SqlException exception)
+    {
+        for (Exception? inner = exception.InnerException; inner is not null; inner = inner.InnerException)
+        {
+            if (inner is System.Net.Sockets.SocketException)
+            {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     [LoggerMessage(Level = LogLevel.Information, Message = "SQL Server connection test failed with error number {Number}.")]
