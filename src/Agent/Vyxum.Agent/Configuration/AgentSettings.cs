@@ -152,7 +152,7 @@ public sealed class SimulatorSettings
 
 /// <summary>
 /// The protocol of a device. <see cref="Type"/> selects which of the other fields apply:
-/// <c>mt-sics</c> (Command, PollInterval, ResponseTimeout, RetriesOnError, MaxConsecutiveTimeouts, Terminator),
+/// <c>mt-sics</c> (Command, PollInterval, ResponseTimeout, ZeroTimeout, RetriesOnError, MaxConsecutiveTimeouts, Terminator),
 /// <c>toledo-continuous</c> (ChecksumEnabled, InactivityTimeout, MaxConsecutiveInvalidFrames) or
 /// <c>generic-ascii</c> (Pattern and the other rule fields, RequestCommand for demand mode). Empty fields keep the
 /// protocol's default.
@@ -170,6 +170,9 @@ public sealed class ProtocolSettings
 
     /// <summary>MT-SICS and generic ASCII demand mode: how long to wait for an answer.</summary>
     public TimeSpan? ResponseTimeout { get; set; }
+
+    /// <summary>MT-SICS: how long to wait for the answer to the zero command <c>Z</c>.</summary>
+    public TimeSpan? ZeroTimeout { get; set; }
 
     /// <summary>MT-SICS: how often a command is resent after ES or ET.</summary>
     public int? RetriesOnError { get; set; }

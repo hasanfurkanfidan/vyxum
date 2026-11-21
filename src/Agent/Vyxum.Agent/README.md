@@ -61,8 +61,8 @@ Each device has an `Id`, a `Transport` and a `Protocol`. Any transport works wit
   - `simulator`: `Simulator` with `Kind` (`MtSics`, `ToledoContinuous`, `Replay`), `Weight`, `Unit`, `State`,
     `Interval`, `RecordingPath` (replay).
 - `Protocol.Type`:
-  - `mt-sics`: `Command` (`SI`, `S` or `SIR`), `PollInterval` (200 ms), `ResponseTimeout` (1 s), `RetriesOnError`,
-    `MaxConsecutiveTimeouts`, `Terminator`.
+  - `mt-sics`: `Command` (`SI`, `S` or `SIR`), `PollInterval` (200 ms), `ResponseTimeout` (1 s), `ZeroTimeout` (3 s),
+    `RetriesOnError`, `MaxConsecutiveTimeouts`, `Terminator`.
   - `toledo-continuous`: `ChecksumEnabled`, `InactivityTimeout` (3 s), `MaxConsecutiveInvalidFrames`.
   - `generic-ascii`: `Pattern` (required, a regular expression with a `weight` group), `StablePattern`,
     `MotionPattern`, `OverloadPattern`, `UnderloadPattern`, `NetPattern`, `DecimalSeparator`, `ThousandsSeparator`,
@@ -70,9 +70,14 @@ Each device has an `Id`, a `Transport` and a `Protocol`. Any transport works wit
 
 `appsettings.Ind231.example.json` shows a METTLER TOLEDO IND231 on COM3 (9600 8N1, MT-SICS, command `SI`).
 
-## Safety: read commands only
+## Safety: read commands, and zero on request
 
-The agent only reads the weight. With MT-SICS it sends `S`, `SI` or `SIR` and nothing else; any other command
-(tare `T`, zero `Z`, reset `@`, configuration commands) is rejected at startup. Toledo Continuous is listen-only.
+The agent reads the weight. With MT-SICS it sends the configured read command (`S`, `SI` or `SIR`) and, only when a
+user presses "Zero" in the web application, `Z` exactly once for that press. Nothing else is ever sent: tare (`T`,
+`TI`, `TA`), immediate zero (`ZI`), reset (`@`) and configuration commands are blocked in code, and `Command` accepts only
+the read commands (any other value is rejected at startup). `Z` is sent between two read commands on the same
+connection. If the scale answers `ES` or `ET` (not executed) it is resent like any other command; if it does not answer
+within `ZeroTimeout`, it is not resent, because the scale may have zeroed. The agent reports which devices support zero
+when it registers. Toledo Continuous is listen-only and does not support zero; neither does `generic-ascii`.
 With `generic-ascii`, `RequestCommand` is free text because every brand uses its own: only ever configure a command
 that reads or prints the weight, never one that tares, zeroes or changes the device.

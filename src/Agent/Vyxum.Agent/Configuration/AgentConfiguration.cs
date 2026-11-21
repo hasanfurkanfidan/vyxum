@@ -335,6 +335,7 @@ public static class AgentConfiguration
                     {
                         PollInterval = Positive(errors, $"{path}:PollInterval", settings.PollInterval) ?? options.PollInterval,
                         ResponseTimeout = Positive(errors, $"{path}:ResponseTimeout", settings.ResponseTimeout) ?? options.ResponseTimeout,
+                        ZeroTimeout = Positive(errors, $"{path}:ZeroTimeout", settings.ZeroTimeout) ?? options.ZeroTimeout,
                         RetriesOnError = AtLeast(errors, $"{path}:RetriesOnError", settings.RetriesOnError, 0) ?? options.RetriesOnError,
                         MaxConsecutiveTimeouts = AtLeast(errors, $"{path}:MaxConsecutiveTimeouts", settings.MaxConsecutiveTimeouts, 1) ?? options.MaxConsecutiveTimeouts,
                         LineTerminator = settings.Terminator ?? options.LineTerminator,

@@ -24,7 +24,7 @@ SQL Server tests run when `VYXUM_TEST_SQLSERVER` is set to a connection string w
 
 ## Adding a protocol
 
-Each protocol is its own project, `src/Devices/Vyxum.Devices.<Name>`, which references only `Vyxum.Devices`. Implement `IScaleProtocol`. Keep the parser a pure function, and test it with unit tests that include recorded raw lines from a real scale. Add a scenario to `Vyxum.Devices.Simulator` so the protocol runs without hardware. Finally, register the type name in the Agent's configuration factory (`AgentConfiguration`). The protocol must only read the weight; never send commands that tare, zero or change the device.
+Each protocol is its own project, `src/Devices/Vyxum.Devices.<Name>`, which references only `Vyxum.Devices`. Implement `IScaleProtocol`. Keep the parser a pure function, and test it with unit tests that include recorded raw lines from a real scale. Add a scenario to `Vyxum.Devices.Simulator` so the protocol runs without hardware. Finally, register the type name in the Agent's configuration factory (`AgentConfiguration`). The protocol must only read the weight; never send commands that tare, zero or change the device. The only exception is zero on an explicit user request: a protocol may implement `ISupportsZero` and send its zero command once per call, serialized with its read loop.
 
 ## Pull requests
 

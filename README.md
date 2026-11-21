@@ -83,7 +83,7 @@ A scale is read in two parts. A **transport** moves bytes over a serial port or 
 
 Supported transports are serial and TCP. Supported protocols are MT-SICS, Toledo Continuous and generic ASCII.
 
-The drivers only read the weight. The MT-SICS driver sends only `S`, `SI` and `SIR`. Toledo Continuous is listen-only. Generic ASCII sends only the request command you configure, which must only read the weight.
+The drivers read the weight. The MT-SICS driver sends only `S`, `SI` and `SIR`, plus `Z` once when a user explicitly asks to zero the scale; tare, reset and settings commands are never sent. Toledo Continuous is listen-only. Generic ASCII sends only the request command you configure, which must only read the weight.
 
 [Vyxum Agent](src/Agent/Vyxum.Agent/README.md) runs on the computer the scale is connected to. It reads the devices and sends the live weight to the web host.
 
@@ -97,6 +97,8 @@ dotnet run --project src/Agent/Vyxum.Agent
 Then open http://localhost:5000/api/devices. The agent's shipped settings use a simulated MT-SICS scale (572 g), so no hardware is needed.
 
 http://localhost:5000/api/devices/{id}/live streams one device as Server-Sent Events: its current state at once, then a new event whenever its state or weight changes. A device id the agent has not reported yet is not an error; the stream starts in the `Disconnected` state and continues once the agent connects.
+
+`POST /api/devices/{id}/zero` asks the scale to zero, once per request. It always answers 200 with `{ "result": "Done" | "NotSupported" | "Rejected" | "Unavailable", "detail": "..." }`; `detail` is English text for logs and may be missing. Each device lists the commands it supports in `supportedCommands` (`["Zero"]` for MT-SICS).
 
 ## Configuration
 

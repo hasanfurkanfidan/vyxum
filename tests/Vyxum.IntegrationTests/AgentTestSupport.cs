@@ -10,8 +10,8 @@ using Vyxum.Devices;
 
 namespace Vyxum.IntegrationTests;
 
-/// <summary>A simulated MT-SICS device for an in-process agent.</summary>
-internal sealed record SimulatedDevice(string Id, decimal Weight, string Unit, WeightState State = WeightState.Stable);
+/// <summary>A simulated device for an in-process agent: MT-SICS by default, or a listen-only Toledo Continuous indicator.</summary>
+internal sealed record SimulatedDevice(string Id, decimal Weight, string Unit, WeightState State = WeightState.Stable, bool Toledo = false);
 
 /// <summary>Builds in-process agents and waits for conditions without fixed sleeps.</summary>
 internal static class AgentTestSupport
@@ -37,10 +37,18 @@ internal static class AgentTestSupport
             var prefix = $"Vyxum:Agent:Devices:{i}:";
             values[prefix + "Id"] = devices[i].Id;
             values[prefix + "Transport:Type"] = "simulator";
-            values[prefix + "Transport:Simulator:Kind"] = "MtSics";
             values[prefix + "Transport:Simulator:Weight"] = devices[i].Weight.ToString(CultureInfo.InvariantCulture);
             values[prefix + "Transport:Simulator:Unit"] = devices[i].Unit;
             values[prefix + "Transport:Simulator:State"] = devices[i].State.ToString();
+            if (devices[i].Toledo)
+            {
+                values[prefix + "Transport:Simulator:Kind"] = "ToledoContinuous";
+                values[prefix + "Transport:Simulator:Interval"] = "00:00:00.020";
+                values[prefix + "Protocol:Type"] = "toledo-continuous";
+                continue;
+            }
+
+            values[prefix + "Transport:Simulator:Kind"] = "MtSics";
             values[prefix + "Protocol:Type"] = "mt-sics";
             values[prefix + "Protocol:Command"] = "SI";
             values[prefix + "Protocol:PollInterval"] = "00:00:00.050";

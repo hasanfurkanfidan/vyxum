@@ -2,6 +2,7 @@ using System.Reflection;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using Shouldly;
+using Vyxum.Agent;
 using Vyxum.Devices;
 using Vyxum.Platform;
 using Vyxum.Platform.Abstractions;
@@ -35,6 +36,8 @@ public class AgentContractTests
         AgentSide.AgentHubContract.Register.ShouldBe(PlatformSide.AgentHubContract.Register);
         AgentSide.AgentHubContract.ReportReading.ShouldBe(PlatformSide.AgentHubContract.ReportReading);
         AgentSide.AgentHubContract.ReportStatus.ShouldBe(PlatformSide.AgentHubContract.ReportStatus);
+        AgentSide.AgentHubContract.Zero.ShouldBe(PlatformSide.AgentHubContract.Zero);
+        AgentSide.AgentDeviceCommands.Zero.ShouldBe(DeviceCommandNames.Zero);
     }
 
     [Theory]
@@ -52,6 +55,7 @@ public class AgentContractTests
     [InlineData(typeof(AgentSide.AgentRegistration), typeof(PlatformSide.AgentRegistration))]
     [InlineData(typeof(AgentSide.AgentReading), typeof(PlatformSide.AgentReading))]
     [InlineData(typeof(AgentSide.AgentDeviceStatus), typeof(PlatformSide.AgentDeviceStatus))]
+    [InlineData(typeof(AgentSide.AgentCommandResult), typeof(PlatformSide.AgentCommandResult))]
     public void Dtos_have_the_same_properties(Type agentType, Type platformType)
     {
         var agentProperties = Properties(agentType);
@@ -81,6 +85,7 @@ public class AgentContractTests
     {
         Enum.GetNames<WeightState>().ShouldBe(Enum.GetNames<LiveWeightState>());
         Enum.GetNames<DeviceStatus>().ShouldBe(Enum.GetNames<DeviceConnectionState>());
+        Enum.GetNames<AgentSide.AgentCommandOutcome>().ShouldBe(Enum.GetNames<DeviceCommandOutcome>());
     }
 
     [Theory]
@@ -143,14 +148,58 @@ public class AgentContractTests
     [Fact]
     public void Registration_written_by_the_agent_is_read_by_the_platform()
     {
-        var sent = new AgentSide.AgentRegistration("PC-1", "1.0.0", ["scale-1", "scale-2"]);
+        var sent = new AgentSide.AgentRegistration(
+            "PC-1",
+            "1.0.0",
+            ["scale-1", "scale-2"],
+            new Dictionary<string, IReadOnlyList<string>> { ["scale-1"] = [AgentSide.AgentDeviceCommands.Zero], ["scale-2"] = [] });
 
-        var received = JsonSerializer.Deserialize<PlatformSide.AgentRegistration>(JsonSerializer.Serialize(sent, Json), Json);
+        var json = JsonSerializer.Serialize(sent, Json);
+        var received = JsonSerializer.Deserialize<PlatformSide.AgentRegistration>(json, Json);
 
+        json.ShouldContain("\"deviceCommands\":{\"scale-1\":[\"Zero\"],\"scale-2\":[]}");
         received.ShouldNotBeNull();
         received.AgentName.ShouldBe("PC-1");
         received.Version.ShouldBe("1.0.0");
         received.DeviceIds.ShouldBe(["scale-1", "scale-2"]);
+        received.DeviceCommands.ShouldNotBeNull();
+        received.DeviceCommands["scale-1"].ShouldBe([DeviceCommandNames.Zero]);
+        received.DeviceCommands["scale-2"].ShouldBeEmpty();
+    }
+
+    [Fact]
+    public void Registration_from_an_agent_without_commands_is_read_by_the_platform()
+    {
+        var received = JsonSerializer.Deserialize<PlatformSide.AgentRegistration>(
+            "{\"agentName\":\"PC-1\",\"version\":null,\"deviceIds\":[\"scale-1\"]}", Json);
+
+        received.ShouldNotBeNull();
+        received.DeviceCommands.ShouldBeNull();
+    }
+
+    [Theory]
+    [InlineData(AgentSide.AgentCommandOutcome.Done, null)]
+    [InlineData(AgentSide.AgentCommandOutcome.NotSupported, "no zero")]
+    [InlineData(AgentSide.AgentCommandOutcome.Rejected, "Z I")]
+    [InlineData(AgentSide.AgentCommandOutcome.Unavailable, "not connected")]
+    public void Command_result_written_by_the_agent_is_read_by_the_platform(AgentSide.AgentCommandOutcome outcome, string? detail)
+    {
+        var json = JsonSerializer.Serialize(new AgentSide.AgentCommandResult(outcome, detail), Json);
+        var received = JsonSerializer.Deserialize<PlatformSide.AgentCommandResult>(json, Json);
+
+        json.ShouldContain($"\"result\":\"{outcome}\"");
+        received.ShouldNotBeNull();
+        received.Result.ToString().ShouldBe(outcome.ToString());
+        received.Detail.ShouldBe(detail);
+    }
+
+    [Fact]
+    public void Zero_client_method_has_the_contract_signature_on_the_agent()
+    {
+        var method = typeof(DeviceFleet).GetMethod(nameof(DeviceFleet.ZeroAsync));
+        method.ShouldNotBeNull();
+        method.GetParameters().Select(p => p.ParameterType).ShouldBe([typeof(string), typeof(TimeSpan), typeof(CancellationToken)]);
+        method.ReturnType.ShouldBe(typeof(Task<AgentSide.AgentCommandResult>));
     }
 
     private static PropertyInfo[] Properties(Type type) =>

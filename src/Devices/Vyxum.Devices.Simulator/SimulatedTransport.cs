@@ -32,6 +32,9 @@ public sealed class SimulatedTransport : ITransport
     /// <inheritdoc />
     public string Description { get; }
 
+    /// <summary>The simulated device behind this transport, for example to inspect the commands it received.</summary>
+    public ISimulatedDevice Device => _device;
+
     /// <summary>True while a session is open (a disconnected link counts as open until it is closed).</summary>
     public bool IsOpen
     {

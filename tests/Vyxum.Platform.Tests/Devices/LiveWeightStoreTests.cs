@@ -33,6 +33,47 @@ public class LiveWeightStoreTests
     }
 
     [Fact]
+    public void Supported_commands_come_from_the_registration_and_default_to_none()
+    {
+        _store.RegisterAgent("c1", "PC-1", ["a", "b"], new Dictionary<string, IReadOnlyList<string>> { ["a"] = [DeviceCommandNames.Zero] });
+
+        _store.GetDevice("a")!.SupportedCommands.ShouldBe([DeviceCommandNames.Zero]);
+        _store.GetDevice("b")!.SupportedCommands.ShouldBeEmpty();
+        _store.TryGetAgent("a", out var connectionId, out var commands).ShouldBeTrue();
+        connectionId.ShouldBe("c1");
+        commands.ShouldBe([DeviceCommandNames.Zero]);
+    }
+
+    [Fact]
+    public void No_agent_is_found_for_unknown_or_disconnected_devices()
+    {
+        _store.RegisterAgent("c1", "PC-1", ["a"], new Dictionary<string, IReadOnlyList<string>> { ["a"] = [DeviceCommandNames.Zero] });
+
+        _store.TryGetAgent("unknown", out _, out _).ShouldBeFalse();
+        _store.DisconnectAgent("c1");
+        _store.TryGetAgent("a", out _, out var commands).ShouldBeFalse();
+        commands.ShouldBeEmpty();
+        _store.GetDevice("a")!.SupportedCommands.ShouldBe([DeviceCommandNames.Zero]);
+    }
+
+    [Fact]
+    public async Task Registering_again_with_the_same_commands_publishes_no_change()
+    {
+        var commands = new Dictionary<string, IReadOnlyList<string>> { ["s"] = [DeviceCommandNames.Zero] };
+        _store.RegisterAgent("c1", "PC-1", ["s"], commands);
+        using var cts = CancellationTokenSource.CreateLinkedTokenSource(TestContext.Current.CancellationToken);
+        await using var watch = _store.WatchDeviceAsync("s", cts.Token).GetAsyncEnumerator(cts.Token);
+        (await watch.MoveNextAsync()).ShouldBeTrue();
+
+        _store.RegisterAgent("c1", "PC-1", ["s"], new Dictionary<string, IReadOnlyList<string>> { ["s"] = [DeviceCommandNames.Zero] });
+        _store.ReportStatus("c1", "s", Status(DeviceConnectionState.Connected));
+
+        (await watch.MoveNextAsync()).ShouldBeTrue();
+        watch.Current.State.ShouldBe(DeviceConnectionState.Connected);
+        watch.Current.SupportedCommands.ShouldBe([DeviceCommandNames.Zero]);
+    }
+
+    [Fact]
     public void Reading_is_stored_with_receive_time_and_marks_device_connected()
     {
         _store.RegisterAgent("c1", "PC-1", ["s"]);

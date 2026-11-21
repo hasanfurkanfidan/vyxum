@@ -74,6 +74,11 @@ public sealed partial class HubWorker : BackgroundService
         var connection = BuildConnection();
         await using (connection.ConfigureAwait(false))
         {
+            // Called by the web application with a result (decision V-29): the operator pressed "Zero".
+            connection.On<string, TimeSpan, AgentCommandResult>(
+                AgentHubContract.Zero,
+                (deviceId, timeout) => _fleet.ZeroAsync(deviceId, timeout, stoppingToken));
+
             connection.Reconnecting += error =>
             {
                 LogReconnecting(_logger, ServerUrl, error?.Message ?? "no error");
@@ -253,7 +258,8 @@ public sealed partial class HubWorker : BackgroundService
     {
         _sent.Clear();
         var deviceIds = _fleet.Devices.Select(d => d.Id).ToList();
-        var registration = new AgentRegistration(_fleet.Settings.EffectiveAgentName, _version, deviceIds);
+        var commands = deviceIds.ToDictionary(id => id, _fleet.GetSupportedCommands, StringComparer.Ordinal);
+        var registration = new AgentRegistration(_fleet.Settings.EffectiveAgentName, _version, deviceIds, commands);
         try
         {
             using (var timeout = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken))

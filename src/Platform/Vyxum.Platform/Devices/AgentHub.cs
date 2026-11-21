@@ -24,7 +24,7 @@ public sealed partial class AgentHub(LiveWeightStore store, ILogger<AgentHub> lo
             throw new HubException("Device ids must not be empty.");
         }
 
-        store.RegisterAgent(Context.ConnectionId, registration.AgentName, deviceIds);
+        store.RegisterAgent(Context.ConnectionId, registration.AgentName, deviceIds, registration.DeviceCommands);
         LogRegistered(logger, registration.AgentName, registration.Version, deviceIds.Count);
     }
 
