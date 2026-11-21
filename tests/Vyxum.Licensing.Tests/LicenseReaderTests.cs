@@ -1,3 +1,4 @@
+using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json.Nodes;
 using Shouldly;
@@ -123,7 +124,18 @@ public class LicenseReaderTests
     }
 
     [Fact]
-    public void Empty_production_key_ring_trusts_nothing()
+    public void Production_key_ring_contains_the_trial_key_as_a_valid_p256_key()
+    {
+        TrustedKeys.PublicKeys.ShouldContainKey("vx-2026-1");
+        var der = Convert.FromBase64String(TrustedKeys.PublicKeys["vx-2026-1"]);
+        using var ecdsa = ECDsa.Create();
+        ecdsa.ImportSubjectPublicKeyInfo(der, out _);
+        ecdsa.ExportParameters(false).Curve.Oid.FriendlyName.ShouldBe("nistP256");
+        LicenseKeyRing.Trusted.ShouldNotBeNull();
+    }
+
+    [Fact]
+    public void Production_key_ring_does_not_trust_a_foreign_key()
     {
         using var key = new TestKey("k1");
 
