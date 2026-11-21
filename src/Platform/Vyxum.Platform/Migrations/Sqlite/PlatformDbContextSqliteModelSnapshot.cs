@@ -35,6 +35,25 @@ namespace Vyxum.Platform.Migrations.Sqlite
 
                     b.ToTable("__vyxum_modules", (string)null);
                 });
+
+            modelBuilder.Entity("Vyxum.Platform.PlatformSetting", b =>
+                {
+                    b.Property<string>("Key")
+                        .HasMaxLength(200)
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Value")
+                        .IsRequired()
+                        .HasMaxLength(4000)
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Key");
+
+                    b.ToTable("plt_Settings", (string)null);
+                });
 #pragma warning restore 612, 618
         }
     }

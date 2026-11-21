@@ -1,6 +1,11 @@
 <Project Sdk="Microsoft.NET.Sdk.Web">
 
   <ItemGroup>
+    <!-- Windows service hosting (MIT, part of .NET) -->
+    <PackageReference Include="Microsoft.Extensions.Hosting.WindowsServices" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\..\Platform\Vyxum.Platform\Vyxum.Platform.csproj" />
     <ProjectReference Include="..\..\Modules\Products\Vyxum.Modules.Products\Vyxum.Modules.Products.csproj" />
     <ProjectReference Include="..\..\Modules\Weighing\Vyxum.Modules.Weighing\Vyxum.Modules.Weighing.csproj" />

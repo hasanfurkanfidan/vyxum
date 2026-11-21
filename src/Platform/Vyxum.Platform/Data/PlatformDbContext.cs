@@ -14,6 +14,8 @@ internal sealed class PlatformDbContext(DbContextOptions<PlatformDbContext> opti
 
     public DbSet<InstalledModule> InstalledModules => Set<InstalledModule>();
 
+    public DbSet<PlatformSetting> Settings => Set<PlatformSetting>();
+
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder) =>
         ProviderMigrations.Configure(optionsBuilder, MigrationsHistoryTable);
 
@@ -25,6 +27,14 @@ internal sealed class PlatformDbContext(DbContextOptions<PlatformDbContext> opti
             entity.HasKey(m => m.ModuleId);
             entity.Property(m => m.ModuleId).HasMaxLength(200);
             entity.Property(m => m.Version).HasMaxLength(50);
+        });
+
+        modelBuilder.Entity<PlatformSetting>(entity =>
+        {
+            entity.ToTable("plt_Settings");
+            entity.HasKey(s => s.Key);
+            entity.Property(s => s.Key).HasMaxLength(200);
+            entity.Property(s => s.Value).HasMaxLength(4000);
         });
     }
 }
@@ -38,4 +48,15 @@ internal sealed class InstalledModule
 
     /// <summary>UTC time the module's tables were created.</summary>
     public DateTime InstalledAt { get; init; }
+}
+
+/// <summary>One platform setting (<see cref="IPlatformSettings"/>).</summary>
+internal sealed class PlatformSetting
+{
+    public required string Key { get; init; }
+
+    public required string Value { get; set; }
+
+    /// <summary>UTC time of the last change.</summary>
+    public DateTime UpdatedAt { get; set; }
 }

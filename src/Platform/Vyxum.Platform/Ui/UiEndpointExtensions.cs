@@ -17,7 +17,8 @@ public static class UiEndpointExtensions
     /// <summary>
     /// Maps <c>GET /api/ui/strings</c>, which returns <c>{ culture, strings: { "prefix.Key": "text" } }</c>
     /// in the request's UI culture (set by request localization), and <c>GET /api/ui/modules</c>, which
-    /// returns <c>{ modules: [{ id, version }], capabilities: ["..."] }</c>.
+    /// returns <c>{ modules: [{ id, version }], capabilities: ["..."], companyName }</c>; <c>companyName</c>
+    /// is the name entered in the setup wizard, or null.
     /// </summary>
     public static IEndpointRouteBuilder MapVyxumUi(this IEndpointRouteBuilder endpoints)
     {
@@ -29,7 +30,7 @@ public static class UiEndpointExtensions
             return Results.Json(new UiStringsResponse(culture.Name, catalog.GetStrings(culture)), DeviceEndpointExtensions.JsonOptions);
         });
 
-        endpoints.MapGet(ModulesPath, (ModuleCatalog catalog) =>
+        endpoints.MapGet(ModulesPath, async (ModuleCatalog catalog, IPlatformSettings settings, CancellationToken cancellationToken) =>
         {
             var modules = catalog.Modules
                 .Select(m => new UiModule(m.Manifest.Id, m.Manifest.Version.ToString()))
@@ -40,7 +41,8 @@ public static class UiEndpointExtensions
                 .Distinct(StringComparer.Ordinal)
                 .Order(StringComparer.Ordinal)
                 .ToList();
-            return Results.Json(new UiModulesResponse(modules, capabilities), DeviceEndpointExtensions.JsonOptions);
+            var companyName = await settings.GetAsync(PlatformSettingKeys.CompanyName, cancellationToken);
+            return Results.Json(new UiModulesResponse(modules, capabilities, companyName), DeviceEndpointExtensions.JsonOptions);
         });
 
         return endpoints;
@@ -50,5 +52,5 @@ public static class UiEndpointExtensions
 
     internal sealed record UiModule(string Id, string Version);
 
-    internal sealed record UiModulesResponse(IReadOnlyList<UiModule> Modules, IReadOnlyList<string> Capabilities);
+    internal sealed record UiModulesResponse(IReadOnlyList<UiModule> Modules, IReadOnlyList<string> Capabilities, string? CompanyName);
 }

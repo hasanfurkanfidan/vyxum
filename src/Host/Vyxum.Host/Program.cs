@@ -1,11 +1,27 @@
 using System.Globalization;
 using Microsoft.AspNetCore.Localization;
+using Microsoft.Extensions.Hosting.WindowsServices;
 using Microsoft.Extensions.Localization;
 using Vyxum.Host;
 using Vyxum.Platform;
 using Vyxum.Platform.Abstractions;
 
-var builder = WebApplication.CreateBuilder(args);
+var runningAsService = WindowsServiceHelpers.IsWindowsService();
+var builder = WebApplication.CreateBuilder(new WebApplicationOptions
+{
+    Args = args,
+
+    // A service starts in the system folder; wwwroot and appsettings.json live next to the executable.
+    ContentRootPath = runningAsService ? AppContext.BaseDirectory : null,
+});
+
+// The shared settings file <DataDirectory>yxum.json (decision V-37) overrides appsettings.json;
+// environment variables and the command line still override it.
+VyxumSettingsFile.AddTo(builder.Configuration);
+
+// Runs as the "Vyxum Web" Windows service when started by the service control manager; no effect otherwise.
+builder.Services.AddWindowsService(options => options.ServiceName = "Vyxum Web");
+builder.Services.Configure<HostRestartOptions>(o => o.ExitForServiceRecovery = runningAsService);
 
 // Do not wait the default 30 seconds for open agent WebSockets when the host shuts down.
 builder.Services.Configure<HostOptions>(o => o.ShutdownTimeout = TimeSpan.FromSeconds(5));
@@ -43,6 +59,7 @@ app.MapGet("/api/hello", (IStringLocalizer<Strings> strings) => Results.Ok(new
 
 app.MapVyxumDevices();
 app.MapVyxumUi();
+app.MapVyxumSetup();
 app.MapVyxumModules();
 
 // The built web UI. Client-side routes fall back to index.html; API, hub and health paths never do.

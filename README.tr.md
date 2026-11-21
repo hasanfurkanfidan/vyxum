@@ -183,7 +183,9 @@ Veritabanı şeması ilk açılışta oluşturulur. Varsayılan SQLite dosyası 
 
 ## Yapılandırma
 
-Anahtarlar `appsettings.json`, ortam değişkenleri (örneğin `Vyxum__Database__Provider`) ya da komut satırı argümanlarından okunur.
+Anahtarlar sırasıyla programın yanındaki `appsettings.json`, veri klasöründeki ortak ayar dosyası `vyxum.json`, ortam değişkenleri (örneğin `Vyxum__Database__Provider`) ve komut satırı argümanlarından okunur; sonraki kaynak öncekini geçersiz kılar.
+
+`vyxum.json` dosyasını Web, Agent ve masaüstü penceresi birlikte kullanır; program klasöründeki `appsettings.json` güncellemede değişir, bu dosya değişmez. Dosyayı kurulum yazar, sihirbaz da başka bir veritabanı seçildiğinde günceller; müşteri elle düzenlemez. Yeri `Vyxum:DataDirectory` ayarını izler: veri klasörü ortam değişkeni ya da komut satırıyla verilirse dosya da oraya taşınır. Dosya açılışta bir kez okunur; veritabanı değişince Web, Windows servisi olarak çalışıyorsa kendini yeniden başlatır, değilse elle yeniden başlatılması gerektiğini yazar.
 
 | Anahtar | Varsayılan | Anlamı |
 |---|---|---|

@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype"><value>text/microsoft-resx</value></resheader>
+  <resheader name="version"><value>2.0</value></resheader>
+  <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+  <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+  <data name="Title" xml:space="preserve"><value>Kurulum</value></data>
+  <data name="StepDatabase" xml:space="preserve"><value>Veritabanı</value></data>
+  <data name="StepScale" xml:space="preserve"><value>Terazi</value></data>
+  <data name="StepCompany" xml:space="preserve"><value>Firma</value></data>
+  <data name="StepProducts" xml:space="preserve"><value>Ürünler</value></data>
+  <data name="StepOf" xml:space="preserve"><value>Adım {0} / {1}</value></data>
+  <data name="Next" xml:space="preserve"><value>İleri</value></data>
+  <data name="Back" xml:space="preserve"><value>Geri</value></data>
+  <data name="Finish" xml:space="preserve"><value>Bitir</value></data>
+  <data name="Skip" xml:space="preserve"><value>Atla</value></data>
+  <data name="DatabaseTitle" xml:space="preserve"><value>Kayıtlar nerede saklansın?</value></data>
+  <data name="DatabaseDescription" xml:space="preserve"><value>Çoğu işletme için bu bilgisayar yeterlidir.</value></data>
+  <data name="SqliteOption" xml:space="preserve"><value>Bu bilgisayarda sakla (önerilir)</value></data>
+  <data name="SqliteDescription" xml:space="preserve"><value>Ek program gerekmez. Kayıtlar bu bilgisayarda kalır ve her güncellemeden önce yedeklenir.</value></data>
+  <data name="Advanced" xml:space="preserve"><value>Gelişmiş: SQL Server</value></data>
+  <data name="SqlServerOption" xml:space="preserve"><value>SQL Server veritabanına bağlan</value></data>
+  <data name="SqlServerDescription" xml:space="preserve"><value>Kurumunuzda SQL Server varsa bağlantı bilgilerini bilgi işlem biriminizden alın.</value></data>
+  <data name="ConnectionString" xml:space="preserve"><value>Bağlantı dizesi</value></data>
+  <data name="ConnectionStringHint" xml:space="preserve"><value>Örnek: Server=SUNUCU;Database=Vyxum;User Id=vyxum;Password=…;TrustServerCertificate=True</value></data>
+  <data name="TestConnection" xml:space="preserve"><value>Bağlantıyı dene</value></data>
+  <data name="Testing" xml:space="preserve"><value>Bağlantı deneniyor…</value></data>
+  <data name="TestRequired" xml:space="preserve"><value>Devam etmeden önce bağlantıyı deneyin.</value></data>
+  <data name="DbConnectionOk" xml:space="preserve"><value>Bağlantı kuruldu.</value></data>
+  <data name="DbWillBeCreated" xml:space="preserve"><value>Bağlantı kuruldu. Veritabanı henüz yok; oluşturulacak.</value></data>
+  <data name="DbLoginFailed" xml:space="preserve"><value>Giriş yapılamadı. Kullanıcı adını ve şifreyi kontrol edin.</value></data>
+  <data name="DbServerNotFound" xml:space="preserve"><value>Sunucuya ulaşılamadı. Sunucu adını ve ağ bağlantısını kontrol edin.</value></data>
+  <data name="DbUnknownError" xml:space="preserve"><value>Bağlantı kurulamadı. Bilgileri kontrol edip yeniden deneyin.</value></data>
+  <data name="ProviderInvalid" xml:space="preserve"><value>Kayıtların nerede saklanacağını seçin.</value></data>
+  <data name="ConnectionStringRequired" xml:space="preserve"><value>Bağlantı dizesi gerekli.</value></data>
+  <data name="ConnectionStringInvalid" xml:space="preserve"><value>Bağlantı dizesi okunamadı. Biçimini kontrol edin.</value></data>
+  <data name="DatabaseNameRequired" xml:space="preserve"><value>Bağlantı dizesinde veritabanı adı olmalı (Database=…).</value></data>
+  <data name="SettingsNotSaved" xml:space="preserve"><value>Ayar kaydedilemedi.</value></data>
+  <data name="Restarting" xml:space="preserve"><value>Vyxum yeniden başlatılıyor…</value></data>
+  <data name="RestartingDescription" xml:space="preserve"><value>Bu birkaç saniye sürer. Sayfa kendiliğinden yenilenir.</value></data>
+  <data name="RestartManual" xml:space="preserve"><value>Ayar kaydedildi. Geçerli olması için Vyxum'u yeniden başlatın.</value></data>
+  <data name="CompanyTitle" xml:space="preserve"><value>Firma bilgisi</value></data>
+  <data name="CompanyDescription" xml:space="preserve"><value>Firma adı ekranlarda ve raporlarda görünür.</value></data>
+  <data name="CompanyName" xml:space="preserve"><value>Firma adı</value></data>
+  <data name="CompanyNameRequired" xml:space="preserve"><value>Firma adı gerekli.</value></data>
+  <data name="CompanyNameTooLong" xml:space="preserve"><value>Firma adı çok uzun (en fazla 200 karakter).</value></data>
+  <data name="DoneTitle" xml:space="preserve"><value>Kurulum tamamlandı</value></data>
+  <data name="DoneDescription" xml:space="preserve"><value>Artık tartıma başlayabilirsiniz.</value></data>
+  <data name="GoToWeighing" xml:space="preserve"><value>Tartıma geç</value></data>
+  <data name="LocalOnly" xml:space="preserve"><value>Kurulum yalnızca Vyxum'un kurulu olduğu bilgisayardan yapılabilir.</value></data>
+  <data name="AlreadyCompleted" xml:space="preserve"><value>Kurulum zaten tamamlandı. Ayarları Ayarlar ekranından değiştirin.</value></data>
+</root>

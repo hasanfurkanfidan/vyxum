@@ -181,7 +181,9 @@ The database schema is created on the first start. The default SQLite file is `v
 
 ## Configuration
 
-Keys are read from `appsettings.json`, environment variables (for example `Vyxum__Database__Provider`) or command-line arguments.
+Keys are read, later sources winning, from `appsettings.json` next to the executable, the shared settings file `vyxum.json` in the data directory, environment variables (for example `Vyxum__Database__Provider`) and command-line arguments.
+
+`vyxum.json` is shared by the web host, the agent and the desktop window, and survives updates (unlike `appsettings.json` in the program folder). The installer writes it, and the setup wizard updates it when a different database is chosen; customers do not edit it by hand. Its location follows `Vyxum:DataDirectory`, so a data directory given as an environment variable or on the command line moves it too. The file is read once at start; after the database changes, the web host restarts (as a Windows service) or asks for a manual restart.
 
 | Key | Default | Meaning |
 |---|---|---|

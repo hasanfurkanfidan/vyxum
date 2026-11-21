@@ -40,6 +40,25 @@ namespace Vyxum.Platform.Migrations.SqlServer
 
                     b.ToTable("__vyxum_modules", (string)null);
                 });
+
+            modelBuilder.Entity("Vyxum.Platform.PlatformSetting", b =>
+                {
+                    b.Property<string>("Key")
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Value")
+                        .IsRequired()
+                        .HasMaxLength(4000)
+                        .HasColumnType("nvarchar(4000)");
+
+                    b.HasKey("Key");
+
+                    b.ToTable("plt_Settings", (string)null);
+                });
 #pragma warning restore 612, 618
         }
     }
