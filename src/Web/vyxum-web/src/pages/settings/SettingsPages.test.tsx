@@ -180,7 +180,7 @@ describe('settings > devices', () => {
 });
 
 describe('settings > about', () => {
-  it('shows version, database, data folder, last backup and how to update', async () => {
+  it('shows version, system requirement, database, data folder, last backup and how to update', async () => {
     installFakeApi({
       routes: {
         'GET /api/setup/status': () =>
@@ -198,6 +198,7 @@ describe('settings > about', () => {
 
     expect(await screen.findByRole('heading', { level: 1, name: 'Hakkında' })).toBeInTheDocument();
     expect(await screen.findByText('0.3.1')).toBeInTheDocument();
+    expect(screen.getByText('Windows 10 ya da 11, 64 bit')).toBeInTheDocument();
     expect(screen.getByText('Örnek Gıda')).toBeInTheDocument();
     expect(screen.getByText('Bu bilgisayar (SQLite)')).toBeInTheDocument();
     expect(screen.getByText('C:\\ProgramData\\Vyxum')).toBeInTheDocument();

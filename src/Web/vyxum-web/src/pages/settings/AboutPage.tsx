@@ -6,7 +6,7 @@ import { getSetupStatus, type SetupStatus } from '../../lib/setup';
 import { PageHeader } from '../../shell/PageHeader';
 import '../../styles/devices.css';
 
-/** Settings > About: version, database, data folder, last backup and how to update (decision V-43). */
+/** Settings > About: version, system requirement, database, data folder, last backup and how to update (decision V-43). */
 export function AboutPage() {
   const t = useT();
   const culture = useCulture();
@@ -54,6 +54,7 @@ export function AboutPage() {
   const sqlite = status.database.provider === 'Sqlite';
   const rows: { label: string; value: ReactNode }[] = [
     { label: t('setup.AboutVersion'), value: <span className="mono">{status.version}</span> },
+    { label: t('setup.AboutSystem'), value: t('setup.AboutSystemValue') },
     { label: t('setup.AboutCompany'), value: status.company.name ?? <span className="muted">{t('setup.AboutNoCompany')}</span> },
     {
       label: t('setup.AboutDatabase'),
