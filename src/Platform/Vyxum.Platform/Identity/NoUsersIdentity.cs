@@ -14,6 +14,16 @@ internal sealed class NoUsersAuthorization : IAuthorization
     public bool IsAllowed(Permission permission) => true;
 }
 
+/// <summary>Without a users module nobody signs: the operation continues without a signer.</summary>
+internal sealed class NoUsersElectronicSignature(TimeProvider time) : IElectronicSignature
+{
+    public Task<SignatureResult> SignAsync(SignatureRequest request, CancellationToken cancellationToken = default)
+    {
+        ArgumentNullException.ThrowIfNull(request);
+        return Task.FromResult(new SignatureResult(true, null, time.GetUtcNow().UtcDateTime, null));
+    }
+}
+
 /// <summary>Without a users module an approval needs only a reason and has no approver.</summary>
 internal sealed class NoUsersSupervisorApproval : ISupervisorApproval
 {

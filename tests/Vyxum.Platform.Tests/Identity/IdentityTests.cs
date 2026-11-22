@@ -66,6 +66,13 @@ public class IdentityTests
         var refused = await approval.ApproveAsync(new ApprovalRequest("samples.orders.cancel", " ", "Order 7", null), TestContext.Current.CancellationToken);
         refused.Approved.ShouldBeFalse();
         refused.RejectionCode.ShouldBe(ApprovalErrors.ReasonRequired);
+
+        // Nobody signs either: a signature step lets the operation continue without a signer.
+        var signature = await scope.ServiceProvider.GetRequiredService<IElectronicSignature>()
+            .SignAsync(new SignatureRequest("samples.orders.cancel", "Order 7 cancelled", null), TestContext.Current.CancellationToken);
+        signature.Signed.ShouldBeTrue();
+        signature.Signer.ShouldBeNull();
+        signature.SignedAtUtc.ShouldNotBeNull();
     }
 
     [Fact]

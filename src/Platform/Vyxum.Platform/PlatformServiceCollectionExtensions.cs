@@ -69,6 +69,7 @@ public static class PlatformServiceCollectionExtensions
         services.TryAddScoped<ICurrentActor, NoUsersCurrentActor>();
         services.TryAddScoped<IAuthorization, NoUsersAuthorization>();
         services.TryAddScoped<ISupervisorApproval, NoUsersSupervisorApproval>();
+        services.TryAddScoped<IElectronicSignature, NoUsersElectronicSignature>();
         services.AddSingleton(databaseSettings);
         services.AddDbContext<PlatformDbContext>((provider, options) =>
             provider.GetRequiredService<DatabaseSettings>().Configure(options));
