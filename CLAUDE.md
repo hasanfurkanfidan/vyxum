@@ -51,6 +51,7 @@ Build settings in `Directory.Build.props`: `Nullable`, `ImplicitUsings`, `TreatW
 - SQL Server tests read the connection string from `VYXUM_TEST_SQLSERVER`. Without it they are skipped with a reason. CI always sets it.
 - Run `dotnet build -warnaserror` and `dotnet test` before committing. The build must be warning-free.
 - Architecture rules are enforced in `tests/Vyxum.ArchitectureTests`. Add a test when you add a new rule.
+- After a change that touches screens, run the end-to-end screen check, `node tests/e2e/run.mjs`, and report its `summary.md` with the screenshots of the changed screens. A changed or new screen also gets its scenario. See `tests/e2e/README.md`.
 
 ## Working style
 
