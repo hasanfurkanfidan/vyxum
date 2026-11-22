@@ -76,7 +76,7 @@ internal sealed class WeighingTestApp : IAsyncDisposable
         var clock = new TestClock();
         builder.Services.AddSingleton<TimeProvider>(clock);
         builder.Services.AddVyxumPlatform(builder.Configuration, modules);
-        var scale = new FakeLiveWeightSource();
+        var scale = new FakeLiveWeightSource(clock);
         builder.Services.AddSingleton<ILiveWeightSource>(scale);
 
         var app = builder.Build();

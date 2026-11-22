@@ -127,7 +127,7 @@ public sealed class WeighingService(
         }
 
         var reading = weights.GetLatest(input.DeviceId);
-        if (reading is null)
+        if (reading is null || IsTooOld(reading))
         {
             return (null, WeighingErrors.NoReading);
         }
@@ -286,6 +286,10 @@ public sealed class WeighingService(
         };
         return (record, null);
     }
+
+    /// <summary>True when the reading is older than <see cref="WeighingOptions.MaxReadingAge"/> allows.</summary>
+    private bool IsTooOld(LiveWeight reading) =>
+        _options.MaxReadingAge > TimeSpan.Zero && time.GetUtcNow() - reading.ReceivedAt > _options.MaxReadingAge;
 
     private static decimal RoundWeight(decimal value) =>
         value.Scale > WeighingLimits.WeightMaxDecimals

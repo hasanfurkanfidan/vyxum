@@ -149,6 +149,7 @@ Tartım kuralları yapılandırmanın `Vyxum:Weighing` bölümünden okunur:
 |---|---|---|
 | `Vyxum:Weighing:RequireStable` | `true` | Yalnızca kararlı ağırlık kaydedilebilir |
 | `Vyxum:Weighing:MinimumNet` | `0` | Kaydedilebilecek en küçük net ağırlık (kg). Net her zaman 0'dan büyük olmalıdır; 0'dan büyük bir değer ayrıca alt sınır koyar. |
+| `Vyxum:Weighing:MaxReadingAge` | `00:00:03` | Kaydedilebilecek en eski terazi okuması. Daha eski bir okuma agent'ın ya da ağının durduğunu gösterir; kayıt reddedilir. `00:00:00` kontrolü kapatır. |
 | `Vyxum:Weighing:RequireCancelReason` | `true` | İptal için neden gerekir |
 | `Vyxum:Weighing:Currency` | `TRY` | Tutarların para birimi; her kayıtta saklanır |
 | `Vyxum:Weighing:AmountDecimals` | `2` | Tutarların yuvarlanacağı ondalık basamak sayısı (0 ile 4 arası) |

@@ -378,6 +378,35 @@ public class WeighingApiTests
     [Theory]
     [InlineData(DatabaseProvider.Sqlite)]
     [InlineData(DatabaseProvider.SqlServer)]
+    public async Task A_reading_older_than_the_limit_is_not_recorded(DatabaseProvider provider)
+    {
+        await using var app = await WeighingTestApp.StartAsync(provider);
+
+        // The agent stopped sending, but the connection still looks open.
+        app.Scale.Set(Scale, 1.250m, age: TimeSpan.FromSeconds(4));
+        await RejectedAsync(app, Body(), WeighingErrors.NoReading);
+
+        app.Scale.Set(Scale, 1.250m, age: TimeSpan.FromSeconds(2));
+        await CreateAsync(app, Body());
+    }
+
+    [Theory]
+    [InlineData(DatabaseProvider.Sqlite)]
+    [InlineData(DatabaseProvider.SqlServer)]
+    public async Task The_reading_age_limit_comes_from_options(DatabaseProvider provider)
+    {
+        await using var app = await WeighingTestApp.StartAsync(provider, settings: Settings(("MaxReadingAge", "00:00:10")));
+        app.Scale.Set(Scale, 1.250m, age: TimeSpan.FromSeconds(8));
+        await CreateAsync(app, Body());
+
+        await using var off = await WeighingTestApp.StartAsync(provider, settings: Settings(("MaxReadingAge", "00:00:00")));
+        off.Scale.Set(Scale, 1.250m, age: TimeSpan.FromMinutes(5));
+        await CreateAsync(off, Body());
+    }
+
+    [Theory]
+    [InlineData(DatabaseProvider.Sqlite)]
+    [InlineData(DatabaseProvider.SqlServer)]
     public async Task Invalid_requests_are_validation_problems_with_resx_keys(DatabaseProvider provider)
     {
         await using var app = await WeighingTestApp.StartAsync(provider);
