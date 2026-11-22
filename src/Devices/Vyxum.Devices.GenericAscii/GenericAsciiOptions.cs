@@ -45,10 +45,17 @@ public sealed record GenericAsciiOptions
     public LineTerminator Terminator { get; init; } = LineTerminator.Any;
 
     /// <summary>
-    /// Optional demand mode: the command sent before each read, without its terminator (for example "P", "W" or "SI").
-    /// It is free text because every brand uses its own. It must be a read or print command; never configure a command
-    /// that tares, zeroes or changes the device. It may not contain CR or LF, so only one command is ever sent.
-    /// Empty means listen-only mode: the device sends on its own.
+    /// The commands allowed as <see cref="RequestCommand"/>: read or print commands of common brands that change nothing
+    /// on the device. <c>P</c> (print), <c>W</c> (weight), <c>S</c> (stable weight), <c>SI</c> (weight now), <c>Q</c>
+    /// (output once), <c>IP</c> (print now), <c>READ</c>, ENQ (<c>\u0005</c>) and ESC P (<c>\u001bP</c>). Tare, zero,
+    /// reset and setting commands can never be configured. The web application checks the same list.
+    /// </summary>
+    public static IReadOnlyList<string> AllowedRequestCommands { get; } = ["P", "W", "S", "SI", "Q", "IP", "READ", "\u0005", "\u001bP"];
+
+    /// <summary>
+    /// Optional demand mode: the command sent before each read, without its terminator. It must be exactly one of
+    /// <see cref="AllowedRequestCommands"/> (case-sensitive), so nothing that tares, zeroes or changes the device is
+    /// ever sent. Empty means listen-only mode: the device sends on its own.
     /// </summary>
     public string? RequestCommand { get; init; }
 
@@ -91,9 +98,11 @@ public sealed record GenericAsciiOptions
             throw new ArgumentException("ThousandsSeparator must be non-empty, contain no digit and differ from DecimalSeparator.", nameof(ThousandsSeparator));
         }
 
-        if (RequestCommand is not null && RequestCommand.AsSpan().IndexOfAny('\r', '\n') >= 0)
+        if (!string.IsNullOrEmpty(RequestCommand) && !AllowedRequestCommands.Contains(RequestCommand, StringComparer.Ordinal))
         {
-            throw new ArgumentException("RequestCommand may not contain CR or LF.", nameof(RequestCommand));
+            throw new ArgumentException(
+                "RequestCommand must be one of the read commands: P, W, S, SI, Q, IP, READ, ENQ (\\u0005) or ESC P (\\u001bP).",
+                nameof(RequestCommand));
         }
 
         if (RequestTerminator.Length == 0 || RequestTerminator.Any(c => c is not ('\r' or '\n')))

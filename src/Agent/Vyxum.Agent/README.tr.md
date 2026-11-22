@@ -95,8 +95,9 @@ arasında gönderilir. Terazi `ES` ya da `ET` (yürütülmedi) yanıtı verirse 
 `ZeroTimeout` içinde yanıt gelmezse yeniden gönderilmez, çünkü terazi sıfırlamış olabilir. Agent kaydolurken hangi
 cihazların sıfırlamayı desteklediğini bildirir. Toledo Continuous yalnızca dinler ve sıfırlamayı desteklemez;
 `generic-ascii` de desteklemez.
-`generic-ascii` içinde `RequestCommand` serbest metindir, çünkü her marka kendi komutunu kullanır: buraya yalnızca
-ağırlığı okuyan ya da yazdıran bir komut yazılır; dara alan, sıfırlayan ya da cihazı değiştiren bir komut asla yazılmaz.
+`generic-ascii` içinde `RequestCommand` şu okuma ya da yazdırma komutlarından biri olmalıdır: `P`, `W`, `S`, `SI`, `Q`,
+`IP`, `READ`, ENQ (`\u0005`) veya ESC P (`\u001bP`). Başka bir değeri agent açılışta, web uygulaması da cihaz kaydedilirken
+reddeder; böylece dara alan, sıfırlayan ya da cihazı değiştiren bir komut ayarlanamaz.
 
 ## Cihaz arama
 

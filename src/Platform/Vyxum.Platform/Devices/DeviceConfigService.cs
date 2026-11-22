@@ -33,6 +33,16 @@ public static class DeviceConfigLimits
 
     /// <summary>Ids that would collide with device routes.</summary>
     public static IReadOnlyList<string> ReservedIds { get; } = ["config", "discover"];
+
+    /// <summary>
+    /// The read commands a <c>generic-ascii</c> device may send (<c>requestCommand</c>). The agent checks the same list
+    /// (<c>GenericAsciiOptions.AllowedRequestCommands</c>); the platform must not reference the device assemblies, so it
+    /// is repeated here and a test keeps the two equal. Nothing that tares, zeroes or changes the scale is allowed.
+    /// </summary>
+    public static IReadOnlyList<string> GenericAsciiRequestCommands { get; } = ["P", "W", "S", "SI", "Q", "IP", "READ", "\u0005", "\u001bP"];
+
+    /// <summary>The read commands an <c>mt-sics</c> device may send (<c>command</c>); same as the agent's list.</summary>
+    public static IReadOnlyList<string> MtSicsReadCommands { get; } = ["S", "SI", "SIR"];
 }
 
 /// <summary>A device's settings as returned by <c>/api/devices/config</c>. Decimals are invariant-culture strings.</summary>
@@ -390,9 +400,25 @@ public sealed partial class DeviceConfigService
             return null;
         }
 
-        if (string.IsNullOrWhiteSpace(GetString(protocol, "type")))
+        var type = GetString(protocol, "type");
+        if (string.IsNullOrWhiteSpace(type))
         {
             errors["protocol.type"] = [DeviceStrings.Code("ProtocolRequired")];
+            return null;
+        }
+
+        // Only read commands ever go to the scale (the installation guide promises that its settings are never changed).
+        var (field, allowed) = type.Trim().ToLowerInvariant() switch
+        {
+            "generic-ascii" => ("requestCommand", DeviceConfigLimits.GenericAsciiRequestCommands),
+            "mt-sics" => ("command", DeviceConfigLimits.MtSicsReadCommands),
+            _ => (null, []),
+        };
+        if (field is not null && GetProperty(protocol, field) is { } command
+            && !(command.ValueKind == JsonValueKind.Null
+                || (command.ValueKind == JsonValueKind.String && (command.GetString() is not { Length: > 0 } text || allowed.Contains(text, StringComparer.Ordinal)))))
+        {
+            errors["protocol." + field] = [DeviceStrings.Code("ReadCommandOnly")];
             return null;
         }
 

@@ -15,6 +15,7 @@
   <data name="HostRequired" xml:space="preserve"><value>IP adresi ya da bilgisayar adı zorunludur.</value></data>
   <data name="PortInvalid" xml:space="preserve"><value>Port 1 ile 65535 arasında bir sayı olmalıdır.</value></data>
   <data name="ProtocolRequired" xml:space="preserve"><value>Cihaz protokolünü seçin.</value></data>
+  <data name="ReadCommandOnly" xml:space="preserve"><value>Teraziye yalnızca ağırlığı okuyan bir komut gönderilebilir.</value></data>
   <data name="SettingsTooLong" xml:space="preserve"><value>Ayarlar çok uzun.</value></data>
   <data name="InvalidNumber" xml:space="preserve"><value>En fazla 6 ondalık basamaklı bir sayı girin.</value></data>
   <data name="MustBePositive" xml:space="preserve"><value>Değer sıfırdan büyük olmalıdır.</value></data>

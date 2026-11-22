@@ -95,8 +95,9 @@ the read commands (any other value is rejected at startup). `Z` is sent between 
 connection. If the scale answers `ES` or `ET` (not executed) it is resent like any other command; if it does not answer
 within `ZeroTimeout`, it is not resent, because the scale may have zeroed. The agent reports which devices support zero
 when it registers. Toledo Continuous is listen-only and does not support zero; neither does `generic-ascii`.
-With `generic-ascii`, `RequestCommand` is free text because every brand uses its own: only ever configure a command
-that reads or prints the weight, never one that tares, zeroes or changes the device.
+With `generic-ascii`, `RequestCommand` must be one of the read or print commands `P`, `W`, `S`, `SI`, `Q`, `IP`, `READ`,
+ENQ (`\u0005`) or ESC P (`\u001bP`); anything else is rejected by the agent at startup and by the web application when
+the device is saved, so no command that tares, zeroes or changes the device can be configured.
 
 ## Device discovery
 
