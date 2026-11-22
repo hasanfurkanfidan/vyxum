@@ -22,7 +22,8 @@ public class ResourceFileTests
 
     private static IEnumerable<string> EnglishResourceFiles(string directory)
     {
-        foreach (var file in Directory.EnumerateFiles(directory, "Strings.resx"))
+        // Every neutral resource file (Strings.resx, and others such as the glossary's Terms.resx).
+        foreach (var file in Directory.EnumerateFiles(directory, "*.resx").Where(f => !f.EndsWith(".tr.resx", StringComparison.OrdinalIgnoreCase)))
         {
             yield return file;
         }
@@ -53,26 +54,27 @@ public class ResourceFileTests
     }
 
     [Fact]
-    public void Every_strings_resx_has_a_turkish_file_with_the_same_keys_and_no_empty_values()
+    public void Every_resx_has_a_turkish_file_with_the_same_keys_and_no_empty_values()
     {
         var root = RepositoryRoot();
         var problems = new List<string>();
         foreach (var english in EnglishResourceFiles(Path.Combine(root, "src")))
         {
             var relative = Path.GetRelativePath(root, english);
-            var turkish = Path.Combine(Path.GetDirectoryName(english)!, "Strings.tr.resx");
+            var turkishName = Path.GetFileNameWithoutExtension(english) + ".tr.resx";
+            var turkish = Path.Combine(Path.GetDirectoryName(english)!, turkishName);
             if (!File.Exists(turkish))
             {
-                problems.Add($"{relative}: Strings.tr.resx is missing.");
+                problems.Add($"{relative}: {turkishName} is missing.");
                 continue;
             }
 
             var en = ReadStrings(english);
             var tr = ReadStrings(turkish);
-            problems.AddRange(en.Keys.Except(tr.Keys).Order(StringComparer.Ordinal).Select(k => $"{relative}: '{k}' is missing in Strings.tr.resx."));
-            problems.AddRange(tr.Keys.Except(en.Keys).Order(StringComparer.Ordinal).Select(k => $"{relative}: '{k}' exists only in Strings.tr.resx."));
+            problems.AddRange(en.Keys.Except(tr.Keys).Order(StringComparer.Ordinal).Select(k => $"{relative}: '{k}' is missing in {turkishName}."));
+            problems.AddRange(tr.Keys.Except(en.Keys).Order(StringComparer.Ordinal).Select(k => $"{relative}: '{k}' exists only in {turkishName}."));
             problems.AddRange(en.Where(p => string.IsNullOrWhiteSpace(p.Value)).Select(p => $"{relative}: '{p.Key}' is empty."));
-            problems.AddRange(tr.Where(p => string.IsNullOrWhiteSpace(p.Value)).Select(p => $"{relative}: '{p.Key}' is empty in Strings.tr.resx."));
+            problems.AddRange(tr.Where(p => string.IsNullOrWhiteSpace(p.Value)).Select(p => $"{relative}: '{p.Key}' is empty in {turkishName}."));
         }
 
         problems.ShouldBeEmpty();

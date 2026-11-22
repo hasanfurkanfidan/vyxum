@@ -3,7 +3,7 @@ import type { UiModule } from '../lib/api';
 // Menu entries of the shell. An entry is shown only when its module is loaded in the host.
 // Groups without visible entries are hidden.
 
-export type NavGroupId = 'core' | 'modules' | 'system' | 'settings';
+export type NavGroupId = 'core' | 'modules' | 'system' | 'settings' | 'help';
 
 export interface NavItem {
   /** Resource key of the label. */
@@ -33,6 +33,8 @@ export const routes = {
   settingsAbout: '/settings/about',
   /** Modules and license settings. */
   settingsLicense: '/settings/license',
+  /** Free glossary of the words used on the screens. */
+  glossary: '/glossary',
   /** Screens of separately built modules: `/m/{moduleId}/...`. */
   module: '/m/:moduleId/*',
 } as const;
@@ -64,6 +66,11 @@ export const navGroups: readonly NavGroup[] = [
       { labelKey: 'license.Title', path: routes.settingsLicense },
       { labelKey: 'setup.AboutTitle', path: routes.settingsAbout },
     ],
+  },
+  {
+    id: 'help',
+    labelKey: 'shell.Help',
+    items: [{ labelKey: 'glossary.Title', path: routes.glossary }],
   },
 ];
 

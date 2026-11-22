@@ -1,0 +1,502 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype"><value>text/microsoft-resx</value></resheader>
+  <resheader name="version"><value>2.0</value></resheader>
+  <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+  <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+  <data name="S0.Title" xml:space="preserve"><value>Most often confused</value></data>
+  <data name="S0.Intro" xml:space="preserve"><value>Words that look alike but mean different things in Vyxum.</value></data>
+  <data name="T0.01.Name" xml:space="preserve"><value>Batch and lot</value></data>
+  <data name="T0.01.Text" xml:space="preserve"><value>Both can mean a group of goods made together. In Vyxum, batch appears in three places: in Formulation, one mixing of a recipe; in Net weight control, the group of packages judged together (for example one hour of production); and the batch number printed on the label. Lot usually means the raw material batch written on the supplier's sack.</value></data>
+  <data name="T0.02.Name" xml:space="preserve"><value>Tare and zero</value></data>
+  <data name="T0.02.Text" xml:space="preserve"><value>Zero sets the empty scale's display back to 0 (dust left on it, drift). Tare subtracts the weight of the container or packaging so that the net weight shows. The zero command goes to the scale; in Vyxum the tare is kept in the software.</value></data>
+  <data name="T0.03.Name" xml:space="preserve"><value>Qn and fill target</value></data>
+  <data name="T0.03.Text" xml:space="preserve"><value>Qn is the quantity printed on the label (250 g). The fill target is what the filling machine aims for, usually a little more (253 g). Net weight control checks against Qn.</value></data>
+  <data name="T0.04.Name" xml:space="preserve"><value>Tolerance and TNE</value></data>
+  <data name="T0.04.Text" xml:space="preserve"><value>Tolerance is the acceptance range the company sets itself (for example target ± 5 g). TNE is the negative error the regulation allows; it is not typed in but calculated from Qn.</value></data>
+  <data name="T0.05.Name" xml:space="preserve"><value>Calibration and verification stamp</value></data>
+  <data name="T0.05.Text" xml:space="preserve"><value>Calibration measures and documents how far the scale is off, using reference weights. The verification stamp is when an authorised body approves and seals the scale for use in trade. One is technical, the other is legal.</value></data>
+  <data name="T0.06.Name" xml:space="preserve"><value>Best before and use by</value></data>
+  <data name="T0.06.Text" xml:space="preserve"><value>The best before date is about quality: after it the product is not dangerous but may lose freshness. The use by date is about safety for products that spoil quickly: after it the product must not be eaten.</value></data>
+  <data name="T0.07.Name" xml:space="preserve"><value>Package, case, pallet</value></data>
+  <data name="T0.07.Text" xml:space="preserve"><value>A package is the single pack the consumer buys. A case is the outer box that holds several packages. A pallet is the wooden base the cases are stacked on. Each can have its own label.</value></data>
+  <data name="S1.Title" xml:space="preserve"><value>Weighing basics</value></data>
+  <data name="S1.Intro" xml:space="preserve"><value>Scale, weight and calculation. The words behind every screen.</value></data>
+  <data name="T1.01.Name" xml:space="preserve"><value>Scale / indicator</value></data>
+  <data name="T1.01.Text" xml:space="preserve"><value>The hardware that weighs. On an industrial scale the platform that measures and the box with the display (the indicator) can be separate; the computer connects to the indicator by cable or over the network.</value></data>
+  <data name="T1.01.InVyxum" xml:space="preserve"><value>The Devices screen and the setup wizard.</value></data>
+  <data name="T1.01.Example" xml:space="preserve"><value>The text "Scale 1 connected".</value></data>
+  <data name="T1.02.Name" xml:space="preserve"><value>Station</value></data>
+  <data name="T1.02.Text" xml:space="preserve"><value>The place where one operator works: scale, screen and, if there is one, a printer. The Vyxum license is counted per station.</value></data>
+  <data name="T1.02.InVyxum" xml:space="preserve"><value>Label numbers and cases are counted per station.</value></data>
+  <data name="T1.02.Example" xml:space="preserve"><value>The "Packing 2" station.</value></data>
+  <data name="T1.03.Name" xml:space="preserve"><value>Gross</value></data>
+  <data name="T1.03.Text" xml:space="preserve"><value>The total weight of everything on the scale: the product plus the container or packaging.</value></data>
+  <data name="T1.03.InVyxum" xml:space="preserve"><value>A weighing record keeps gross, tare and net separately.</value></data>
+  <data name="T1.03.Example" xml:space="preserve"><value>1.260 kg including the pack.</value></data>
+  <data name="T1.04.Name" xml:space="preserve"><value>Tare</value></data>
+  <data name="T1.04.Text" xml:space="preserve"><value>The weight of the container, box or packaging. It is subtracted from the gross to find the real product weight. "Take tare" makes whatever is on the scale now the tare.</value></data>
+  <data name="T1.04.InVyxum" xml:space="preserve"><value>"Take tare" on the Weighing screen; the packaging tare on the product card is applied when the product is chosen.</value></data>
+  <data name="T1.04.Example" xml:space="preserve"><value>Empty bag 0.012 kg.</value></data>
+  <data name="T1.05.Name" xml:space="preserve"><value>Net</value></data>
+  <data name="T1.05.Text" xml:space="preserve"><value>The weight of the product itself. Net = gross − tare.</value></data>
+  <data name="T1.05.InVyxum" xml:space="preserve"><value>The large number on the screen is usually the net; the amount and the label are based on the net.</value></data>
+  <data name="T1.05.Example" xml:space="preserve"><value>1.260 − 0.012 = 1.248 kg.</value></data>
+  <data name="T1.06.Name" xml:space="preserve"><value>Zero</value></data>
+  <data name="T1.06.Text" xml:space="preserve"><value>Making the display start from 0 while the scale is empty. It is not the same as tare (see Most often confused).</value></data>
+  <data name="T1.06.InVyxum" xml:space="preserve"><value>The "Zero" button; a single command goes to the scale. Vyxum sends no other setting commands to the scale.</value></data>
+  <data name="T1.06.Example" xml:space="preserve"><value>If the empty scale shows 0.002, zero it.</value></data>
+  <data name="T1.07.Name" xml:space="preserve"><value>Stable / unstable</value></data>
+  <data name="T1.07.Text" xml:space="preserve"><value>A weight that has settled is stable; one that is still moving is unstable. An unstable weight is not saved.</value></data>
+  <data name="T1.07.InVyxum" xml:space="preserve"><value>"stable" or "moving" on the Weighing screen.</value></data>
+  <data name="T1.07.Example" xml:space="preserve"><value>A pack is put down and settles a second later.</value></data>
+  <data name="T1.08.Name" xml:space="preserve"><value>Max, Min, e</value></data>
+  <data name="T1.08.Text" xml:space="preserve"><value>Max is the largest load the scale can carry (capacity). Min is the smallest weighing that counts as reliable. e (the division) is the smallest step of the display.</value></data>
+  <data name="T1.08.Example" xml:space="preserve"><value>Max 6 kg, Min 40 g, e = 2 g.</value></data>
+  <data name="T1.09.Name" xml:space="preserve"><value>Overload / underload</value></data>
+  <data name="T1.09.Text" xml:space="preserve"><value>The weight is above or below the range the scale can measure. The reading cannot be trusted then.</value></data>
+  <data name="T1.09.InVyxum" xml:space="preserve"><value>The record is refused.</value></data>
+  <data name="T1.10.Name" xml:space="preserve"><value>Weighing range</value></data>
+  <data name="T1.10.Text" xml:space="preserve"><value>Which weights a scale is used for.</value></data>
+  <data name="T1.10.InVyxum" xml:space="preserve"><value>Formulation sends each ingredient to the scale whose range fits its target.</value></data>
+  <data name="T1.10.Example" xml:space="preserve"><value>Scale 2: 0 to 0.5 kg; small additives are weighed there.</value></data>
+  <data name="T1.11.Name" xml:space="preserve"><value>Target weight</value></data>
+  <data name="T1.11.Text" xml:space="preserve"><value>The weight a package or ingredient should have.</value></data>
+  <data name="T1.11.InVyxum" xml:space="preserve"><value>On the product card (optional) and in the recipe; the vertical line on the gauge.</value></data>
+  <data name="T1.11.Example" xml:space="preserve"><value>Target 1,000 g.</value></data>
+  <data name="T1.12.Name" xml:space="preserve"><value>Tolerance / tolerance band</value></data>
+  <data name="T1.12.Text" xml:space="preserve"><value>How far below or above the target is allowed. The band runs from target − tolerance to target + tolerance. The company sets it.</value></data>
+  <data name="T1.12.InVyxum" xml:space="preserve"><value>Shown as a box on the gauge. In Formulation, "Confirm" stays closed outside the band.</value></data>
+  <data name="T1.12.Example" xml:space="preserve"><value>1,000 g ± 5 g → 995 to 1,005 g.</value></data>
+  <data name="T1.13.Name" xml:space="preserve"><value>Deviation</value></data>
+  <data name="T1.13.Text" xml:space="preserve"><value>The difference between what was weighed and the target.</value></data>
+  <data name="T1.13.InVyxum" xml:space="preserve"><value>The batch complete screen and reports.</value></data>
+  <data name="T1.13.Example" xml:space="preserve"><value>Target 50 kg, weighed 50.12 kg: +0.12 kg (0.24%).</value></data>
+  <data name="T1.14.Name" xml:space="preserve"><value>Mean (x̄) and standard deviation (s)</value></data>
+  <data name="T1.14.Text" xml:space="preserve"><value>The mean is the average weight of a group of packages. The standard deviation shows how far the packages spread around the mean; if it is small, filling is even.</value></data>
+  <data name="T1.14.InVyxum" xml:space="preserve"><value>The net weight quality screen and the compliance report.</value></data>
+  <data name="T1.14.Example" xml:space="preserve"><value>x̄ = 251.4 g, s = 2.1 g.</value></data>
+  <data name="T1.15.Name" xml:space="preserve"><value>PLU</value></data>
+  <data name="T1.15.Text" xml:space="preserve"><value>The product's short code (Price Look-Up). Used to call up the product quickly and to put it in the weight barcode.</value></data>
+  <data name="T1.15.InVyxum" xml:space="preserve"><value>The code field on the product card; search by PLU on the Weighing screen.</value></data>
+  <data name="T1.15.Example" xml:space="preserve"><value>Pistachios: 00417.</value></data>
+  <data name="T1.16.Name" xml:space="preserve"><value>Unit price / amount</value></data>
+  <data name="T1.16.Text" xml:space="preserve"><value>The unit price is the price per kilogram. Amount = net × unit price.</value></data>
+  <data name="T1.16.InVyxum" xml:space="preserve"><value>The Weighing screen and the retail label.</value></data>
+  <data name="T1.16.Example" xml:space="preserve"><value>1.248 kg × 400 ₺/kg = 499.20 ₺.</value></data>
+  <data name="T1.17.Name" xml:space="preserve"><value>Calibration</value></data>
+  <data name="T1.17.Text" xml:space="preserve"><value>Testing the scale with known weights (reference weights) to measure and document how far it is off. It is adjusted if needed.</value></data>
+  <data name="T1.17.Example" xml:space="preserve"><value>A 5 kg weight is put on and the scale shows 5.002.</value></data>
+  <data name="T1.18.Name" xml:space="preserve"><value>Verification stamp / periodic inspection</value></data>
+  <data name="T1.18.Text" xml:space="preserve"><value>A scale used in trade is inspected and sealed by an authorised body. It is renewed at set intervals. A scale without a valid stamp cannot be used for legal weighing.</value></data>
+  <data name="T1.18.InVyxum" xml:space="preserve"><value>The stamp date on the compliance report; Net weight control needs a legal measuring instrument.</value></data>
+  <data name="T1.18.Example" xml:space="preserve"><value>The inspection sticker and seal on the scale.</value></data>
+  <data name="T1.19.Name" xml:space="preserve"><value>Legal measuring instrument</value></data>
+  <data name="T1.19.Text" xml:space="preserve"><value>A measuring instrument under state control because it is used for sales or legal declarations. Its settings must not be changed.</value></data>
+  <data name="T1.19.InVyxum" xml:space="preserve"><value>This is why Vyxum sends the scale only read and zero commands.</value></data>
+  <data name="S2.Title" xml:space="preserve"><value>Products and production</value></data>
+  <data name="S2.Intro" xml:space="preserve"><value>Product card, recipe and batch: the language of production.</value></data>
+  <data name="T2.01.Name" xml:space="preserve"><value>Product card</value></data>
+  <data name="T2.01.Text" xml:space="preserve"><value>A product's main data: code (PLU), name, unit price, packaging tare, target weight; for labels, shelf life and ingredients.</value></data>
+  <data name="T2.01.InVyxum" xml:space="preserve"><value>The Products screen.</value></data>
+  <data name="T2.02.Name" xml:space="preserve"><value>Raw material</value></data>
+  <data name="T2.02.Text" xml:space="preserve"><value>Material that goes into production. It usually comes from the supplier in sacks or boxes.</value></data>
+  <data name="T2.02.InVyxum" xml:space="preserve"><value>The ingredient of each step in Formulation; its barcode is scanned.</value></data>
+  <data name="T2.02.Example" xml:space="preserve"><value>Almonds, sugar, salt.</value></data>
+  <data name="T2.03.Name" xml:space="preserve"><value>Finished product</value></data>
+  <data name="T2.03.Text" xml:space="preserve"><value>The product that comes out of production, ready for sale.</value></data>
+  <data name="T2.03.InVyxum" xml:space="preserve"><value>Waste calculation: how much finished product was packed from the raw material weighed.</value></data>
+  <data name="T2.03.Example" xml:space="preserve"><value>A 250 g pack of mixed nuts.</value></data>
+  <data name="T2.04.Name" xml:space="preserve"><value>Recipe (formula)</value></data>
+  <data name="T2.04.Text" xml:space="preserve"><value>The list of which ingredients, and how much of each, go into a product. It is written for the standard batch size.</value></data>
+  <data name="T2.04.InVyxum" xml:space="preserve"><value>The Recipes tab in Formulation.</value></data>
+  <data name="T2.04.Example" xml:space="preserve"><value>In a 50 kg batch, 20 kg almonds, 15 kg hazelnuts…</value></data>
+  <data name="T2.05.Name" xml:space="preserve"><value>Standard batch</value></data>
+  <data name="T2.05.Text" xml:space="preserve"><value>The base quantity the recipe is written for. A larger or smaller batch is scaled from it.</value></data>
+  <data name="T2.05.InVyxum" xml:space="preserve"><value>Ingredient target = standard quantity × (batch / standard batch).</value></data>
+  <data name="T2.05.Example" xml:space="preserve"><value>Standard 50 kg, wanted 5 kg: every ingredient drops to a tenth.</value></data>
+  <data name="T2.06.Name" xml:space="preserve"><value>Recipe version</value></data>
+  <data name="T2.06.Text" xml:space="preserve"><value>Every change to a recipe makes a new version. States: draft, in approval, published (in use), old. A published version cannot be changed.</value></data>
+  <data name="T2.06.InVyxum" xml:space="preserve"><value>The batch report shows which version was used.</value></data>
+  <data name="T2.06.Example" xml:space="preserve"><value>R-014 version 4.</value></data>
+  <data name="T2.07.Name" xml:space="preserve"><value>Formulation</value></data>
+  <data name="T2.07.Text" xml:space="preserve"><value>Weighing ingredients one by one, in order, according to a recipe. The operator sees what to add and how much is left.</value></data>
+  <data name="T2.07.InVyxum" xml:space="preserve"><value>The paid Formulation module.</value></data>
+  <data name="T2.08.Name" xml:space="preserve"><value>Work order</value></data>
+  <data name="T2.08.Text" xml:space="preserve"><value>The instruction "make this much of this product". Vyxum splits it into batches.</value></data>
+  <data name="T2.08.InVyxum" xml:space="preserve"><value>In Formulation the operator picks it from "Today's jobs".</value></data>
+  <data name="T2.08.Example" xml:space="preserve"><value>WO-0001: 250 pieces → 10 batches × 5 kg.</value></data>
+  <data name="T2.09.Name" xml:space="preserve"><value>Batch (Formulation)</value></data>
+  <data name="T2.09.Text" xml:space="preserve"><value>One complete weighing and mixing of a recipe. It is tracked by its number.</value></data>
+  <data name="T2.09.InVyxum" xml:space="preserve"><value>The batch number has the form L-yyMMdd-sequence.</value></data>
+  <data name="T2.09.Example" xml:space="preserve"><value>L-261121-05: the 5th batch of 21 November 2026.</value></data>
+  <data name="T2.10.Name" xml:space="preserve"><value>Lot / raw material batch</value></data>
+  <data name="T2.10.Text" xml:space="preserve"><value>The number of a group of goods made under the same conditions. For raw materials, it is the batch number on the supplier's sack.</value></data>
+  <data name="T2.10.InVyxum" xml:space="preserve"><value>In Formulation it is read from the sack barcode and stored with the batch; tracing back uses it.</value></data>
+  <data name="T2.10.Example" xml:space="preserve"><value>Almond sack lot 24-1187.</value></data>
+  <data name="T2.11.Name" xml:space="preserve"><value>Container</value></data>
+  <data name="T2.11.Text" xml:space="preserve"><value>The bucket or container the ingredients are weighed into.</value></data>
+  <data name="T2.11.InVyxum" xml:space="preserve"><value>The "Take tare and start" step in Formulation.</value></data>
+  <data name="T2.12.Name" xml:space="preserve"><value>Waste</value></data>
+  <data name="T2.12.Text" xml:space="preserve"><value>The quantity lost in production: the difference between the raw material weighed and the finished product packed.</value></data>
+  <data name="T2.12.InVyxum" xml:space="preserve"><value>The batch report.</value></data>
+  <data name="T2.12.Example" xml:space="preserve"><value>50 kg weighed, 49 kg packed: 2% waste.</value></data>
+  <data name="T2.13.Name" xml:space="preserve"><value>Allergen</value></data>
+  <data name="T2.13.Text" xml:space="preserve"><value>Substances that cause allergies in some people and must be highlighted on the label.</value></data>
+  <data name="T2.13.InVyxum" xml:space="preserve"><value>A warning in the Formulation step; printed in bold on the label.</value></data>
+  <data name="T2.13.Example" xml:space="preserve"><value>Hazelnuts, milk, gluten, sesame.</value></data>
+  <data name="T2.14.Name" xml:space="preserve"><value>Cross-contamination</value></data>
+  <data name="T2.14.Text" xml:space="preserve"><value>The chance that an allergen not in the product gets in, in small amounts, because the same machine or plant is used.</value></data>
+  <data name="T2.14.InVyxum" xml:space="preserve"><value>The warning on the label; the cleaning confirmation in Formulation.</value></data>
+  <data name="T2.14.Example" xml:space="preserve"><value>"May contain traces of peanuts."</value></data>
+  <data name="T2.15.Name" xml:space="preserve"><value>Cleaning confirmation</value></data>
+  <data name="T2.15.Text" xml:space="preserve"><value>If an allergen from the previous batch is not in the new recipe, the step where someone confirms the station was cleaned before starting.</value></data>
+  <data name="T2.15.InVyxum" xml:space="preserve"><value>The ingredient weighing screen of Formulation.</value></data>
+  <data name="T2.16.Name" xml:space="preserve"><value>Expiry date</value></data>
+  <data name="T2.16.Text" xml:space="preserve"><value>The last day a raw material may be used.</value></data>
+  <data name="T2.16.InVyxum" xml:space="preserve"><value>Formulation refuses an expired raw material.</value></data>
+  <data name="T2.17.Name" xml:space="preserve"><value>Shelf life</value></data>
+  <data name="T2.17.Text" xml:space="preserve"><value>How many days the product stays good after production. The date on the label is calculated from it.</value></data>
+  <data name="T2.17.InVyxum" xml:space="preserve"><value>Date on the label = production date + shelf life.</value></data>
+  <data name="T2.17.Example" xml:space="preserve"><value>Shelf life 180 days.</value></data>
+  <data name="T2.18.Name" xml:space="preserve"><value>FEFO</value></data>
+  <data name="T2.18.Text" xml:space="preserve"><value>First Expired, First Out: use the item with the nearest date first.</value></data>
+  <data name="T2.19.Name" xml:space="preserve"><value>Traceability: tracing back and forward</value></data>
+  <data name="T2.19.Text" xml:space="preserve"><value>Tracing back: which raw materials went into a batch? Tracing forward: which batches and labels did a raw material go into?</value></data>
+  <data name="T2.19.InVyxum" xml:space="preserve"><value>Batches in Formulation, Printed in Labels.</value></data>
+  <data name="T2.19.Example" xml:space="preserve"><value>Which 12 batches used the faulty almond lot?</value></data>
+  <data name="T2.20.Name" xml:space="preserve"><value>Recall</value></data>
+  <data name="T2.20.Text" xml:space="preserve"><value>Taking a faulty batch back from the market. You need to find quickly which cases and packages went where.</value></data>
+  <data name="T2.20.InVyxum" xml:space="preserve"><value>In Labels, a recall list by batch number (cases, SSCCs, quantity).</value></data>
+  <data name="T2.20.Example" xml:space="preserve"><value>Foreign matter in a batch: 48 cases are recalled.</value></data>
+  <data name="T2.21.Name" xml:space="preserve"><value>Quarantine / on hold</value></data>
+  <data name="T2.21.Text" xml:space="preserve"><value>Goods that must not be used or shipped until a decision is made.</value></data>
+  <data name="T2.21.InVyxum" xml:space="preserve"><value>In Net weight control a failed batch is put on hold.</value></data>
+  <data name="T2.22.Name" xml:space="preserve"><value>Consumption / stock deduction</value></data>
+  <data name="T2.22.Text" xml:space="preserve"><value>Deducting the raw material used in production from stock.</value></data>
+  <data name="T2.22.InVyxum" xml:space="preserve"><value>Can be sent to the ERP when a batch is finished.</value></data>
+  <data name="S3.Title" xml:space="preserve"><value>Labels and barcodes</value></data>
+  <data name="S3.Intro" xml:space="preserve"><value>Labels, GS1 barcodes, printers and food label rules.</value></data>
+  <data name="T3.01.Name" xml:space="preserve"><value>GS1</value></data>
+  <data name="T3.01.Text" xml:space="preserve"><value>The organisation that gives out barcode numbers worldwide and writes the barcode rules. All supermarket barcodes follow GS1 rules. Companies join their national GS1 office (in Turkey, GS1 Turkey).</value></data>
+  <data name="T3.01.InVyxum" xml:space="preserve"><value>Once the GS1 company prefix is entered, GS1 barcodes and templates become available. Vyxum does not issue numbers; the company gets them from GS1.</value></data>
+  <data name="T3.01.Example" xml:space="preserve"><value>A supermarket chain asks its supplier for GS1 case labels.</value></data>
+  <data name="T3.02.Name" xml:space="preserve"><value>GS1 company prefix</value></data>
+  <data name="T3.02.Text" xml:space="preserve"><value>The number prefix GS1 gives a company. All the company's barcode numbers start with it. 869 stands for Turkey.</value></data>
+  <data name="T3.02.InVyxum" xml:space="preserve"><value>The company and GS1 details in the Labels module.</value></data>
+  <data name="T3.02.Example" xml:space="preserve"><value>8691234 (example).</value></data>
+  <data name="T3.03.Name" xml:space="preserve"><value>GTIN</value></data>
+  <data name="T3.03.Text" xml:space="preserve"><value>Global Trade Item Number: a product's unique number worldwide. The number in the 13-digit supermarket barcode is a GTIN-13; trade units such as cases use a 14-digit GTIN-14. The GTIN-14 of a variable weight product starts with 9.</value></data>
+  <data name="T3.03.InVyxum" xml:space="preserve"><value>Product details in the Labels module.</value></data>
+  <data name="T3.03.Example" xml:space="preserve"><value>8691234004173.</value></data>
+  <data name="T3.04.Name" xml:space="preserve"><value>EAN-13</value></data>
+  <data name="T3.04.Text" xml:space="preserve"><value>The 13-digit barcode scanned at supermarket checkouts.</value></data>
+  <data name="T3.04.InVyxum" xml:space="preserve"><value>The retail label: the GTIN for fixed weight products, with the weight embedded for weighed products.</value></data>
+  <data name="T3.05.Name" xml:space="preserve"><value>Weight-embedded EAN-13</value></data>
+  <data name="T3.05.Text" xml:space="preserve"><value>For weighed products the weight (or price) is put inside the barcode so the checkout knows it. Prefix 20 to 29 + PLU (5 digits) + weight in grams (5 digits) + check digit.</value></data>
+  <data name="T3.05.InVyxum" xml:space="preserve"><value>The weighed retail template.</value></data>
+  <data name="T3.05.Example" xml:space="preserve"><value>29 00417 01248 2 → PLU 00417, 1.248 kg.</value></data>
+  <data name="T3.06.Name" xml:space="preserve"><value>Check digit</value></data>
+  <data name="T3.06.Text" xml:space="preserve"><value>The last digit of a barcode. It is calculated from the other digits and catches reading errors.</value></data>
+  <data name="T3.06.InVyxum" xml:space="preserve"><value>Vyxum calculates it.</value></data>
+  <data name="T3.07.Name" xml:space="preserve"><value>GS1-128</value></data>
+  <data name="T3.07.Text" xml:space="preserve"><value>The long GS1 barcode used on case and logistics labels. It carries several pieces of data, separated by AIs.</value></data>
+  <data name="T3.07.InVyxum" xml:space="preserve"><value>The GS1 case template; if it does not fit, Vyxum splits it into several barcodes.</value></data>
+  <data name="T3.08.Name" xml:space="preserve"><value>AI (application identifier)</value></data>
+  <data name="T3.08.Text" xml:space="preserve"><value>The code in brackets in front of each piece of data in a GS1 barcode; it says what the data after it is.</value></data>
+  <data name="T3.08.InVyxum" xml:space="preserve"><value>Users do not type AIs; they tick the data to put in the barcode from a list.</value></data>
+  <data name="T3.08.Example" xml:space="preserve"><value>(01) GTIN, (10) batch, (15) best before, (17) use by, (3103) net kg, (37) count, (00) SSCC.</value></data>
+  <data name="T3.09.Name" xml:space="preserve"><value>FNC1</value></data>
+  <data name="T3.09.Text" xml:space="preserve"><value>A special separator in GS1-128 that marks the end of a variable-length data field.</value></data>
+  <data name="T3.09.InVyxum" xml:space="preserve"><value>Vyxum adds it.</value></data>
+  <data name="T3.09.Example" xml:space="preserve"><value>It goes after the (10) batch number when another AI follows.</value></data>
+  <data name="T3.10.Name" xml:space="preserve"><value>SSCC</value></data>
+  <data name="T3.10.Text" xml:space="preserve"><value>Serial Shipping Container Code: the unique 18-digit serial number of each case or pallet. Extension digit + company prefix + serial number + check digit. A number is never used twice.</value></data>
+  <data name="T3.10.InVyxum" xml:space="preserve"><value>The barcode at the bottom of the case label; the recall list.</value></data>
+  <data name="T3.10.Example" xml:space="preserve"><value>(00) 386912340000001234.</value></data>
+  <data name="T3.11.Name" xml:space="preserve"><value>DataMatrix</value></data>
+  <data name="T3.11.Text" xml:space="preserve"><value>A small, square two-dimensional barcode. It holds a lot of data in little space. One written to GS1 rules is a GS1 DataMatrix.</value></data>
+  <data name="T3.11.InVyxum" xml:space="preserve"><value>The batch label.</value></data>
+  <data name="T3.12.Name" xml:space="preserve"><value>Code 128</value></data>
+  <data name="T3.12.Text" xml:space="preserve"><value>A general-purpose barcode that can hold letters and digits. No GS1 membership is needed.</value></data>
+  <data name="T3.12.InVyxum" xml:space="preserve"><value>On the container label when there is no GS1 prefix.</value></data>
+  <data name="T3.12.Example" xml:space="preserve"><value>L-261121-05-03.</value></data>
+  <data name="T3.13.Name" xml:space="preserve"><value>QR</value></data>
+  <data name="T3.13.Text" xml:space="preserve"><value>A square barcode that phones can read.</value></data>
+  <data name="T3.13.InVyxum" xml:space="preserve"><value>For free text or a link.</value></data>
+  <data name="T3.14.Name" xml:space="preserve"><value>Quiet zone</value></data>
+  <data name="T3.14.Text" xml:space="preserve"><value>The blank space that must be left on both sides of a barcode. The scanner uses it to find where the barcode starts.</value></data>
+  <data name="T3.14.InVyxum" xml:space="preserve"><value>Taken into account when checking whether the barcode fits on the label.</value></data>
+  <data name="T3.15.Name" xml:space="preserve"><value>X dimension (bar width)</value></data>
+  <data name="T3.15.Text" xml:space="preserve"><value>The width of the narrowest bar in a barcode. A larger value makes the barcode longer but easier to read.</value></data>
+  <data name="T3.15.InVyxum" xml:space="preserve"><value>Default 0.5 mm on the case label.</value></data>
+  <data name="T3.16.Name" xml:space="preserve"><value>Scan test</value></data>
+  <data name="T3.16.Text" xml:space="preserve"><value>Decoding the barcodes on the drawn label with scanning software and comparing them with the expected data.</value></data>
+  <data name="T3.16.InVyxum" xml:space="preserve"><value>"4 / 4 barcodes read" in the template editor.</value></data>
+  <data name="T3.17.Name" xml:space="preserve"><value>Label template</value></data>
+  <data name="T3.17.Text" xml:space="preserve"><value>The layout of a label: size, what goes where, text size, barcode. The data comes from the product card. Its version goes up with every save.</value></data>
+  <data name="T3.17.InVyxum" xml:space="preserve"><value>Templates and the template editor in the Labels module.</value></data>
+  <data name="T3.17.Example" xml:space="preserve"><value>Weighed retail 100 × 60 mm.</value></data>
+  <data name="T3.18.Name" xml:space="preserve"><value>Starter template</value></data>
+  <data name="T3.18.Text" xml:space="preserve"><value>A ready draft with the required data that a new template starts from. You never start from a blank page.</value></data>
+  <data name="T3.18.InVyxum" xml:space="preserve"><value>The "New template" screen.</value></data>
+  <data name="T3.18.Example" xml:space="preserve"><value>GS1 case 100 × 150, Container label 58 × 40.</value></data>
+  <data name="T3.19.Name" xml:space="preserve"><value>Retail label</value></data>
+  <data name="T3.19.Text" xml:space="preserve"><value>The label on the pack the consumer buys: name, ingredients, net, price, date, barcode.</value></data>
+  <data name="T3.19.InVyxum" xml:space="preserve"><value>"Save and print label" on the Weighing screen.</value></data>
+  <data name="T3.20.Name" xml:space="preserve"><value>Case</value></data>
+  <data name="T3.20.Text" xml:space="preserve"><value>The outer cardboard box that holds several packages. Goods go to shops and warehouses in cases. "Packs per case" is how many packages go in one case.</value></data>
+  <data name="T3.20.InVyxum" xml:space="preserve"><value>Cases are counted automatically; when one is full its label is printed and a new case starts.</value></data>
+  <data name="T3.20.Example" xml:space="preserve"><value>12 packs per case; the case label prints after the 12th pack.</value></data>
+  <data name="T3.21.Name" xml:space="preserve"><value>Case label</value></data>
+  <data name="T3.21.Text" xml:space="preserve"><value>The logistics label on a case: the product inside, number of packs, total net, batch, date and SSCC, with GS1-128 barcodes.</value></data>
+  <data name="T3.21.InVyxum" xml:space="preserve"><value>The GS1 case template.</value></data>
+  <data name="T3.22.Name" xml:space="preserve"><value>Container label</value></data>
+  <data name="T3.22.Text" xml:space="preserve"><value>The small label stuck on the container of a weighed ingredient: ingredient, raw material batch, net, step.</value></data>
+  <data name="T3.22.InVyxum" xml:space="preserve"><value>Printed at every confirmation in Formulation when the option is on.</value></data>
+  <data name="T3.23.Name" xml:space="preserve"><value>Batch label</value></data>
+  <data name="T3.23.Text" xml:space="preserve"><value>The label printed when a Formulation batch is finished: product, recipe version, work order, net, allergens, raw material batches.</value></data>
+  <data name="T3.23.InVyxum" xml:space="preserve"><value>Printed automatically when the batch is finished.</value></data>
+  <data name="T3.24.Name" xml:space="preserve"><value>Pallet</value></data>
+  <data name="T3.24.Text" xml:space="preserve"><value>The wooden base that cases are stacked on.</value></data>
+  <data name="T3.25.Name" xml:space="preserve"><value>Reprint</value></data>
+  <data name="T3.25.Text" xml:space="preserve"><value>Printing a creased or torn label again with the same number. The reason and the person are recorded.</value></data>
+  <data name="T3.26.Name" xml:space="preserve"><value>ZPL / TSPL</value></data>
+  <data name="T3.26.Text" xml:space="preserve"><value>Common command languages of label printers. No Windows driver is needed.</value></data>
+  <data name="T3.26.InVyxum" xml:space="preserve"><value>Vyxum Agent talks to the printer in these languages.</value></data>
+  <data name="T3.27.Name" xml:space="preserve"><value>dpi</value></data>
+  <data name="T3.27.Text" xml:space="preserve"><value>The printer's dots per inch. 203 dpi is common; 300 dpi is sharper.</value></data>
+  <data name="T3.27.InVyxum" xml:space="preserve"><value>The template resolution.</value></data>
+  <data name="T3.28.Name" xml:space="preserve"><value>Thermal printer / ribbon</value></data>
+  <data name="T3.28.Text" xml:space="preserve"><value>Label printers print with heat. Some use a ribbon; printing stops when the ribbon runs out.</value></data>
+  <data name="T3.28.InVyxum" xml:space="preserve"><value>"Load paper" or a ribbon-out warning in the status area.</value></data>
+  <data name="T3.29.Name" xml:space="preserve"><value>Virtual printer</value></data>
+  <data name="T3.29.Text" xml:space="preserve"><value>Software that acts like a printer when there is no real one. It builds the commands but sends nothing, and keeps the output.</value></data>
+  <data name="T3.29.InVyxum" xml:space="preserve"><value>The status area says "Sent" instead of "Printed". For training and trials.</value></data>
+  <data name="T3.30.Name" xml:space="preserve"><value>Best before / use by date</value></data>
+  <data name="T3.30.Text" xml:space="preserve"><value>Best before is a quality date; use by is a safety date for products that spoil quickly (see Most often confused). The full wording is printed on the label.</value></data>
+  <data name="T3.30.InVyxum" xml:space="preserve"><value>Chosen per product; (15) and (17) in GS1.</value></data>
+  <data name="T3.30.Example" xml:space="preserve"><value>Best before: 20.05.2027.</value></data>
+  <data name="T3.31.Name" xml:space="preserve"><value>Nutrition declaration</value></data>
+  <data name="T3.31.Text" xml:space="preserve"><value>The table of energy (kJ and kcal), fat, saturated fat, carbohydrate, sugars, protein and salt per 100 g.</value></data>
+  <data name="T3.31.InVyxum" xml:space="preserve"><value>The nutrition table on the label.</value></data>
+  <data name="T3.32.Name" xml:space="preserve"><value>Food business registration number</value></data>
+  <data name="T3.32.Text" xml:space="preserve"><value>The number the Turkish Ministry of Agriculture and Forestry gives a food business. It must be on the label.</value></data>
+  <data name="T3.32.InVyxum" xml:space="preserve"><value>The food label check looks for it.</value></data>
+  <data name="T3.33.Name" xml:space="preserve"><value>Origin</value></data>
+  <data name="T3.33.Text" xml:space="preserve"><value>The country or place the product or its main ingredient comes from.</value></data>
+  <data name="T3.33.Example" xml:space="preserve"><value>Origin: Turkey.</value></data>
+  <data name="T3.34.Name" xml:space="preserve"><value>Turkish Food Codex</value></data>
+  <data name="T3.34.Text" xml:space="preserve"><value>The regulations that hold Turkey's food rules. The labelling regulation sets the required information and text sizes.</value></data>
+  <data name="T3.34.InVyxum" xml:space="preserve"><value>The basis of the food label check.</value></data>
+  <data name="T3.35.Name" xml:space="preserve"><value>x-height</value></data>
+  <data name="T3.35.Text" xml:space="preserve"><value>The height of a lowercase "x". The regulation measures the smallest text on a label with it: at least 1.2 mm for required information, or 0.9 mm if the largest surface of the package is smaller than 80 cm². It is the package surface that counts, not the label size.</value></data>
+  <data name="T3.35.InVyxum" xml:space="preserve"><value>The food label check measures text size by it.</value></data>
+  <data name="T3.35.Example" xml:space="preserve"><value>7 pt text ≈ 1.26 mm.</value></data>
+  <data name="T3.36.Name" xml:space="preserve"><value>Food label check</value></data>
+  <data name="T3.36.Text" xml:space="preserve"><value>Vyxum checks a template for required information, text size, barcode readability and fit. It only warns; the food engineer gives the final approval.</value></data>
+  <data name="T3.36.InVyxum" xml:space="preserve"><value>The "2 warnings" line in the template editor.</value></data>
+  <data name="S4.Title" xml:space="preserve"><value>Net weight control</value></data>
+  <data name="S4.Intro" xml:space="preserve"><value>The language of the prepackage regulation: Qn, TNE, T1, T2.</value></data>
+  <data name="T4.01.Name" xml:space="preserve"><value>Prepackage</value></data>
+  <data name="T4.01.Text" xml:space="preserve"><value>A pack filled and closed without the customer present, whose contents cannot change without opening it.</value></data>
+  <data name="T4.01.InVyxum" xml:space="preserve"><value>What Net weight control checks.</value></data>
+  <data name="T4.01.Example" xml:space="preserve"><value>A 250 g pack of nuts.</value></data>
+  <data name="T4.02.Name" xml:space="preserve"><value>Fixed quantity / variable weight</value></data>
+  <data name="T4.02.Text" xml:space="preserve"><value>With fixed quantity every pack says the same amount (250 g). With variable weight each pack is weighed and priced (1.248 kg).</value></data>
+  <data name="T4.02.InVyxum" xml:space="preserve"><value>Net weight control works only with fixed quantity products.</value></data>
+  <data name="T4.03.Name" xml:space="preserve"><value>Prepackage regulation (76/211/EEC)</value></data>
+  <data name="T4.03.Text" xml:space="preserve"><value>The Turkish regulation on determining the net quantity of prepackages. It matches the European directive 76/211/EEC.</value></data>
+  <data name="T4.03.InVyxum" xml:space="preserve"><value>The rules of Net weight control are based on it.</value></data>
+  <data name="T4.04.Name" xml:space="preserve"><value>Qn (nominal quantity)</value></data>
+  <data name="T4.04.Text" xml:space="preserve"><value>The quantity printed on the label.</value></data>
+  <data name="T4.04.InVyxum" xml:space="preserve"><value>A separate field from the fill target on the plan screen.</value></data>
+  <data name="T4.04.Example" xml:space="preserve"><value>Qn = 250 g.</value></data>
+  <data name="T4.05.Name" xml:space="preserve"><value>Fill target</value></data>
+  <data name="T4.05.Text" xml:space="preserve"><value>The quantity the filling machine aims for; usually a little more than Qn.</value></data>
+  <data name="T4.05.InVyxum" xml:space="preserve"><value>Vyxum suggests a fill target but does not set the machine.</value></data>
+  <data name="T4.05.Example" xml:space="preserve"><value>253 g.</value></data>
+  <data name="T4.06.Name" xml:space="preserve"><value>Overfill</value></data>
+  <data name="T4.06.Text" xml:space="preserve"><value>Product put into packs beyond Qn. It is not a legal problem, but it costs money.</value></data>
+  <data name="T4.06.InVyxum" xml:space="preserve"><value>The cost of overfill in the batch details.</value></data>
+  <data name="T4.06.Example" xml:space="preserve"><value>+3 g per pack × 1,000 packs = 3 kg of free product.</value></data>
+  <data name="T4.07.Name" xml:space="preserve"><value>TNE</value></data>
+  <data name="T4.07.Text" xml:space="preserve"><value>Tolerable negative error: how much less than Qn a pack may contain. It is calculated from Qn using the table in the regulation, not typed in.</value></data>
+  <data name="T4.07.InVyxum" xml:space="preserve"><value>Calculated on the plan screen.</value></data>
+  <data name="T4.07.Example" xml:space="preserve"><value>Qn 250 g → TNE 9 g.</value></data>
+  <data name="T4.08.Name" xml:space="preserve"><value>T1</value></data>
+  <data name="T4.08.Text" xml:space="preserve"><value>T1 = Qn − TNE. A pack below this limit is "short". The number of short packs in a batch is limited.</value></data>
+  <data name="T4.08.InVyxum" xml:space="preserve"><value>"Short, below T1" in the status area.</value></data>
+  <data name="T4.08.Example" xml:space="preserve"><value>250 − 9 = 241 g.</value></data>
+  <data name="T4.09.Name" xml:space="preserve"><value>T2</value></data>
+  <data name="T4.09.Text" xml:space="preserve"><value>T2 = Qn − 2 × TNE. A pack below this limit is "far too short" and must not reach the market. Even one is a reason to stop the line.</value></data>
+  <data name="T4.09.InVyxum" xml:space="preserve"><value>"Stop" in the status area; the batch is put on hold and needs a supervisor's approval.</value></data>
+  <data name="T4.09.Example" xml:space="preserve"><value>250 − 18 = 232 g.</value></data>
+  <data name="T4.10.Name" xml:space="preserve"><value>℮ mark</value></data>
+  <data name="T4.10.Text" xml:space="preserve"><value>The small "e" on the label: it declares that the pack was filled by the regulation's procedure. It is optional, but packs that carry it must follow the rules.</value></data>
+  <data name="T4.10.InVyxum" xml:space="preserve"><value>No ℮-marked label is printed for a pack below T2.</value></data>
+  <data name="T4.10.Example" xml:space="preserve"><value>"250 g ℮"</value></data>
+  <data name="T4.11.Name" xml:space="preserve"><value>Three conditions</value></data>
+  <data name="T4.11.Text" xml:space="preserve"><value>For a batch to pass: (1) the mean is high enough, (2) the number of packs below T1 is within the limit, (3) no pack is below T2.</value></data>
+  <data name="T4.11.InVyxum" xml:space="preserve"><value>Three lines on the quality screen, each "met" or "not met".</value></data>
+  <data name="T4.12.Name" xml:space="preserve"><value>Batch (Net weight)</value></data>
+  <data name="T4.12.Text" xml:space="preserve"><value>The group of packs judged together under the regulation: same product, line and place. At the end of a line, at most one hour of production; otherwise at most 10,000 packs.</value></data>
+  <data name="T4.12.InVyxum" xml:space="preserve"><value>Batch type on the plan screen: hourly or production lot.</value></data>
+  <data name="T4.12.Example" xml:space="preserve"><value>A line making 360 packs an hour: one batch every hour.</value></data>
+  <data name="T4.13.Name" xml:space="preserve"><value>Sampling / sampling plan</value></data>
+  <data name="T4.13.Text" xml:space="preserve"><value>Deciding by weighing a set number of packs instead of the whole batch. The batch size decides how many.</value></data>
+  <data name="T4.13.InVyxum" xml:space="preserve"><value>Vyxum spreads the sample over the hour: 30 packs → 10 packs every 20 minutes.</value></data>
+  <data name="T4.13.Example" xml:space="preserve"><value>Batch of 100–500 packs: 30 packs.</value></data>
+  <data name="T4.14.Name" xml:space="preserve"><value>Acceptance and rejection number / second sample</value></data>
+  <data name="T4.14.Text" xml:space="preserve"><value>The number of packs below T1 allowed in a sample. Up to the acceptance number it passes; from the rejection number it fails; in between a second sample is taken.</value></data>
+  <data name="T4.14.InVyxum" xml:space="preserve"><value>"Start second sample" at the station.</value></data>
+  <data name="T4.14.Example" xml:space="preserve"><value>Sample of 30 with 1 short: passes; 2 short: second sample; 3 short: fails.</value></data>
+  <data name="T4.15.Name" xml:space="preserve"><value>Non-destructive / destructive testing</value></data>
+  <data name="T4.15.Text" xml:space="preserve"><value>In non-destructive testing the pack is weighed unopened and the average packaging weight is subtracted as tare. In destructive testing the pack is opened.</value></data>
+  <data name="T4.15.InVyxum" xml:space="preserve"><value>Vyxum uses the non-destructive method.</value></data>
+  <data name="T4.16.Name" xml:space="preserve"><value>Tare sample</value></data>
+  <data name="T4.16.Text" xml:space="preserve"><value>Weighing a few empty packs at the start of a shift and using their average as the tare for that shift.</value></data>
+  <data name="T4.16.InVyxum" xml:space="preserve"><value>The tare step at the station: 6 / 10.</value></data>
+  <data name="T4.16.Example" xml:space="preserve"><value>10 empty bags, average 12 g.</value></data>
+  <data name="T4.17.Name" xml:space="preserve"><value>Mean criterion (k factor)</value></data>
+  <data name="T4.17.Text" xml:space="preserve"><value>The statistical formula for the sample mean to be enough: x̄ ≥ Qn − k · s. k is a fixed number that depends on the sample size.</value></data>
+  <data name="T4.17.InVyxum" xml:space="preserve"><value>Only on the quality screen; the operator does no calculation.</value></data>
+  <data name="T4.17.Example" xml:space="preserve"><value>For n = 30, k = 0.503.</value></data>
+  <data name="T4.18.Name" xml:space="preserve"><value>Pass / pass with warning / fail</value></data>
+  <data name="T4.18.Text" xml:space="preserve"><value>The batch result. With warning: the conditions are met but the mean is below Qn; the next check is brought forward.</value></data>
+  <data name="T4.18.InVyxum" xml:space="preserve"><value>The batch list and the compliance report.</value></data>
+  <data name="T4.19.Name" xml:space="preserve"><value>Sort / refill / destroy</value></data>
+  <data name="T4.19.Text" xml:space="preserve"><value>The decision options for a failed batch. Sorting means weighing every pack and taking out the short ones.</value></data>
+  <data name="T4.19.InVyxum" xml:space="preserve"><value>The decision form, with an electronic signature.</value></data>
+  <data name="T4.20.Name" xml:space="preserve"><value>Trend warning</value></data>
+  <data name="T4.20.Text" xml:space="preserve"><value>A rule that gives early warning that the filling machine is drifting when short packs become more frequent.</value></data>
+  <data name="T4.20.InVyxum" xml:space="preserve"><value>"3 short in the last 10 packs. Check the filling machine."</value></data>
+  <data name="T4.21.Name" xml:space="preserve"><value>Compliance report</value></data>
+  <data name="T4.21.Text" xml:space="preserve"><value>The report for the inspector, showing the batch results, the method and the signatures.</value></data>
+  <data name="T4.21.InVyxum" xml:space="preserve"><value>Available as PDF and Excel.</value></data>
+  <data name="T4.22.Name" xml:space="preserve"><value>Metrology / legal metrology</value></data>
+  <data name="T4.22.Text" xml:space="preserve"><value>Metrology is the science of measurement. Legal metrology is the state's rules for measurements used in trade. In Turkey, quantity inspection belongs to the Ministry of Industry and Technology.</value></data>
+  <data name="T4.23.Name" xml:space="preserve"><value>WELMEC / OIML</value></data>
+  <data name="T4.23.Text" xml:space="preserve"><value>The European (WELMEC) and international (OIML) legal metrology organisations. They publish guidance documents.</value></data>
+  <data name="T4.24.Name" xml:space="preserve"><value>Checkweigher</value></data>
+  <data name="T4.24.Text" xml:space="preserve"><value>An automatic checking scale on the line that weighs every pack and rejects the short ones.</value></data>
+  <data name="S5.Title" xml:space="preserve"><value>Quality, records and reports</value></data>
+  <data name="S5.Intro" xml:space="preserve"><value>Record and approval terms that auditors ask about.</value></data>
+  <data name="T5.01.Name" xml:space="preserve"><value>Four-eyes principle</value></data>
+  <data name="T5.01.Text" xml:space="preserve"><value>The person who did a task cannot approve it; a second person checks.</value></data>
+  <data name="T5.01.InVyxum" xml:space="preserve"><value>Whoever wrote a recipe cannot approve it. It can be turned off in the settings; on by default.</value></data>
+  <data name="T5.02.Name" xml:space="preserve"><value>Electronic signature</value></data>
+  <data name="T5.02.Text" xml:space="preserve"><value>An approval recorded with name, time and meaning after the person enters their password again. The electronic version of a handwritten signature.</value></data>
+  <data name="T5.02.InVyxum" xml:space="preserve"><value>Recipe approval, net weight batch approval and decision.</value></data>
+  <data name="T5.02.Example" xml:space="preserve"><value>"Recipe approval, R-014 version 4".</value></data>
+  <data name="T5.03.Name" xml:space="preserve"><value>Supervisor approval / PIN</value></data>
+  <data name="T5.03.Text" xml:space="preserve"><value>When a rule has to be broken (outside tolerance, below T2), the shift supervisor allows it with a short code and a reason.</value></data>
+  <data name="T5.03.InVyxum" xml:space="preserve"><value>The small, locked "Supervisor approval" button under the main button.</value></data>
+  <data name="T5.04.Name" xml:space="preserve"><value>Audit trail</value></data>
+  <data name="T5.04.Text" xml:space="preserve"><value>A list that cannot be deleted of who changed what, and when.</value></data>
+  <data name="T5.04.InVyxum" xml:space="preserve"><value>Records are only ever added; even a cancellation is a mark, not a deletion.</value></data>
+  <data name="T5.05.Name" xml:space="preserve"><value>Hash chain / record integrity</value></data>
+  <data name="T5.05.Text" xml:space="preserve"><value>Each record carries a fingerprint of the one before it. If someone changes an old record, the chain breaks and it is noticed.</value></data>
+  <data name="T5.05.InVyxum" xml:space="preserve"><value>The "Record integrity broken" warning.</value></data>
+  <data name="T5.06.Name" xml:space="preserve"><value>GMP</value></data>
+  <data name="T5.06.Text" xml:space="preserve"><value>Good Manufacturing Practice: quality rules that are mandatory especially in pharmaceuticals.</value></data>
+  <data name="T5.07.Name" xml:space="preserve"><value>21 CFR Part 11 / EU GMP Annex 11</value></data>
+  <data name="T5.07.Text" xml:space="preserve"><value>The US (FDA) and EU rules for electronic records and electronic signatures. Pharmaceutical companies expect software to follow them.</value></data>
+  <data name="T5.08.Name" xml:space="preserve"><value>Validation</value></data>
+  <data name="T5.08.Text" xml:space="preserve"><value>Proving with documents that the software works as intended. Pharmaceutical companies require it.</value></data>
+  <data name="T5.09.Name" xml:space="preserve"><value>End of day</value></data>
+  <data name="T5.09.Text" xml:space="preserve"><value>A summary of the day's weighings: number of records, total net, total amount, cancellations.</value></data>
+  <data name="T5.09.InVyxum" xml:space="preserve"><value>The paid Reporting module.</value></data>
+  <data name="T5.10.Name" xml:space="preserve"><value>Z report</value></data>
+  <data name="T5.10.Text" xml:space="preserve"><value>A term from cash registers: the closing report that gives the day's totals and resets the counters. An interim report without reset is an X report.</value></data>
+  <data name="T5.10.InVyxum" xml:space="preserve"><value>The paid Reporting module.</value></data>
+  <data name="T5.10.Example" xml:space="preserve"><value>The Z report is taken at 18:00; the next day the counters start from zero.</value></data>
+  <data name="T5.11.Name" xml:space="preserve"><value>Period closing</value></data>
+  <data name="T5.11.Text" xml:space="preserve"><value>Finalising and reporting the records of a period (day, week, month).</value></data>
+  <data name="T5.11.InVyxum" xml:space="preserve"><value>The paid Reporting module.</value></data>
+  <data name="T5.12.Name" xml:space="preserve"><value>Shift</value></data>
+  <data name="T5.12.Text" xml:space="preserve"><value>A working period (for example 08:00–16:00). The tare sample and some batches start and end with the shift.</value></data>
+  <data name="S6.Title" xml:space="preserve"><value>Screens and use</value></data>
+  <data name="S6.Intro" xml:space="preserve"><value>Ideas that come up often on the screens.</value></data>
+  <data name="T6.01.Name" xml:space="preserve"><value>Operator</value></data>
+  <data name="T6.01.Text" xml:space="preserve"><value>The person weighing at a station. Often gloved, standing and in a hurry; the screens are kept simple for them.</value></data>
+  <data name="T6.01.InVyxum" xml:space="preserve"><value>The Operator column on the Records screen.</value></data>
+  <data name="T6.02.Name" xml:space="preserve"><value>Shift supervisor / quality manager</value></data>
+  <data name="T6.02.Text" xml:space="preserve"><value>The shift supervisor runs the line and gives supervisor approvals. The quality manager writes the plans and approves batches.</value></data>
+  <data name="T6.02.InVyxum" xml:space="preserve"><value>Permissions in the Users and roles module.</value></data>
+  <data name="T6.03.Name" xml:space="preserve"><value>Status area</value></data>
+  <data name="T6.03.Text" xml:space="preserve"><value>The largest coloured area on an operator screen: colour, icon and one word. It tells what is happening in three seconds.</value></data>
+  <data name="T6.03.InVyxum" xml:space="preserve"><value>"Printed", "Short", "Stop", "OK".</value></data>
+  <data name="T6.04.Name" xml:space="preserve"><value>Go / OK / stop colours</value></data>
+  <data name="T6.04.Text" xml:space="preserve"><value>The three colours of the status area: go (there is work to do), OK (good), stop (there is a problem). Colour never carries the meaning alone; there is always an icon and a word.</value></data>
+  <data name="T6.05.Name" xml:space="preserve"><value>Main button</value></data>
+  <data name="T6.05.Text" xml:space="preserve"><value>The single large button on every operator screen. It is always in the same place; when it is closed it says what is missing.</value></data>
+  <data name="T6.05.InVyxum" xml:space="preserve"><value>"Save and print label", "Add 258 g more".</value></data>
+  <data name="T6.06.Name" xml:space="preserve"><value>Focus mode</value></data>
+  <data name="T6.06.Text" xml:space="preserve"><value>A screen where the left menu is hidden and only the current job shows. You leave it with "Pause".</value></data>
+  <data name="T6.06.InVyxum" xml:space="preserve"><value>Formulation ingredient weighing and the net weight station.</value></data>
+  <data name="T6.07.Name" xml:space="preserve"><value>Appearance: light, dark, large touch</value></data>
+  <data name="T6.07.Text" xml:space="preserve"><value>The three appearances of the screen. In large touch, buttons and rows grow big enough to press with gloves.</value></data>
+  <data name="T6.08.Name" xml:space="preserve"><value>Automatic printing / automatic saving</value></data>
+  <data name="T6.08.Text" xml:space="preserve"><value>Saving and printing the label as soon as the weight is stable, without pressing a button.</value></data>
+  <data name="T6.08.InVyxum" xml:space="preserve"><value>The Labels and Net weight stations.</value></data>
+  <data name="T6.09.Name" xml:space="preserve"><value>Poka-yoke</value></data>
+  <data name="T6.09.Text" xml:space="preserve"><value>Japanese for "mistake-proofing": design that makes the wrong action impossible.</value></data>
+  <data name="T6.09.InVyxum" xml:space="preserve"><value>"Confirm" stays closed for the wrong raw material or outside the band.</value></data>
+  <data name="T6.10.Name" xml:space="preserve"><value>Locked preview</value></data>
+  <data name="T6.10.Text" xml:space="preserve"><value>A paid module without a license shows as locked in the menu; clicking it shows a blurred sample image and a "Request a trial license" button.</value></data>
+  <data name="T6.10.InVyxum" xml:space="preserve"><value>Under "Vyxum Pro" in the menu.</value></data>
+  <data name="S7.Title" xml:space="preserve"><value>ERP and license</value></data>
+  <data name="S7.Intro" xml:space="preserve"><value>Connecting to the accounting system, and the Vyxum license.</value></data>
+  <data name="T7.01.Name" xml:space="preserve"><value>ERP</value></data>
+  <data name="T7.01.Text" xml:space="preserve"><value>The main system that runs a company's stock, production, sales and accounting.</value></data>
+  <data name="T7.01.InVyxum" xml:space="preserve"><value>The integration module sends weighing results to the ERP.</value></data>
+  <data name="T7.02.Name" xml:space="preserve"><value>Integration / connector</value></data>
+  <data name="T7.02.Text" xml:space="preserve"><value>The module that carries data between Vyxum and the ERP. A connector is the part made for one specific ERP.</value></data>
+  <data name="T7.02.InVyxum" xml:space="preserve"><value>A paid module.</value></data>
+  <data name="T7.03.Name" xml:space="preserve"><value>Field mapping</value></data>
+  <data name="T7.03.Text" xml:space="preserve"><value>Linking a field in Vyxum to the matching field in the ERP. It is done on a screen, without writing code.</value></data>
+  <data name="T7.03.InVyxum" xml:space="preserve"><value>A screen of the integration module.</value></data>
+  <data name="T7.03.Example" xml:space="preserve"><value>Vyxum "batch" → ERP "serial/lot no".</value></data>
+  <data name="T7.04.Name" xml:space="preserve"><value>Item card</value></data>
+  <data name="T7.04.Text" xml:space="preserve"><value>The product or raw material record in the ERP. The counterpart of the product card in Vyxum.</value></data>
+  <data name="T7.04.InVyxum" xml:space="preserve"><value>Can be imported from the ERP into Vyxum.</value></data>
+  <data name="T7.05.Name" xml:space="preserve"><value>Production order</value></data>
+  <data name="T7.05.Text" xml:space="preserve"><value>The "make this" document opened in the ERP. The counterpart of the work order in Vyxum.</value></data>
+  <data name="T7.06.Name" xml:space="preserve"><value>Slips: production receipt, consumption, waste, reversal</value></data>
+  <data name="T7.06.Text" xml:space="preserve"><value>Documents that record stock movements in the ERP. A production receipt adds finished goods to stock, consumption deducts raw material, waste records losses, a reversal cancels.</value></data>
+  <data name="T7.06.InVyxum" xml:space="preserve"><value>Sent from Vyxum to the ERP; by default all at once when a batch closes.</value></data>
+  <data name="T7.07.Name" xml:space="preserve"><value>License file (.vxlic)</value></data>
+  <data name="T7.07.Text" xml:space="preserve"><value>A signed file that says which modules the company may use, on how many stations and until when. It is verified without the internet.</value></data>
+  <data name="T7.07.InVyxum" xml:space="preserve"><value>Settings &gt; Modules and license; it unlocks paid modules without reinstalling.</value></data>
+  <data name="T7.08.Name" xml:space="preserve"><value>Per-station license</value></data>
+  <data name="T7.08.Text" xml:space="preserve"><value>Price and limits are based on the number of workplaces with a scale.</value></data>
+  <data name="T7.08.InVyxum" xml:space="preserve"><value>Paid modules are licensed by the number of stations.</value></data>
+  <data name="T7.09.Name" xml:space="preserve"><value>Trial license / grace period</value></data>
+  <data name="T7.09.Text" xml:space="preserve"><value>A trial license unlocks paid modules for a limited time. The grace period is the time given after a license ends before the module becomes read-only. No data is deleted.</value></data>
+  <data name="T7.09.InVyxum" xml:space="preserve"><value>"Request a trial license" in the locked preview; a warning strip at the top of the screen during the grace period.</value></data>
+  <data name="T7.10.Name" xml:space="preserve"><value>Open core / Vyxum Pro</value></data>
+  <data name="T7.10.Text" xml:space="preserve"><value>The free, open-source core (weighing, records, products) and the paid modules unlocked with a license on top of it (Labels, Formulation, Net weight…).</value></data>
+  <data name="T7.10.InVyxum" xml:space="preserve"><value>Paid modules are under "Vyxum Pro" in the menu.</value></data>
+  <data name="S8.Title" xml:space="preserve"><value>Connecting scales and printers</value></data>
+  <data name="S8.Intro" xml:space="preserve"><value>Hardware words from the setup wizard and the Devices screen.</value></data>
+  <data name="T8.01.Name" xml:space="preserve"><value>Serial port / COM / RS232</value></data>
+  <data name="T8.01.Text" xml:space="preserve"><value>An old but common cable connection between scale and computer. In Windows it shows up with names like COM1 or COM3.</value></data>
+  <data name="T8.01.InVyxum" xml:space="preserve"><value>A device setting; the operator screen does not show the port name.</value></data>
+  <data name="T8.01.Example" xml:space="preserve"><value>Scale → COM3.</value></data>
+  <data name="T8.02.Name" xml:space="preserve"><value>Baud, parity, stop bits (8N1)</value></data>
+  <data name="T8.02.Text" xml:space="preserve"><value>The speed and format settings of a serial connection. If the two ends do not use the same settings, the data comes out as nonsense. 9600 8N1 is a common setting.</value></data>
+  <data name="T8.02.InVyxum" xml:space="preserve"><value>The setup wizard and the Devices screen; common settings are tried while searching for the scale.</value></data>
+  <data name="T8.03.Name" xml:space="preserve"><value>TCP/IP, port 9100</value></data>
+  <data name="T8.03.Text" xml:space="preserve"><value>A network connection. Label printers on a network usually take commands on port 9100.</value></data>
+  <data name="T8.03.InVyxum" xml:space="preserve"><value>Printers and scales can also connect over the network.</value></data>
+  <data name="T8.04.Name" xml:space="preserve"><value>Vyxum Agent</value></data>
+  <data name="T8.04.Text" xml:space="preserve"><value>A small program on the computer the scale and printer are connected to. It carries weights to the server and labels from the server to the printer.</value></data>
+  <data name="T8.04.InVyxum" xml:space="preserve"><value>Runs as a Windows service.</value></data>
+  <data name="T8.05.Name" xml:space="preserve"><value>Protocol</value></data>
+  <data name="T8.05.Text" xml:space="preserve"><value>The format in which the scale sends the weight. Some scales answer when asked; others send the weight continuously.</value></data>
+  <data name="T8.05.InVyxum" xml:space="preserve"><value>Choose the protocol that fits your scale in the device settings.</value></data>
+  <data name="T8.06.Name" xml:space="preserve"><value>Simulator</value></data>
+  <data name="T8.06.Text" xml:space="preserve"><value>A pretend scale that produces weights when there is no real one. For trials, training and demos.</value></data>
+  <data name="T8.06.InVyxum" xml:space="preserve"><value>Connection type "Simulator" in the device settings.</value></data>
+</root>

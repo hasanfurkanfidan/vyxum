@@ -2,6 +2,7 @@ import { useEffect, type ReactNode } from 'react';
 import { Navigate, Route, Routes, useLocation, useNavigate } from 'react-router-dom';
 import { onSignInRequired } from './lib/api';
 import { I18nProvider } from './i18n/I18nProvider';
+import { GlossaryPage } from './pages/GlossaryPage';
 import { ProductsPage } from './pages/ProductsPage';
 import { RecordsPage } from './pages/RecordsPage';
 import { WeighingPage } from './pages/WeighingPage';
@@ -104,6 +105,7 @@ function MainScreens() {
         <Route path={routes.settingsDevices} element={<DevicesPage />} />
         <Route path={routes.settingsLicense} element={<ModulesLicensePage />} />
         <Route path={routes.settingsAbout} element={<AboutPage />} />
+        <Route path={routes.glossary} element={<GlossaryPage />} />
         <Route path={routes.module} element={<ModuleScreen />} />
         <Route path="*" element={<Navigate to={routes.weighing} replace />} />
       </Routes>
