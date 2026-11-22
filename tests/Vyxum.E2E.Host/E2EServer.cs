@@ -16,7 +16,9 @@ namespace Vyxum.E2E.Host;
 /// <item>It also trusts a signing key generated at start-up. The key lives only in memory and dies with the process.</item>
 /// <item><c>GET /e2e/license</c> returns license files signed with that key, so scenarios can load valid, expired or
 /// damaged licenses without real license files.</item>
-/// <item>A simulated MT-SICS scale listens on the next port (<see cref="FakeScale"/>); <c>/e2e/scale</c> controls it.</item>
+/// <item>A simulated MT-SICS scale listens on the next port (<see cref="FakeScale"/>); <c>/e2e/scale</c> controls it.
+/// A second one listens on the port after it, for scenarios with two scales at a station; <c>/e2e/scale2</c> controls
+/// it. Setup adds only the first.</item>
 /// </list>
 /// The production keys stay trusted, so real license files work here as well.
 /// </summary>
@@ -30,7 +32,7 @@ public static class E2EServer
     /// <summary>
     /// Starts the server and runs until Ctrl+C, SIGTERM or the end of standard input.
     /// Arguments: <c>--port</c> (default 5390), <c>--data</c> (default: a new temporary folder),
-    /// <c>--scale-port</c> (default: port + 1), <c>--content-root</c> (default: the <c>src/Host/Vyxum.Host</c> folder of
+    /// <c>--scale-port</c> (default: port + 1), <c>--scale2-port</c> (default: port + 2), <c>--content-root</c> (default: the <c>src/Host/Vyxum.Host</c> folder of
 /// the checkout).
     /// Other <c>--Key value</c> pairs are passed to the host as configuration.
     /// </summary>
@@ -44,7 +46,9 @@ public static class E2EServer
         Directory.CreateDirectory(dataDirectory);
         var contentRoot = options.GetValueOrDefault("content-root") ?? FindHostContentRoot();
         var scalePort = int.Parse(options.GetValueOrDefault("scale-port", (port + 1).ToString(CultureInfo.InvariantCulture)), CultureInfo.InvariantCulture);
-        await using var scale = new FakeScale(scalePort);
+        var scale2Port = int.Parse(options.GetValueOrDefault("scale2-port", (port + 2).ToString(CultureInfo.InvariantCulture)), CultureInfo.InvariantCulture);
+        await using var scale = new FakeScale(scalePort, "E2E0000001");
+        await using var scale2 = new FakeScale(scale2Port, "E2E0000002");
 
         using var key = ECDsa.Create(ECCurve.NamedCurves.nistP256);
         var keyRing = LicenseKeyRing.FromBase64(
@@ -69,13 +73,13 @@ public static class E2EServer
             builder.ConfigureTestServices(services =>
             {
                 services.AddSingleton<ILicenseKeyRing>(keyRing);
-                services.AddSingleton<IStartupFilter>(new ControlEndpoints(signer, scale));
+                services.AddSingleton<IStartupFilter>(new ControlEndpoints(signer, scale, scale2));
             });
         });
         factory.UseKestrel(kestrel => kestrel.Listen(IPAddress.Loopback, port));
         factory.StartServer();
 
-        Console.WriteLine($"Vyxum E2E host listening on http://127.0.0.1:{port} (fake scale: tcp 127.0.0.1:{scale.Port}, data: {dataDirectory})");
+        Console.WriteLine($"Vyxum E2E host listening on http://127.0.0.1:{port} (fake scales: tcp 127.0.0.1:{scale.Port} and {scale2.Port}, data: {dataDirectory})");
 
         using var stop = new CancellationTokenSource();
         Console.CancelKeyPress += (_, e) => { e.Cancel = true; stop.Cancel(); };
@@ -123,11 +127,12 @@ public static class E2EServer
     }
 
     /// <summary>Adds the test-only endpoints in front of the host's own pipeline.</summary>
-    private sealed class ControlEndpoints(LicenseSigner signer, FakeScale scale) : IStartupFilter
+    private sealed class ControlEndpoints(LicenseSigner signer, FakeScale scale, FakeScale scale2) : IStartupFilter
     {
         public Action<IApplicationBuilder> Configure(Action<IApplicationBuilder> next) => app =>
         {
             app.Map(ControlPrefix + "/license", branch => branch.Run(context => WriteLicenseAsync(context, signer)));
+            app.Map(ControlPrefix + "/scale2", branch => branch.Run(scale2.HandleAsync));
             app.Map(ControlPrefix + "/scale", branch => branch.Run(scale.HandleAsync));
             next(app);
         };
