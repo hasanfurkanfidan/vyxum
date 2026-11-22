@@ -41,6 +41,8 @@ public class AgentContractTests
         AgentSide.AgentHubContract.DevicesChanged.ShouldBe(PlatformSide.AgentHubContract.DevicesChanged);
         AgentSide.AgentHubContract.Discover.ShouldBe(PlatformSide.AgentHubContract.Discover);
         AgentSide.AgentHubContract.ReportDiscoveryProgress.ShouldBe(PlatformSide.AgentHubContract.ReportDiscoveryProgress);
+        AgentSide.AgentHubContract.PrintRaw.ShouldBe(PlatformSide.AgentHubContract.PrintRaw);
+        AgentSide.AgentFeatures.RawPrint.ShouldBe(PlatformSide.AgentFeatures.RawPrint);
         AgentSide.AgentDeviceCommands.Zero.ShouldBe(DeviceCommandNames.Zero);
     }
 
@@ -67,6 +69,8 @@ public class AgentContractTests
     [InlineData(typeof(AgentSide.DiscoveryPortState), typeof(PlatformSide.DiscoveryPortState))]
     [InlineData(typeof(AgentSide.DiscoveryReading), typeof(PlatformSide.DiscoveryReading))]
     [InlineData(typeof(AgentSide.DiscoveryCandidate), typeof(PlatformSide.DiscoveryCandidate))]
+    [InlineData(typeof(AgentSide.AgentPrintRequest), typeof(PlatformSide.AgentPrintRequest))]
+    [InlineData(typeof(AgentSide.AgentPrintResult), typeof(PlatformSide.AgentPrintResult))]
     public void Dtos_have_the_same_properties(Type agentType, Type platformType)
     {
         var agentProperties = Properties(agentType);
@@ -108,6 +112,8 @@ public class AgentContractTests
         Enum.GetNames<DeviceStatus>().ShouldBe(Enum.GetNames<DeviceConnectionState>());
         Enum.GetNames<AgentSide.AgentCommandOutcome>().ShouldBe(Enum.GetNames<DeviceCommandOutcome>());
         Enum.GetNames<AgentSide.DiscoveryPortStatus>().ShouldBe(Enum.GetNames<PlatformSide.DiscoveryPortStatus>());
+        Enum.GetNames<AgentSide.AgentPrinterConnection>().ShouldBe(Enum.GetNames<RawPrinterConnection>());
+        Enum.GetNames<AgentSide.AgentPrintOutcome>().ShouldBe(Enum.GetNames<RawPrintOutcome>());
     }
 
     [Theory]
@@ -323,6 +329,59 @@ public class AgentContractTests
         method.ShouldNotBeNull();
         method.GetParameters()[0].ParameterType.ShouldBe(typeof(AgentSide.DiscoveryRequest));
         method.ReturnType.ShouldBe(typeof(Task<AgentSide.DiscoveryResult>));
+    }
+
+    [Fact]
+    public void Registration_features_are_read_by_the_platform()
+    {
+        var sent = new AgentSide.AgentRegistration("PC-1", "1.0.0", [], null, [AgentSide.AgentFeatures.RawPrint]);
+
+        var received = JsonSerializer.Deserialize<PlatformSide.AgentRegistration>(JsonSerializer.Serialize(sent, Json), Json);
+
+        received.ShouldNotBeNull();
+        received.Features.ShouldBe([PlatformSide.AgentFeatures.RawPrint]);
+    }
+
+    [Fact]
+    public void Print_request_written_by_the_platform_is_read_by_the_agent()
+    {
+        var sent = new PlatformSide.AgentPrintRequest(
+            RawPrinterConnection.Serial, null, null, "COM4", 9600, [0x02, 0x7E, 0xFF], 16, TimeSpan.FromSeconds(2), 0x03, TimeSpan.FromSeconds(28));
+
+        var json = JsonSerializer.Serialize(sent, Json);
+        var received = JsonSerializer.Deserialize<AgentSide.AgentPrintRequest>(json, Json);
+
+        json.ShouldContain("\"connection\":\"Serial\"");
+        received.ShouldNotBeNull();
+        received.Connection.ShouldBe(AgentSide.AgentPrinterConnection.Serial);
+        received.PortName.ShouldBe("COM4");
+        received.BaudRate.ShouldBe(9600);
+        received.Data.ShouldBe(new byte[] { 0x02, 0x7E, 0xFF });
+        received.ReplyMaxBytes.ShouldBe(16);
+        received.ReplyTimeout.ShouldBe(TimeSpan.FromSeconds(2));
+        received.ReplyEndByte.ShouldBe((byte)0x03);
+        received.Timeout.ShouldBe(TimeSpan.FromSeconds(28));
+    }
+
+    [Fact]
+    public void Print_result_written_by_the_agent_is_read_by_the_platform()
+    {
+        var json = JsonSerializer.Serialize(new AgentSide.AgentPrintResult(AgentSide.AgentPrintOutcome.Sent, [0x02, 0x31, 0x03]), Json);
+        var received = JsonSerializer.Deserialize<PlatformSide.AgentPrintResult>(json, Json);
+
+        json.ShouldContain("\"outcome\":\"Sent\"");
+        received.ShouldNotBeNull();
+        received.Outcome.ShouldBe(RawPrintOutcome.Sent);
+        received.Reply.ShouldBe(new byte[] { 0x02, 0x31, 0x03 });
+    }
+
+    [Fact]
+    public void PrintRaw_client_method_has_the_contract_signature_on_the_agent()
+    {
+        var method = typeof(RawPrinter).GetMethod(nameof(RawPrinter.PrintAsync));
+        method.ShouldNotBeNull();
+        method.GetParameters().Select(p => p.ParameterType).ShouldBe([typeof(AgentSide.AgentPrintRequest), typeof(CancellationToken)]);
+        method.ReturnType.ShouldBe(typeof(Task<AgentSide.AgentPrintResult>));
     }
 
     private static PropertyInfo[] Properties(Type type) =>

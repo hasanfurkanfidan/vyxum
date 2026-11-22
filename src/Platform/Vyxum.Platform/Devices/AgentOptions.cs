@@ -23,4 +23,10 @@ public sealed class AgentOptions
     /// <c>devices.AgentTimeout</c>. Default: 60 seconds.
     /// </summary>
     public TimeSpan DiscoveryTimeout { get; set; } = TimeSpan.FromSeconds(60);
+
+    /// <summary>
+    /// How long a print job may take, including the round trip to the agent. After it the result is
+    /// <see cref="Abstractions.RawPrintOutcome.Uncertain"/>. Default: 30 seconds.
+    /// </summary>
+    public TimeSpan PrintTimeout { get; set; } = TimeSpan.FromSeconds(30);
 }

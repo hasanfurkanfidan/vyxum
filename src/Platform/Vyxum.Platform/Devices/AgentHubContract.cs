@@ -52,7 +52,50 @@ public static class AgentHubContract
 
     /// <summary>Hub method: <c>ReportDiscoveryProgress(string discoveryId, DiscoveryPortState[] ports)</c>, sent while scanning.</summary>
     public const string ReportDiscoveryProgress = "ReportDiscoveryProgress";
+
+    /// <summary>
+    /// Client method invoked with a result: <c>AgentPrintResult PrintRaw(AgentPrintRequest request)</c>. The agent sends
+    /// the bytes to the printer at most once and answers within <c>request.Timeout</c>. Only sent to agents that list
+    /// <see cref="AgentFeatures.RawPrint"/> when they register.
+    /// </summary>
+    public const string PrintRaw = "PrintRaw";
 }
+
+/// <summary>Names of the features an agent lists in <see cref="AgentRegistration.Features"/>.</summary>
+public static class AgentFeatures
+{
+    /// <summary>The agent carries out <see cref="AgentHubContract.PrintRaw"/>.</summary>
+    public const string RawPrint = "RawPrint";
+}
+
+/// <summary>A print job sent to an agent with <see cref="AgentHubContract.PrintRaw"/>.</summary>
+/// <param name="Connection">How the printer is connected.</param>
+/// <param name="Host">Network: host name or IP address.</param>
+/// <param name="Port">Network: TCP port.</param>
+/// <param name="PortName">Serial: the port name.</param>
+/// <param name="BaudRate">Serial: baud rate (8N1).</param>
+/// <param name="Data">The bytes to send.</param>
+/// <param name="ReplyMaxBytes">When above 0, the answer is read after sending, up to this many bytes.</param>
+/// <param name="ReplyTimeout">How long to wait for the answer.</param>
+/// <param name="ReplyEndByte">When set, reading stops after this byte.</param>
+/// <param name="Timeout">How long the whole job may take on the agent.</param>
+public sealed record AgentPrintRequest(
+    RawPrinterConnection Connection,
+    string? Host,
+    int? Port,
+    string? PortName,
+    int? BaudRate,
+    byte[] Data,
+    int ReplyMaxBytes,
+    TimeSpan ReplyTimeout,
+    byte? ReplyEndByte,
+    TimeSpan Timeout);
+
+/// <summary>The answer of an agent to <see cref="AgentHubContract.PrintRaw"/>.</summary>
+/// <param name="Outcome">The outcome. An agent answers <c>Sent</c>, <c>Unavailable</c>, <c>Refused</c> or <c>Failed</c>.</param>
+/// <param name="Reply">The printer's answer when one was asked for.</param>
+/// <param name="Detail">A short English explanation for logs.</param>
+public sealed record AgentPrintResult(RawPrintOutcome Outcome, byte[]? Reply = null, string? Detail = null);
 
 /// <summary>What <see cref="AgentHubContract.Discover"/> should scan.</summary>
 /// <param name="DiscoveryId">The id of the discovery job; progress reports carry it.</param>
@@ -141,11 +184,13 @@ public sealed record AgentDeviceConfig(string Id, JsonElement Transport, JsonEle
 /// For each device id, the commands it supports (see <see cref="DeviceCommandNames"/>); null from an agent that does
 /// not report them, which means none.
 /// </param>
+/// <param name="Features">The features of the agent (see <see cref="AgentFeatures"/>); null from an older agent, which means none.</param>
 public sealed record AgentRegistration(
     string AgentName,
     string? Version,
     IReadOnlyList<string> DeviceIds,
-    IReadOnlyDictionary<string, IReadOnlyList<string>>? DeviceCommands = null);
+    IReadOnlyDictionary<string, IReadOnlyList<string>>? DeviceCommands = null,
+    IReadOnlyList<string>? Features = null);
 
 /// <summary>The answer of an agent to a device command.</summary>
 /// <param name="Result">The outcome.</param>

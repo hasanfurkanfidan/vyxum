@@ -30,7 +30,8 @@ public sealed partial class AgentHub(
             throw new HubException("Device ids must not be empty.");
         }
 
-        var conflicts = store.RegisterAgent(Context.ConnectionId, registration.AgentName, deviceIds, registration.DeviceCommands);
+        var conflicts = store.RegisterAgent(
+            Context.ConnectionId, registration.AgentName, deviceIds, registration.DeviceCommands, registration.Features);
         LogRegistered(logger, registration.AgentName, registration.Version, deviceIds.Count);
         foreach (var (deviceId, heldBy) in conflicts)
         {

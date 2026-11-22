@@ -9,7 +9,7 @@ public static class AgentHubServiceCollectionExtensions
 {
     /// <summary>
     /// Registers SignalR (enums as strings), <see cref="AgentOptions"/>, <see cref="AgentConnectionGate"/>, the device settings (<see cref="DeviceConfigService"/>) and
-    /// <see cref="Abstractions.IDeviceCommands"/> (sent through the hub).
+    /// <see cref="Abstractions.IDeviceCommands"/> and <see cref="Abstractions.IRawPrinterChannel"/> (sent through the hub).
     /// Call after <see cref="PlatformServiceCollectionExtensions.AddVyxumPlatform(IServiceCollection, IConfiguration, IEnumerable{Abstractions.IModule})"/>
     /// in a web host, then map the hub with <see cref="DeviceEndpointExtensions.MapVyxumDevices"/>.
     /// </summary>
@@ -21,6 +21,7 @@ public static class AgentHubServiceCollectionExtensions
         services.Configure<AgentOptions>(configuration.GetSection(AgentOptions.SectionName));
         services.AddSingleton<AgentConnectionGate>();
         services.AddSingleton<Abstractions.IDeviceCommands, AgentDeviceCommands>();
+        services.AddSingleton<Abstractions.IRawPrinterChannel, AgentRawPrinterChannel>();
 
         // Device settings (decision V-39): /api/devices/config, hub GetDevices and DevicesChanged.
         services.AddSingleton<AgentDeviceAssignments>();
