@@ -10,6 +10,7 @@ import {
   type Product,
   type ProductField,
   type ProductInput,
+  type SaleUnit,
 } from '../lib/products';
 
 interface FormValues {
@@ -23,6 +24,8 @@ interface FormValues {
   targetWeight: string;
   lowerTolerance: string;
   upperTolerance: string;
+  saleUnit: SaleUnit;
+  unitCost: string;
 }
 
 type FieldErrors = Partial<Record<ProductField, readonly string[]>>;
@@ -38,6 +41,8 @@ const emptyValues: FormValues = {
   targetWeight: '',
   lowerTolerance: '',
   upperTolerance: '',
+  saleUnit: 'Kg',
+  unitCost: '',
 };
 
 export interface ProductCardProps {
@@ -60,6 +65,8 @@ function toValues(product: Product | null, culture: 'tr' | 'en'): FormValues {
     targetWeight: toInputDecimal(product.targetWeight, culture),
     lowerTolerance: toInputDecimal(product.lowerTolerance, culture),
     upperTolerance: toInputDecimal(product.upperTolerance, culture),
+    saleUnit: product.saleUnit ?? 'Kg',
+    unitCost: toInputDecimal(product.unitCost ?? null, culture),
   };
 }
 
@@ -167,6 +174,8 @@ export function ProductCard({ product: initial, onChanged }: ProductCardProps) {
       targetWeight: optionalDecimal(values.targetWeight),
       lowerTolerance: optionalDecimal(values.lowerTolerance),
       upperTolerance: optionalDecimal(values.upperTolerance),
+      saleUnit: values.saleUnit,
+      unitCost: optionalDecimal(values.unitCost),
     };
 
     setBusy(true);
@@ -270,6 +279,26 @@ export function ProductCard({ product: initial, onChanged }: ProductCardProps) {
               />
             )}
           </Field>
+          <Field id={fieldId('unitCost')} label={t('products.UnitCostPerKg')} errors={errors.unitCost}>
+            {(a) => (
+              <input
+                {...a}
+                className="input input--mono"
+                type="text"
+                inputMode="decimal"
+                value={values.unitCost}
+                onChange={(event) => set('unitCost', event.target.value)}
+              />
+            )}
+          </Field>
+          <Field id={fieldId('saleUnit')} label={t('products.SaleUnit')} errors={errors.saleUnit}>
+            {(a) => (
+              <select {...a} className="input" value={values.saleUnit} onChange={(event) => set('saleUnit', event.target.value)}>
+                <option value="Kg">{t('products.SaleUnitKg')}</option>
+                <option value="Piece">{t('products.SaleUnitPiece')}</option>
+              </select>
+            )}
+          </Field>
           <Field id={fieldId('shelfLifeDays')} label={t('products.ShelfLife')} errors={errors.shelfLifeDays}>
             {(a) => (
               <input
@@ -285,7 +314,7 @@ export function ProductCard({ product: initial, onChanged }: ProductCardProps) {
           <Field
             id={fieldId('targetWeight')}
             label={t('products.TargetWeight')}
-            hint={t('products.ToleranceHint')}
+            hint={values.saleUnit === 'Piece' ? t('products.SaleUnitHint') : t('products.ToleranceHint')}
             errors={errors.targetWeight}
             wide
           >

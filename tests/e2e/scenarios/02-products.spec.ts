@@ -16,6 +16,10 @@ test('Products: add a card, refuse a duplicate PLU, find by PLU', async ({ page,
     await page.getByLabel(t('products.TargetWeight'), { exact: true }).fill('0.250');
     await page.getByLabel(t('products.LowerTolerance'), { exact: true }).fill('0.005');
     await page.getByLabel(t('products.UpperTolerance'), { exact: true }).fill('0.010');
+    // Sold by the piece: the target weight is the weight of one piece (work orders in pieces turn into kg with it).
+    await page.getByLabel(t('products.UnitCostPerKg'), { exact: true }).fill('95');
+    await page.getByLabel(t('products.SaleUnit'), { exact: true }).selectOption('Piece');
+    await expect(page.getByText(t('products.SaleUnitHint'))).toBeVisible();
     await shot('yeni-urun-formu');
     await page.getByRole('button', { name: exact(t('products.Save')) }).click();
     await expect(page.getByText(t('products.Saved'))).toBeVisible();
