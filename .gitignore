@@ -28,6 +28,9 @@ artifacts/
 # Node and the built frontend (served by the host, produced by src/Web/vyxum-web)
 src/Host/Vyxum.Host/wwwroot/
 node_modules/
+
+# End-to-end screen check output (tests/e2e; run.mjs writes to artifacts/e2e/)
+tests/e2e/results/
 dist/
 npm-debug.log*
 yarn-debug.log*
