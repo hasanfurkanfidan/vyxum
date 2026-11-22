@@ -24,6 +24,10 @@ namespace Vyxum.Modules.Weighing;
 /// <param name="TargetWeight">Target weight in kg on the product when the record was saved, if any.</param>
 /// <param name="LowerTolerance">Allowed amount below the target in kg, if any.</param>
 /// <param name="UpperTolerance">Allowed amount above the target in kg, if any.</param>
+/// <param name="LabelRequested">
+/// True when the operator asked for a label with this record ("Save and print label"). The weighing module does not
+/// print; a label module that is present reacts to it. False in events written before the field existed.
+/// </param>
 [IntegrationEvent("weighing.recorded", 1)]
 public sealed record WeighingRecorded(
     long RecordId,
@@ -46,7 +50,8 @@ public sealed record WeighingRecorded(
     string? Operator,
     decimal? TargetWeight = null,
     decimal? LowerTolerance = null,
-    decimal? UpperTolerance = null) : IIntegrationEvent;
+    decimal? UpperTolerance = null,
+    bool LabelRequested = false) : IIntegrationEvent;
 
 /// <summary>Published when a weighing record is cancelled.</summary>
 /// <param name="RecordId">Record id.</param>

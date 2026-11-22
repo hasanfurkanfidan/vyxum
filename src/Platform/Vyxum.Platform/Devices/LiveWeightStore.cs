@@ -15,6 +15,7 @@ public sealed class LiveWeightStore(TimeProvider time) : ILiveWeightSource
     private readonly Lock _lock = new();
     private readonly Dictionary<string, DeviceEntry> _devices = new(StringComparer.Ordinal);
     private readonly Dictionary<string, string> _agentNames = new(StringComparer.Ordinal);
+    private readonly Dictionary<string, HashSet<string>> _agentFeatures = new(StringComparer.Ordinal);
     private readonly Dictionary<string, HashSet<string>> _registeredDevices = new(StringComparer.Ordinal);
 
     /// <summary>
@@ -32,7 +33,8 @@ public sealed class LiveWeightStore(TimeProvider time) : ILiveWeightSource
         string connectionId,
         string agentName,
         IEnumerable<string> deviceIds,
-        IReadOnlyDictionary<string, IReadOnlyList<string>>? deviceCommands = null)
+        IReadOnlyDictionary<string, IReadOnlyList<string>>? deviceCommands = null,
+        IReadOnlyList<string>? features = null)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(connectionId);
         ArgumentException.ThrowIfNullOrWhiteSpace(agentName);
@@ -44,6 +46,8 @@ public sealed class LiveWeightStore(TimeProvider time) : ILiveWeightSource
         lock (_lock)
         {
             _agentNames[connectionId] = agentName;
+            _agentFeatures[connectionId] = new HashSet<string>(
+                (features ?? []).Where(f => !string.IsNullOrWhiteSpace(f)), StringComparer.Ordinal);
             _registeredDevices[connectionId] = new HashSet<string>(ids, StringComparer.Ordinal);
 
             // A registration lists every device the agent serves now; the ones it dropped are released.
@@ -112,6 +116,18 @@ public sealed class LiveWeightStore(TimeProvider time) : ILiveWeightSource
         lock (_lock)
         {
             return _agentNames.GetValueOrDefault(connectionId);
+        }
+    }
+
+    /// <summary>True when the agent connection listed the feature when it registered (see <see cref="AgentFeatures"/>).</summary>
+    public bool HasFeature(string connectionId, string feature)
+    {
+        ArgumentNullException.ThrowIfNull(connectionId);
+        ArgumentNullException.ThrowIfNull(feature);
+
+        lock (_lock)
+        {
+            return _agentFeatures.TryGetValue(connectionId, out var features) && features.Contains(feature);
         }
     }
 
@@ -210,6 +226,7 @@ public sealed class LiveWeightStore(TimeProvider time) : ILiveWeightSource
         lock (_lock)
         {
             _agentNames.Remove(connectionId);
+            _agentFeatures.Remove(connectionId);
             _registeredDevices.Remove(connectionId);
             var count = 0;
             foreach (var entry in _devices.Values.Where(e => e.ConnectionId == connectionId).ToList())

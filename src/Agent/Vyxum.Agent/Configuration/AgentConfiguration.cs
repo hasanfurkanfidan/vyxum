@@ -117,6 +117,14 @@ public static class AgentConfiguration
         RequirePositive(errors, $"{root}:HeartbeatInterval", settings.HeartbeatInterval);
         RequirePositive(errors, $"{root}:ReconnectDelay", settings.ReconnectDelay);
         RequirePositive(errors, $"{root}:MaxReconnectDelay", settings.MaxReconnectDelay);
+        RequirePositive(errors, $"{root}:Printing:ConnectTimeout", settings.Printing.ConnectTimeout);
+        foreach (var port in settings.Printing.AllowedTcpPorts ?? [])
+        {
+            if (port is < 1 or > 65535)
+            {
+                errors.Add($"{root}:Printing:AllowedTcpPorts: {port} is not a TCP port (1 to 65535).");
+            }
+        }
 
         var devices = new List<AgentDevice>();
         var ids = new HashSet<string>(StringComparer.OrdinalIgnoreCase);

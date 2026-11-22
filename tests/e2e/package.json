@@ -1,0 +1,17 @@
+{
+  "name": "vyxum-e2e",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "license": "Apache-2.0",
+  "description": "End-to-end screen check: the real host, the real agent and a simulated scale, driven in a real browser.",
+  "scripts": {
+    "check": "node run.mjs",
+    "typecheck": "tsc --noEmit -p tsconfig.json"
+  },
+  "devDependencies": {
+    "@playwright/test": "1.63.0",
+    "@types/node": "^22.19.0",
+    "typescript": "~5.9"
+  }
+}

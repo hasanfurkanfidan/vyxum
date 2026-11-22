@@ -49,7 +49,80 @@ public static class AgentHubContract
 
     /// <summary>Hub method: <c>ReportDiscoveryProgress(string discoveryId, DiscoveryPortState[] ports)</c>, sent while scanning.</summary>
     public const string ReportDiscoveryProgress = "ReportDiscoveryProgress";
+
+    /// <summary>
+    /// Client method invoked with a result: <c>AgentPrintResult PrintRaw(AgentPrintRequest request)</c>. The agent sends
+    /// the bytes to the printer at most once and answers within <c>request.Timeout</c>.
+    /// </summary>
+    public const string PrintRaw = "PrintRaw";
 }
+
+/// <summary>Names of the features listed in <see cref="AgentRegistration.Features"/>.</summary>
+public static class AgentFeatures
+{
+    /// <summary>The agent carries out <see cref="AgentHubContract.PrintRaw"/>.</summary>
+    public const string RawPrint = "RawPrint";
+}
+
+/// <summary>How a printer is connected.</summary>
+public enum AgentPrinterConnection
+{
+    /// <summary>Over TCP.</summary>
+    Network,
+
+    /// <summary>On a serial port.</summary>
+    Serial,
+}
+
+/// <summary>A print job from the web application.</summary>
+/// <param name="Connection">How the printer is connected.</param>
+/// <param name="Host">Network: host name or IP address.</param>
+/// <param name="Port">Network: TCP port.</param>
+/// <param name="PortName">Serial: the port name.</param>
+/// <param name="BaudRate">Serial: baud rate (8N1).</param>
+/// <param name="Data">The bytes to send.</param>
+/// <param name="ReplyMaxBytes">When above 0, the answer is read after sending, up to this many bytes.</param>
+/// <param name="ReplyTimeout">How long to wait for the answer.</param>
+/// <param name="ReplyEndByte">When set, reading stops after this byte has arrived <paramref name="ReplyEndCount"/> times.</param>
+/// <param name="ReplyEndCount">How many end bytes end the answer.</param>
+/// <param name="Timeout">How long the whole job may take.</param>
+public sealed record AgentPrintRequest(
+    AgentPrinterConnection Connection,
+    string? Host,
+    int? Port,
+    string? PortName,
+    int? BaudRate,
+    byte[] Data,
+    int ReplyMaxBytes,
+    TimeSpan ReplyTimeout,
+    byte? ReplyEndByte,
+    int ReplyEndCount,
+    TimeSpan Timeout);
+
+/// <summary>The outcome of a print job. The agent answers only the first four.</summary>
+public enum AgentPrintOutcome
+{
+    /// <summary>Every byte was written to the printer connection.</summary>
+    Sent,
+
+    /// <summary>Printing is turned off on this agent, or the job is not valid; nothing was sent.</summary>
+    Unavailable,
+
+    /// <summary>The target is not allowed on this agent; nothing was sent.</summary>
+    Refused,
+
+    /// <summary>The printer could not be reached or the connection broke.</summary>
+    Failed,
+
+    /// <summary>Used by the web application only.</summary>
+    Uncertain,
+}
+
+/// <summary>The answer to <see cref="AgentHubContract.PrintRaw"/>.</summary>
+/// <param name="Outcome">The outcome.</param>
+/// <param name="Reply">The printer's answer when one was asked for.</param>
+/// <param name="Detail">A short English explanation for logs.</param>
+public sealed record AgentPrintResult(AgentPrintOutcome Outcome, byte[]? Reply = null, string? Detail = null);
 
 /// <summary>What <see cref="AgentHubContract.Discover"/> should scan.</summary>
 /// <param name="DiscoveryId">The id of the discovery job in the web application; progress reports carry it.</param>
@@ -142,11 +215,13 @@ public static class AgentDeviceCommands
 /// <param name="Version">The agent version.</param>
 /// <param name="DeviceIds">The devices the agent serves.</param>
 /// <param name="DeviceCommands">For each device id, the commands it supports (see <see cref="AgentDeviceCommands"/>).</param>
+/// <param name="Features">The features of the agent (see <see cref="AgentFeatures"/>).</param>
 public sealed record AgentRegistration(
     string AgentName,
     string? Version,
     IReadOnlyList<string> DeviceIds,
-    IReadOnlyDictionary<string, IReadOnlyList<string>>? DeviceCommands = null);
+    IReadOnlyDictionary<string, IReadOnlyList<string>>? DeviceCommands = null,
+    IReadOnlyList<string>? Features = null);
 
 /// <summary>The outcome of a device command.</summary>
 public enum AgentCommandOutcome

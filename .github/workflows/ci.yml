@@ -63,6 +63,45 @@ jobs:
 
       - run: npm run build
 
+  # The end-to-end screen check (tests/e2e): the real host, agent and a simulated scale, driven in Chromium.
+  # The report and every screenshot are uploaded as the "e2e-report" artifact, also when a scenario fails.
+  e2e:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 10.0.x
+          global-json-file: global.json
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: |
+            src/Web/vyxum-web/package-lock.json
+            tests/e2e/package-lock.json
+
+      - run: npm ci
+        working-directory: tests/e2e
+
+      - run: npx playwright install --with-deps chromium
+        working-directory: tests/e2e
+
+      - run: npm run typecheck
+        working-directory: tests/e2e
+
+      - run: node tests/e2e/run.mjs --out artifacts/e2e/ci --real-url none
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: e2e-report
+          path: artifacts/e2e/ci
+          if-no-files-found: ignore
+
   installer:
     runs-on: windows-latest
 

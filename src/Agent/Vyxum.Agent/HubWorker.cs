@@ -35,6 +35,7 @@ public sealed partial class HubWorker : BackgroundService
 
     private readonly DeviceFleet _fleet;
     private readonly DeviceDiscovery _discovery;
+    private readonly RawPrinter _printer;
     private readonly AgentHubClientOptions _clientOptions;
     private readonly ILogger<HubWorker> _logger;
     private readonly TimeProvider _time;
@@ -51,15 +52,18 @@ public sealed partial class HubWorker : BackgroundService
     public HubWorker(
         DeviceFleet fleet,
         DeviceDiscovery discovery,
+        RawPrinter printer,
         IOptions<AgentHubClientOptions> clientOptions,
         ILogger<HubWorker> logger,
         TimeProvider timeProvider)
     {
         ArgumentNullException.ThrowIfNull(fleet);
         ArgumentNullException.ThrowIfNull(discovery);
+        ArgumentNullException.ThrowIfNull(printer);
         ArgumentNullException.ThrowIfNull(clientOptions);
         _fleet = fleet;
         _discovery = discovery;
+        _printer = printer;
         _clientOptions = clientOptions.Value;
         _logger = logger;
         _time = timeProvider;
@@ -98,6 +102,11 @@ public sealed partial class HubWorker : BackgroundService
                     request,
                     ports => connection.SendAsync(AgentHubContract.ReportDiscoveryProgress, request.DiscoveryId, ports, stoppingToken),
                     stoppingToken));
+
+            // Called by the web application with a result: send a print job to a printer connected to this computer.
+            connection.On<AgentPrintRequest, AgentPrintResult>(
+                AgentHubContract.PrintRaw,
+                request => _printer.PrintAsync(request, stoppingToken));
 
             if (!_fleet.UsesLocalDevices)
             {
@@ -355,7 +364,8 @@ public sealed partial class HubWorker : BackgroundService
     {
         var deviceIds = _fleet.DeviceIds;
         var commands = deviceIds.ToDictionary(id => id, _fleet.GetSupportedCommands, StringComparer.Ordinal);
-        var registration = new AgentRegistration(_fleet.Settings.EffectiveAgentName, _version, deviceIds, commands);
+        IReadOnlyList<string> features = _printer.Enabled ? [AgentFeatures.RawPrint] : [];
+        var registration = new AgentRegistration(_fleet.Settings.EffectiveAgentName, _version, deviceIds, commands, features);
         using var timeout = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
         timeout.CancelAfter(SendTimeout);
         await connection.InvokeAsync(AgentHubContract.Register, registration, timeout.Token).ConfigureAwait(false);

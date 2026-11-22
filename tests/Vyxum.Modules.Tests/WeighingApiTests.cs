@@ -54,6 +54,26 @@ public class WeighingApiTests
     private static Dictionary<string, string?> Settings(params (string Key, string Value)[] values) =>
         values.ToDictionary(v => $"Vyxum:Weighing:{v.Key}", v => (string?)v.Value);
 
+    [Fact]
+    public async Task Save_and_print_asks_for_a_label_in_the_event_and_a_retry_does_not_ask_again()
+    {
+        await using var app = await WeighingTestApp.StartAsync(DatabaseProvider.Sqlite);
+        await app.DeliverAsync(Product(Pistachio));
+        app.Scale.Set(Scale, 1.260m, "kg");
+        var requestId = Guid.NewGuid();
+
+        await CreateAsync(app, new { requestId, deviceId = Scale, productId = Pistachio, printLabel = true });
+        var (again, _) = await app.SendAsync(HttpMethod.Post, "/api/weighing/records", new { requestId, deviceId = Scale, productId = Pistachio, printLabel = true });
+        again.StatusCode.ShouldBe(HttpStatusCode.OK);
+
+        var message = (await app.OutboxAsync()).ShouldHaveSingleItem();
+        JsonSerializer.Deserialize<WeighingRecorded>(message.Payload, JsonSerializerOptions.Web)!.LabelRequested.ShouldBeTrue();
+
+        // An event written before the field existed reads as "no label".
+        var old = JsonSerializer.Deserialize<WeighingRecorded>(message.Payload.Replace("\"labelRequested\":true", "\"x\":0", StringComparison.Ordinal), JsonSerializerOptions.Web)!;
+        old.LabelRequested.ShouldBeFalse();
+    }
+
     [Theory]
     [InlineData(DatabaseProvider.Sqlite)]
     [InlineData(DatabaseProvider.SqlServer)]
@@ -118,6 +138,7 @@ public class WeighingApiTests
         recorded.TargetWeight.ShouldBe(1.25m);
         recorded.LowerTolerance.ShouldBe(0.005m);
         recorded.UpperTolerance.ShouldBe(0.01m);
+        recorded.LabelRequested.ShouldBeFalse();
 
         var stored = await app.WithDbAsync(db => Task.FromResult(db.Records.Single()));
         stored.NetMilligrams.ShouldBe(1_248_000);

@@ -32,6 +32,7 @@
     <Project Path="tests/Vyxum.ArchitectureTests/Vyxum.ArchitectureTests.csproj" />
     <Project Path="tests/Vyxum.Desktop.Tests/Vyxum.Desktop.Tests.csproj" />
     <Project Path="tests/Vyxum.Devices.Tests/Vyxum.Devices.Tests.csproj" />
+    <Project Path="tests/Vyxum.E2E.Host/Vyxum.E2E.Host.csproj" />
     <Project Path="tests/Vyxum.IntegrationTests/Vyxum.IntegrationTests.csproj" />
     <Project Path="tests/Vyxum.Licensing.Tests/Vyxum.Licensing.Tests.csproj" />
     <Project Path="tests/Vyxum.Modules.Tests/Vyxum.Modules.Tests.csproj" />
