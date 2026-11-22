@@ -1,3 +1,4 @@
+using System.Globalization;
 using System.Reflection;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.Configuration;
@@ -104,6 +105,10 @@ public static class PlatformServiceCollectionExtensions
         var dataDirectory = DatabaseSettings.GetDataDirectory(configuration);
         services.AddUiStrings(SetupStrings.KeyPrefix, SetupStrings.ResourceManager);
         services.AddUiStrings(LicenseStrings.KeyPrefix, LicenseStrings.ResourceManager);
+
+        // Glossary (GET /api/glossary): free, offline, part of the platform.
+        services.AddUiStrings(GlossaryStrings.KeyPrefix, GlossaryStrings.ResourceManager);
+        services.AddSingleton(new GlossaryCatalog(GlossaryStrings.Terms, [CultureInfo.GetCultureInfo("en"), CultureInfo.GetCultureInfo("tr")]));
         services.AddScoped<IPlatformSettings, PlatformSettings>();
         services.AddSingleton(new VyxumSettingsFile(Path.Combine(dataDirectory, VyxumSettingsFile.FileName)));
         services.AddSingleton(provider => new SetupState(

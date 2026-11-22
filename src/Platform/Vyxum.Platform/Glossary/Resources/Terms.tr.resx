@@ -1,0 +1,502 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype"><value>text/microsoft-resx</value></resheader>
+  <resheader name="version"><value>2.0</value></resheader>
+  <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+  <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+  <data name="S0.Title" xml:space="preserve"><value>En çok karıştırılanlar</value></data>
+  <data name="S0.Intro" xml:space="preserve"><value>Birbirine benzeyen ama Vyxum'da farklı şey anlatan kelimeler.</value></data>
+  <data name="T0.01.Name" xml:space="preserve"><value>Parti ve lot</value></data>
+  <data name="T0.01.Text" xml:space="preserve"><value>Türkçede ikisi de birlikte üretilmiş mal grubunu anlatabilir. Vyxum'da parti üç yerde geçer: Formülasyon'da bir reçetenin bir kez karıştırılması, Net ağırlık kontrolünde birlikte değerlendirilen paket grubu (ör. bir saatlik üretim) ve etikette yazan parti numarası. Lot genelde tedarikçinin çuvalındaki hammadde partisi için kullanılır.</value></data>
+  <data name="T0.02.Name" xml:space="preserve"><value>Dara ve sıfırlama</value></data>
+  <data name="T0.02.Text" xml:space="preserve"><value>Sıfırlama, boş terazinin göstergesini 0'a çeker (üstünde kalan toz, kayma). Dara ise kabın ya da ambalajın ağırlığını düşer ki net görünsün. Sıfırlama komutu teraziye gider; Vyxum'da dara yazılımda tutulur.</value></data>
+  <data name="T0.03.Name" xml:space="preserve"><value>Qn ve dolum hedefi</value></data>
+  <data name="T0.03.Text" xml:space="preserve"><value>Qn etikette yazan miktardır (250 g). Dolum hedefi makinenin doldurmaya çalıştığı miktardır, genelde biraz fazladır (253 g). Net ağırlık kontrolü Qn'ye bakar.</value></data>
+  <data name="T0.04.Name" xml:space="preserve"><value>Tolerans ve TNE</value></data>
+  <data name="T0.04.Text" xml:space="preserve"><value>Tolerans firmanın kendi koyduğu kabul aralığıdır (ör. hedef ± 5 g). TNE yönetmeliğin izin verdiği eksi hatadır; elle girilmez, Qn'den hesaplanır.</value></data>
+  <data name="T0.05.Name" xml:space="preserve"><value>Kalibrasyon ve damga</value></data>
+  <data name="T0.05.Text" xml:space="preserve"><value>Kalibrasyon, terazinin ne kadar şaştığını referans ağırlıklarla ölçüp belgelemektir. Damga (muayene), yetkili kuruluşun teraziyi ticarette kullanılabilir diye onaylayıp mühürlemesidir. Biri teknik, öteki yasaldır.</value></data>
+  <data name="T0.06.Name" xml:space="preserve"><value>TETT ve STT</value></data>
+  <data name="T0.06.Text" xml:space="preserve"><value>Tavsiye edilen tüketim tarihi (TETT) kaliteyle ilgilidir; geçince ürün tehlikeli olmaz ama tazeliğini yitirebilir. Son tüketim tarihi (STT) çabuk bozulan ürünlerde güvenlikle ilgilidir; geçince ürün tüketilmez.</value></data>
+  <data name="T0.07.Name" xml:space="preserve"><value>Paket, koli, palet</value></data>
+  <data name="T0.07.Text" xml:space="preserve"><value>Paket tüketicinin aldığı tek ambalajdır. Koli birkaç paketin konduğu dış kutudur. Palet kolilerin dizildiği tahta altlıktır. Her birinin ayrı etiketi olabilir.</value></data>
+  <data name="S1.Title" xml:space="preserve"><value>Tartımın temelleri</value></data>
+  <data name="S1.Intro" xml:space="preserve"><value>Terazi, ağırlık ve hesap. Her ekranın altında yatan kelimeler.</value></data>
+  <data name="T1.01.Name" xml:space="preserve"><value>Terazi / gösterge</value></data>
+  <data name="T1.01.Text" xml:space="preserve"><value>Tartımı yapan donanım. Endüstriyel terazide ağırlığı ölçen platform ile ekranlı kutu (gösterge) ayrı olabilir; bilgisayar göstergeye kabloyla ya da ağdan bağlanır.</value></data>
+  <data name="T1.01.InVyxum" xml:space="preserve"><value>Cihazlar ekranı ve kurulum sihirbazı.</value></data>
+  <data name="T1.01.Example" xml:space="preserve"><value>"Terazi 1 bağlı" yazısı.</value></data>
+  <data name="T1.02.Name" xml:space="preserve"><value>İstasyon</value></data>
+  <data name="T1.02.Text" xml:space="preserve"><value>Bir operatörün çalıştığı nokta: terazi, ekran ve varsa yazıcı. Vyxum'un lisansı istasyon başına sayılır.</value></data>
+  <data name="T1.02.InVyxum" xml:space="preserve"><value>Etiket numarası ve koli istasyon başına sayılır.</value></data>
+  <data name="T1.02.Example" xml:space="preserve"><value>"Paketleme 2" istasyonu.</value></data>
+  <data name="T1.03.Name" xml:space="preserve"><value>Brüt</value></data>
+  <data name="T1.03.Text" xml:space="preserve"><value>Teraziye konan her şeyin toplam ağırlığı: ürün ile kap ya da ambalaj.</value></data>
+  <data name="T1.03.InVyxum" xml:space="preserve"><value>Tartım kaydında brüt, dara ve net ayrı saklanır.</value></data>
+  <data name="T1.03.Example" xml:space="preserve"><value>Paketle birlikte 1,260 kg.</value></data>
+  <data name="T1.04.Name" xml:space="preserve"><value>Dara</value></data>
+  <data name="T1.04.Text" xml:space="preserve"><value>Kabın, kutunun ya da ambalajın ağırlığı. Gerçek ürün ağırlığını bulmak için brütten düşülür. "Dara al", o an terazide olanı dara yapar.</value></data>
+  <data name="T1.04.InVyxum" xml:space="preserve"><value>Tartım ekranında "Dara al"; ürün kartındaki ambalaj darası ürün seçilince uygulanır.</value></data>
+  <data name="T1.04.Example" xml:space="preserve"><value>Boş poşet 0,012 kg.</value></data>
+  <data name="T1.05.Name" xml:space="preserve"><value>Net</value></data>
+  <data name="T1.05.Text" xml:space="preserve"><value>Ürünün kendi ağırlığı. Net = brüt − dara.</value></data>
+  <data name="T1.05.InVyxum" xml:space="preserve"><value>Ekranda büyük yazılan sayı çoğunlukla nettir; tutar ve etiket nete göre hesaplanır.</value></data>
+  <data name="T1.05.Example" xml:space="preserve"><value>1,260 − 0,012 = 1,248 kg.</value></data>
+  <data name="T1.06.Name" xml:space="preserve"><value>Sıfırlama</value></data>
+  <data name="T1.06.Text" xml:space="preserve"><value>Terazi boşken göstergenin 0'dan başlamasını sağlamak. Daradan farklıdır (bkz. En çok karıştırılanlar).</value></data>
+  <data name="T1.06.InVyxum" xml:space="preserve"><value>"Sıfırla" tuşu; teraziye tek bir komut gider. Vyxum teraziye başka ayar komutu göndermez.</value></data>
+  <data name="T1.06.Example" xml:space="preserve"><value>Boş terazi 0,002 gösteriyorsa sıfırlanır.</value></data>
+  <data name="T1.07.Name" xml:space="preserve"><value>Sabit / kararsız</value></data>
+  <data name="T1.07.Text" xml:space="preserve"><value>Ağırlık oturduysa sabit, sallanıyorsa kararsızdır. Kararsız ağırlık kaydedilmez.</value></data>
+  <data name="T1.07.InVyxum" xml:space="preserve"><value>Tartım ekranında "sabit" ya da "hareketli".</value></data>
+  <data name="T1.07.Example" xml:space="preserve"><value>Paket konur, bir saniye sonra sabitlenir.</value></data>
+  <data name="T1.08.Name" xml:space="preserve"><value>Max, Min, e</value></data>
+  <data name="T1.08.Text" xml:space="preserve"><value>Max terazinin taşıyabileceği en büyük yük (kapasite). Min güvenilir kabul edilen en küçük tartım. e (bölüntü) göstergenin en küçük adımı.</value></data>
+  <data name="T1.08.Example" xml:space="preserve"><value>Max 6 kg, Min 40 g, e = 2 g.</value></data>
+  <data name="T1.09.Name" xml:space="preserve"><value>Aşırı yük / düşük yük</value></data>
+  <data name="T1.09.Text" xml:space="preserve"><value>Ağırlık terazinin ölçebileceği aralığın üstünde ya da altında. Bu durumda okunan değer güvenilmez.</value></data>
+  <data name="T1.09.InVyxum" xml:space="preserve"><value>Kayıt reddedilir.</value></data>
+  <data name="T1.10.Name" xml:space="preserve"><value>Tartım aralığı</value></data>
+  <data name="T1.10.Text" xml:space="preserve"><value>Bir terazinin hangi ağırlıklar için kullanılacağı.</value></data>
+  <data name="T1.10.InVyxum" xml:space="preserve"><value>Formülasyon malzemeyi hedefine uyan teraziye yönlendirir.</value></data>
+  <data name="T1.10.Example" xml:space="preserve"><value>Terazi 2: 0 ile 0,5 kg; küçük katkılar orada tartılır.</value></data>
+  <data name="T1.11.Name" xml:space="preserve"><value>Hedef ağırlık</value></data>
+  <data name="T1.11.Text" xml:space="preserve"><value>Bir paketin ya da malzemenin olması istenen ağırlığı.</value></data>
+  <data name="T1.11.InVyxum" xml:space="preserve"><value>Ürün kartında (isteğe bağlı) ve reçetede; ekrandaki göstergede dikey çizgi.</value></data>
+  <data name="T1.11.Example" xml:space="preserve"><value>Hedef 1.000 g.</value></data>
+  <data name="T1.12.Name" xml:space="preserve"><value>Tolerans / tolerans bandı</value></data>
+  <data name="T1.12.Text" xml:space="preserve"><value>Hedefin ne kadar altına ya da üstüne izin verildiği. Hedef ± tolerans arası banttır. Firma kendisi koyar.</value></data>
+  <data name="T1.12.InVyxum" xml:space="preserve"><value>Göstergede kutu olarak görünür. Formülasyon'da bant dışında "Onayla" açılmaz.</value></data>
+  <data name="T1.12.Example" xml:space="preserve"><value>1.000 g ± 5 g → 995 ile 1.005 g.</value></data>
+  <data name="T1.13.Name" xml:space="preserve"><value>Sapma</value></data>
+  <data name="T1.13.Text" xml:space="preserve"><value>Tartılanla hedef arasındaki fark.</value></data>
+  <data name="T1.13.InVyxum" xml:space="preserve"><value>Parti tamamlandı ekranı ve raporlar.</value></data>
+  <data name="T1.13.Example" xml:space="preserve"><value>Hedef 50 kg, tartılan 50,12 kg: +0,12 kg (%0,24).</value></data>
+  <data name="T1.14.Name" xml:space="preserve"><value>Ortalama (x̄) ve standart sapma (s)</value></data>
+  <data name="T1.14.Text" xml:space="preserve"><value>Ortalama bir grup paketin ortalama ağırlığıdır. Standart sapma paketlerin ortalamadan ne kadar dağıldığını gösterir; küçükse dolum düzenlidir.</value></data>
+  <data name="T1.14.InVyxum" xml:space="preserve"><value>Net ağırlık kalite ekranı ve uygunluk raporu.</value></data>
+  <data name="T1.14.Example" xml:space="preserve"><value>x̄ = 251,4 g, s = 2,1 g.</value></data>
+  <data name="T1.15.Name" xml:space="preserve"><value>PLU</value></data>
+  <data name="T1.15.Text" xml:space="preserve"><value>Ürünün kısa kodu (Price Look-Up). Ürünü hızlı çağırmak ve ağırlık barkoduna yazmak için kullanılır.</value></data>
+  <data name="T1.15.InVyxum" xml:space="preserve"><value>Ürün kartındaki kod alanı; Tartım ekranında PLU ile arama.</value></data>
+  <data name="T1.15.Example" xml:space="preserve"><value>Antep fıstığı: 00417.</value></data>
+  <data name="T1.16.Name" xml:space="preserve"><value>Birim fiyat / tutar</value></data>
+  <data name="T1.16.Text" xml:space="preserve"><value>Birim fiyat kilogram başına fiyattır. Tutar = net × birim fiyat.</value></data>
+  <data name="T1.16.InVyxum" xml:space="preserve"><value>Tartım ekranı ve perakende etiketi.</value></data>
+  <data name="T1.16.Example" xml:space="preserve"><value>1,248 kg × 400 ₺/kg = 499,20 ₺.</value></data>
+  <data name="T1.17.Name" xml:space="preserve"><value>Kalibrasyon</value></data>
+  <data name="T1.17.Text" xml:space="preserve"><value>Teraziyi bilinen ağırlıklarla (referans ağırlıklar) deneyip ne kadar şaştığını ölçmek ve belgelemek. Gerekirse ayar yapılır.</value></data>
+  <data name="T1.17.Example" xml:space="preserve"><value>5 kg'lık ağırlık konur, terazi 5,002 gösterir.</value></data>
+  <data name="T1.18.Name" xml:space="preserve"><value>Damga / periyodik muayene</value></data>
+  <data name="T1.18.Text" xml:space="preserve"><value>Ticarette kullanılan terazinin yetkili kuruluşça muayene edilip mühürlenmesi. Belirli aralıklarla yenilenir. Damgasız terazi yasal tartım için kullanılamaz.</value></data>
+  <data name="T1.18.InVyxum" xml:space="preserve"><value>Uygunluk raporunda damga tarihi; Net ağırlık kontrolü yasal ölçü aleti ister.</value></data>
+  <data name="T1.18.Example" xml:space="preserve"><value>Terazinin üstündeki muayene etiketi ve mühür.</value></data>
+  <data name="T1.19.Name" xml:space="preserve"><value>Yasal ölçü aleti</value></data>
+  <data name="T1.19.Text" xml:space="preserve"><value>Satış ya da yasal beyan için kullanıldığından devlet denetimindeki ölçü aleti. Ayarıyla oynanmamalıdır.</value></data>
+  <data name="T1.19.InVyxum" xml:space="preserve"><value>Bu yüzden Vyxum teraziye yalnızca okuma ve sıfırlama komutu gönderir.</value></data>
+  <data name="S2.Title" xml:space="preserve"><value>Ürün ve üretim</value></data>
+  <data name="S2.Intro" xml:space="preserve"><value>Ürün kartı, reçete ve parti: üretimin dili.</value></data>
+  <data name="T2.01.Name" xml:space="preserve"><value>Ürün kartı</value></data>
+  <data name="T2.01.Text" xml:space="preserve"><value>Bir ürünün ana bilgileri: kod (PLU), ad, birim fiyat, ambalaj darası, hedef ağırlık; etiket için raf ömrü ve içindekiler.</value></data>
+  <data name="T2.01.InVyxum" xml:space="preserve"><value>Ürünler ekranı.</value></data>
+  <data name="T2.02.Name" xml:space="preserve"><value>Hammadde</value></data>
+  <data name="T2.02.Text" xml:space="preserve"><value>Üretime giren malzeme. Genelde tedarikçiden çuval ya da kutuyla gelir.</value></data>
+  <data name="T2.02.InVyxum" xml:space="preserve"><value>Formülasyon'da her adımın malzemesi; barkodu okutulur.</value></data>
+  <data name="T2.02.Example" xml:space="preserve"><value>Badem içi, şeker, tuz.</value></data>
+  <data name="T2.03.Name" xml:space="preserve"><value>Mamul</value></data>
+  <data name="T2.03.Text" xml:space="preserve"><value>Üretimden çıkan, satışa hazır ürün.</value></data>
+  <data name="T2.03.InVyxum" xml:space="preserve"><value>Fire hesabı: tartılan hammaddeden ne kadar mamul paketlendi.</value></data>
+  <data name="T2.03.Example" xml:space="preserve"><value>250 g'lık karışık kuruyemiş paketi.</value></data>
+  <data name="T2.04.Name" xml:space="preserve"><value>Reçete (formül)</value></data>
+  <data name="T2.04.Text" xml:space="preserve"><value>Bir ürünün hangi malzemeden ne kadar konarak yapılacağının listesi. Standart parti miktarına göre yazılır.</value></data>
+  <data name="T2.04.InVyxum" xml:space="preserve"><value>Formülasyon'da Reçeteler sekmesi.</value></data>
+  <data name="T2.04.Example" xml:space="preserve"><value>50 kg'lık partide 20 kg badem, 15 kg fındık…</value></data>
+  <data name="T2.05.Name" xml:space="preserve"><value>Standart parti</value></data>
+  <data name="T2.05.Text" xml:space="preserve"><value>Reçetenin yazıldığı temel miktar. Daha büyük ya da küçük parti bundan oranlanarak hesaplanır.</value></data>
+  <data name="T2.05.InVyxum" xml:space="preserve"><value>Malzeme hedefi = standart miktar × (parti / standart parti).</value></data>
+  <data name="T2.05.Example" xml:space="preserve"><value>Standart 50 kg, istenen 5 kg: her malzeme onda birine iner.</value></data>
+  <data name="T2.06.Name" xml:space="preserve"><value>Reçete sürümü</value></data>
+  <data name="T2.06.Text" xml:space="preserve"><value>Reçetenin her değişikliği yeni bir sürümdür. Durumlar: taslak, onayda, yayında (kullanılan), eski. Yayındaki sürüm değiştirilemez.</value></data>
+  <data name="T2.06.InVyxum" xml:space="preserve"><value>Parti raporunda hangi sürümle üretildiği yazar.</value></data>
+  <data name="T2.06.Example" xml:space="preserve"><value>R-014 sürüm 4.</value></data>
+  <data name="T2.07.Name" xml:space="preserve"><value>Formülasyon</value></data>
+  <data name="T2.07.Text" xml:space="preserve"><value>Reçeteye göre malzemeleri tek tek, sırayla tartma işi. Operatör ne koyacağını ve ne kadar kaldığını ekranda görür.</value></data>
+  <data name="T2.07.InVyxum" xml:space="preserve"><value>Ücretli Formülasyon modülü.</value></data>
+  <data name="T2.08.Name" xml:space="preserve"><value>İş emri</value></data>
+  <data name="T2.08.Text" xml:space="preserve"><value>"Şu üründen şu kadar üret" talimatı. Vyxum bunu partilere böler.</value></data>
+  <data name="T2.08.InVyxum" xml:space="preserve"><value>Formülasyon'da operatör "Bugünkü işler"den seçer.</value></data>
+  <data name="T2.08.Example" xml:space="preserve"><value>İE-0001: 250 adet → 10 parti × 5 kg.</value></data>
+  <data name="T2.09.Name" xml:space="preserve"><value>Parti (Formülasyon)</value></data>
+  <data name="T2.09.Text" xml:space="preserve"><value>Bir reçetenin bir kez baştan sona tartılıp karıştırılması. Numarasıyla izlenir.</value></data>
+  <data name="T2.09.InVyxum" xml:space="preserve"><value>Parti numarası L-yyAAgg-sıra biçimindedir.</value></data>
+  <data name="T2.09.Example" xml:space="preserve"><value>L-261121-05: 21 Kasım 2026'nın 5. partisi.</value></data>
+  <data name="T2.10.Name" xml:space="preserve"><value>Lot / hammadde partisi</value></data>
+  <data name="T2.10.Text" xml:space="preserve"><value>Aynı koşullarda üretilmiş mal grubunun numarası. Hammaddede tedarikçinin çuvalında yazan parti numarasıdır.</value></data>
+  <data name="T2.10.InVyxum" xml:space="preserve"><value>Formülasyon'da çuval barkodundan okunur ve parti kaydına yazılır; geri izleme bununla yapılır.</value></data>
+  <data name="T2.10.Example" xml:space="preserve"><value>Badem çuvalı lot 24-1187.</value></data>
+  <data name="T2.11.Name" xml:space="preserve"><value>Kap</value></data>
+  <data name="T2.11.Text" xml:space="preserve"><value>Malzemelerin içine tartıldığı kova ya da kap.</value></data>
+  <data name="T2.11.InVyxum" xml:space="preserve"><value>Formülasyon'da "Dara al ve başla" adımı.</value></data>
+  <data name="T2.12.Name" xml:space="preserve"><value>Fire</value></data>
+  <data name="T2.12.Text" xml:space="preserve"><value>Üretimde kaybolan miktar: tartılan hammadde ile paketlenen mamul arasındaki fark.</value></data>
+  <data name="T2.12.InVyxum" xml:space="preserve"><value>Parti raporu.</value></data>
+  <data name="T2.12.Example" xml:space="preserve"><value>50 kg tartıldı, 49 kg paketlendi: %2 fire.</value></data>
+  <data name="T2.13.Name" xml:space="preserve"><value>Alerjen</value></data>
+  <data name="T2.13.Text" xml:space="preserve"><value>Bazı kişilerde alerji yapan ve etikette vurgulanması zorunlu maddeler.</value></data>
+  <data name="T2.13.InVyxum" xml:space="preserve"><value>Formülasyon adımında uyarı; etikette kalın yazılır.</value></data>
+  <data name="T2.13.Example" xml:space="preserve"><value>Fındık, süt, gluten, susam.</value></data>
+  <data name="T2.14.Name" xml:space="preserve"><value>Çapraz bulaşma</value></data>
+  <data name="T2.14.Text" xml:space="preserve"><value>Ürünün içinde olmayan bir alerjenin aynı makine ya da tesis yüzünden az miktarda bulaşma olasılığı.</value></data>
+  <data name="T2.14.InVyxum" xml:space="preserve"><value>Etiketteki uyarı; Formülasyon'daki temizlik onayı.</value></data>
+  <data name="T2.14.Example" xml:space="preserve"><value>"Eser miktarda yer fıstığı içerebilir."</value></data>
+  <data name="T2.15.Name" xml:space="preserve"><value>Temizlik onayı</value></data>
+  <data name="T2.15.Text" xml:space="preserve"><value>Önceki partide olan bir alerjen yeni reçetede yoksa, başlamadan istasyonun temizlendiğini onaylama adımı.</value></data>
+  <data name="T2.15.InVyxum" xml:space="preserve"><value>Formülasyon'un bileşen tartımı ekranı.</value></data>
+  <data name="T2.16.Name" xml:space="preserve"><value>Son kullanma tarihi</value></data>
+  <data name="T2.16.Text" xml:space="preserve"><value>Hammaddenin kullanılabileceği son gün.</value></data>
+  <data name="T2.16.InVyxum" xml:space="preserve"><value>Formülasyon tarihi geçmiş hammaddeyi kabul etmez.</value></data>
+  <data name="T2.17.Name" xml:space="preserve"><value>Raf ömrü</value></data>
+  <data name="T2.17.Text" xml:space="preserve"><value>Üretimden sonra ürünün kaç gün iyi kalacağı. Etiketteki tüketim tarihi bundan hesaplanır.</value></data>
+  <data name="T2.17.InVyxum" xml:space="preserve"><value>Etiketteki tarih = üretim tarihi + raf ömrü.</value></data>
+  <data name="T2.17.Example" xml:space="preserve"><value>Raf ömrü 180 gün.</value></data>
+  <data name="T2.18.Name" xml:space="preserve"><value>FEFO</value></data>
+  <data name="T2.18.Text" xml:space="preserve"><value>First Expired, First Out: önce tarihi en yakın olanı kullan.</value></data>
+  <data name="T2.19.Name" xml:space="preserve"><value>İzlenebilirlik: geri ve ileri izleme</value></data>
+  <data name="T2.19.Text" xml:space="preserve"><value>Geri izleme: bir partide hangi hammaddeler kullanıldı? İleri izleme: bir hammadde hangi partilere ve etiketlere gitti?</value></data>
+  <data name="T2.19.InVyxum" xml:space="preserve"><value>Formülasyon'da Partiler, Etiket'te Basılanlar.</value></data>
+  <data name="T2.19.Example" xml:space="preserve"><value>Kusurlu badem lotu hangi 12 partiye girdi?</value></data>
+  <data name="T2.20.Name" xml:space="preserve"><value>Geri çağırma</value></data>
+  <data name="T2.20.Text" xml:space="preserve"><value>Sorunlu bir partinin piyasadan toplatılması. Hangi koli ve paketlerin nereye gittiğinin hızla bulunması gerekir.</value></data>
+  <data name="T2.20.InVyxum" xml:space="preserve"><value>Etiket'te parti numarasıyla geri çağırma listesi (koliler, SSCC'ler, adet).</value></data>
+  <data name="T2.20.Example" xml:space="preserve"><value>Partide yabancı madde: 48 koli toplanır.</value></data>
+  <data name="T2.21.Name" xml:space="preserve"><value>Karantina / beklemede</value></data>
+  <data name="T2.21.Text" xml:space="preserve"><value>Karar verilene kadar kullanılmaması ya da sevk edilmemesi gereken mal.</value></data>
+  <data name="T2.21.InVyxum" xml:space="preserve"><value>Net ağırlık kontrolünde uygun olmayan parti beklemeye alınır.</value></data>
+  <data name="T2.22.Name" xml:space="preserve"><value>Sarf / stok düşümü</value></data>
+  <data name="T2.22.Text" xml:space="preserve"><value>Üretimde kullanılan hammaddenin stoktan düşülmesi.</value></data>
+  <data name="T2.22.InVyxum" xml:space="preserve"><value>Parti bitince ERP'ye gönderilebilir.</value></data>
+  <data name="S3.Title" xml:space="preserve"><value>Etiket ve barkod</value></data>
+  <data name="S3.Intro" xml:space="preserve"><value>Etiketler, GS1 barkodları, yazıcılar ve gıda etiketi kuralları.</value></data>
+  <data name="T3.01.Name" xml:space="preserve"><value>GS1</value></data>
+  <data name="T3.01.Text" xml:space="preserve"><value>Dünya çapında barkod numaralarını dağıtan ve barkod kurallarını yazan kuruluş. Market barkodlarının hepsi GS1 kuralıyla yapılır. Türkiye'deki temsilcisi GS1 Türkiye'dir; firmalar üye olur.</value></data>
+  <data name="T3.01.InVyxum" xml:space="preserve"><value>GS1 firma öneki girilince GS1 barkodları ve hazır düzenleri açılır. Vyxum numara üretmez; numarayı firma GS1'den alır.</value></data>
+  <data name="T3.01.Example" xml:space="preserve"><value>Zincir market tedarikçisinden GS1 koli etiketi ister.</value></data>
+  <data name="T3.02.Name" xml:space="preserve"><value>GS1 firma öneki</value></data>
+  <data name="T3.02.Text" xml:space="preserve"><value>GS1'in firmaya verdiği numara başı. Firmanın bütün barkod numaraları bununla başlar. 869 Türkiye'yi gösterir.</value></data>
+  <data name="T3.02.InVyxum" xml:space="preserve"><value>Etiket modülündeki firma ve GS1 bilgileri.</value></data>
+  <data name="T3.02.Example" xml:space="preserve"><value>8691234 (örnek).</value></data>
+  <data name="T3.03.Name" xml:space="preserve"><value>GTIN</value></data>
+  <data name="T3.03.Text" xml:space="preserve"><value>Global Trade Item Number: bir ürünün dünyada tekil numarası. Marketteki 13 haneli barkodun numarası GTIN-13'tür; koli gibi ticari birimler için 14 haneli GTIN-14 kullanılır. Değişken ağırlıklı ürünün GTIN-14'ü 9 ile başlar.</value></data>
+  <data name="T3.03.InVyxum" xml:space="preserve"><value>Etiket modülünde ürün bilgileri.</value></data>
+  <data name="T3.03.Example" xml:space="preserve"><value>8691234004173.</value></data>
+  <data name="T3.04.Name" xml:space="preserve"><value>EAN-13</value></data>
+  <data name="T3.04.Text" xml:space="preserve"><value>Marketlerde kasada okutulan 13 haneli çizgili barkod.</value></data>
+  <data name="T3.04.InVyxum" xml:space="preserve"><value>Perakende etiketi: sabit ağırlıklı üründe GTIN, tartılan üründe ağırlık gömülü olarak.</value></data>
+  <data name="T3.05.Name" xml:space="preserve"><value>Ağırlık gömülü EAN-13</value></data>
+  <data name="T3.05.Text" xml:space="preserve"><value>Tartılan üründe barkodun içine ağırlık (ya da fiyat) yazılır ki kasa ağırlığı bilsin. 20 ile 29 arası ön ek + PLU (5 hane) + gram cinsinden ağırlık (5 hane) + kontrol hanesi.</value></data>
+  <data name="T3.05.InVyxum" xml:space="preserve"><value>Perakende ağırlıklı hazır düzeni.</value></data>
+  <data name="T3.05.Example" xml:space="preserve"><value>29 00417 01248 2 → PLU 00417, 1,248 kg.</value></data>
+  <data name="T3.06.Name" xml:space="preserve"><value>Kontrol hanesi</value></data>
+  <data name="T3.06.Text" xml:space="preserve"><value>Barkodun son hanesi. Diğer hanelerden hesaplanır; okuma hatasını yakalar.</value></data>
+  <data name="T3.06.InVyxum" xml:space="preserve"><value>Vyxum kendisi hesaplar.</value></data>
+  <data name="T3.07.Name" xml:space="preserve"><value>GS1-128</value></data>
+  <data name="T3.07.Text" xml:space="preserve"><value>Koli ve lojistik etiketlerinde kullanılan uzun, çizgili GS1 barkodu. İçinde AI'lerle ayrılmış birden çok bilgi taşır.</value></data>
+  <data name="T3.07.InVyxum" xml:space="preserve"><value>Koli GS1 hazır düzeni; sığmazsa Vyxum birden çok barkoda böler.</value></data>
+  <data name="T3.08.Name" xml:space="preserve"><value>AI (uygulama tanımlayıcısı)</value></data>
+  <data name="T3.08.Text" xml:space="preserve"><value>GS1 barkodunda her bilginin önündeki parantezli kod; arkasından gelen verinin ne olduğunu söyler.</value></data>
+  <data name="T3.08.InVyxum" xml:space="preserve"><value>Kullanıcı AI yazmaz; barkoda girecek bilgileri listeden işaretler.</value></data>
+  <data name="T3.08.Example" xml:space="preserve"><value>(01) GTIN, (10) parti, (15) TETT, (17) STT, (3103) net kg, (37) adet, (00) SSCC.</value></data>
+  <data name="T3.09.Name" xml:space="preserve"><value>FNC1</value></data>
+  <data name="T3.09.Text" xml:space="preserve"><value>GS1-128'de uzunluğu değişken bir bilginin bittiğini gösteren özel ayıraç.</value></data>
+  <data name="T3.09.InVyxum" xml:space="preserve"><value>Vyxum kendisi koyar.</value></data>
+  <data name="T3.09.Example" xml:space="preserve"><value>(10) parti numarasından sonra başka AI gelecekse araya girer.</value></data>
+  <data name="T3.10.Name" xml:space="preserve"><value>SSCC</value></data>
+  <data name="T3.10.Text" xml:space="preserve"><value>Serial Shipping Container Code: her koli ya da paletin 18 haneli tekil seri numarası. Uzantı hanesi + firma öneki + sıra numarası + kontrol hanesi. Aynı numara ikinci kez kullanılmaz.</value></data>
+  <data name="T3.10.InVyxum" xml:space="preserve"><value>Koli etiketinin en altındaki barkod; geri çağırma listesi.</value></data>
+  <data name="T3.10.Example" xml:space="preserve"><value>(00) 386912340000001234.</value></data>
+  <data name="T3.11.Name" xml:space="preserve"><value>DataMatrix</value></data>
+  <data name="T3.11.Text" xml:space="preserve"><value>Küçük kare biçimli iki boyutlu barkod. Az yerde çok bilgi taşır. GS1 kuralıyla yazılana GS1 DataMatrix denir.</value></data>
+  <data name="T3.11.InVyxum" xml:space="preserve"><value>Parti etiketi.</value></data>
+  <data name="T3.12.Name" xml:space="preserve"><value>Code 128</value></data>
+  <data name="T3.12.Text" xml:space="preserve"><value>Harf ve rakam taşıyabilen genel amaçlı çizgili barkod. GS1 üyeliği gerekmez.</value></data>
+  <data name="T3.12.InVyxum" xml:space="preserve"><value>GS1 öneki yoksa kap etiketinde.</value></data>
+  <data name="T3.12.Example" xml:space="preserve"><value>L-261121-05-03.</value></data>
+  <data name="T3.13.Name" xml:space="preserve"><value>QR</value></data>
+  <data name="T3.13.Text" xml:space="preserve"><value>Telefonla okunabilen kare barkod.</value></data>
+  <data name="T3.13.InVyxum" xml:space="preserve"><value>Serbest metin ya da bağlantı için.</value></data>
+  <data name="T3.14.Name" xml:space="preserve"><value>Sessiz bölge</value></data>
+  <data name="T3.14.Text" xml:space="preserve"><value>Barkodun iki yanında bırakılması gereken boşluk. Okuyucu barkodun başını buradan anlar.</value></data>
+  <data name="T3.14.InVyxum" xml:space="preserve"><value>Barkodun etikete sığıp sığmadığı hesaplanırken hesaba katılır.</value></data>
+  <data name="T3.15.Name" xml:space="preserve"><value>X boyutu (çubuk genişliği)</value></data>
+  <data name="T3.15.Text" xml:space="preserve"><value>Barkoddaki en ince çubuğun genişliği. Büyüdükçe barkod uzar ama daha kolay okunur.</value></data>
+  <data name="T3.15.InVyxum" xml:space="preserve"><value>Koli etiketinde varsayılan 0,5 mm.</value></data>
+  <data name="T3.16.Name" xml:space="preserve"><value>Okuma testi</value></data>
+  <data name="T3.16.Text" xml:space="preserve"><value>Çizilen etiketteki barkodları okuyucu yazılımla çözüp beklenen veriyle karşılaştırma.</value></data>
+  <data name="T3.16.InVyxum" xml:space="preserve"><value>Şablon düzenleyicide "4 / 4 barkod okundu".</value></data>
+  <data name="T3.17.Name" xml:space="preserve"><value>Etiket şablonu</value></data>
+  <data name="T3.17.Text" xml:space="preserve"><value>Etiketin düzeni: ölçü, hangi bilgi nerede, yazı boyu, barkod. Veri ürün kartından gelir. Her kaydedişte sürümü artar.</value></data>
+  <data name="T3.17.InVyxum" xml:space="preserve"><value>Etiket modülünde Şablonlar ve şablon düzenleyici.</value></data>
+  <data name="T3.17.Example" xml:space="preserve"><value>Perakende ağırlıklı 100 × 60 mm.</value></data>
+  <data name="T3.18.Name" xml:space="preserve"><value>Hazır düzen</value></data>
+  <data name="T3.18.Text" xml:space="preserve"><value>Yeni şablonun başladığı, zorunlu bilgileri içeren hazır taslak. Boş sayfadan başlanmaz.</value></data>
+  <data name="T3.18.InVyxum" xml:space="preserve"><value>"Yeni şablon" ekranı.</value></data>
+  <data name="T3.18.Example" xml:space="preserve"><value>Koli GS1 100 × 150, Kap etiketi 58 × 40.</value></data>
+  <data name="T3.19.Name" xml:space="preserve"><value>Perakende etiketi</value></data>
+  <data name="T3.19.Text" xml:space="preserve"><value>Tüketicinin aldığı paketin üstündeki etiket: ad, içindekiler, net, fiyat, tarih, barkod.</value></data>
+  <data name="T3.19.InVyxum" xml:space="preserve"><value>Tartım ekranında "Kaydet ve etiket bas".</value></data>
+  <data name="T3.20.Name" xml:space="preserve"><value>Koli</value></data>
+  <data name="T3.20.Text" xml:space="preserve"><value>Birkaç paketin konduğu dış karton kutu. Mağazaya ve depoya koli halinde gider. "Koli içi paket" bir koliye kaç paket girdiğidir.</value></data>
+  <data name="T3.20.InVyxum" xml:space="preserve"><value>Koli kendiliğinden sayılır; dolunca koli etiketi basılır ve yeni koli açılır.</value></data>
+  <data name="T3.20.Example" xml:space="preserve"><value>Koli içi 12 paket; 12. paketten sonra koli etiketi çıkar.</value></data>
+  <data name="T3.21.Name" xml:space="preserve"><value>Koli etiketi</value></data>
+  <data name="T3.21.Text" xml:space="preserve"><value>Kolinin üstündeki lojistik etiket: içindeki ürün, paket sayısı, toplam net, parti, tarih ve SSCC; GS1-128 barkodlarıyla.</value></data>
+  <data name="T3.21.InVyxum" xml:space="preserve"><value>Koli GS1 hazır düzeni.</value></data>
+  <data name="T3.22.Name" xml:space="preserve"><value>Kap etiketi</value></data>
+  <data name="T3.22.Text" xml:space="preserve"><value>Tartılan malzemenin kabına yapıştırılan küçük etiket: malzeme, hammadde partisi, net, adım.</value></data>
+  <data name="T3.22.InVyxum" xml:space="preserve"><value>Formülasyon'da seçenek açıksa her onayda basılır.</value></data>
+  <data name="T3.23.Name" xml:space="preserve"><value>Parti etiketi</value></data>
+  <data name="T3.23.Text" xml:space="preserve"><value>Formülasyon partisi bitince basılan etiket: ürün, reçete sürümü, iş emri, net, alerjenler, hammadde partileri.</value></data>
+  <data name="T3.23.InVyxum" xml:space="preserve"><value>Parti bitince kendiliğinden basılır.</value></data>
+  <data name="T3.24.Name" xml:space="preserve"><value>Palet</value></data>
+  <data name="T3.24.Text" xml:space="preserve"><value>Kolilerin üst üste dizildiği tahta altlık.</value></data>
+  <data name="T3.25.Name" xml:space="preserve"><value>Yeniden baskı</value></data>
+  <data name="T3.25.Text" xml:space="preserve"><value>Buruşan ya da yırtılan etiketin aynı numarayla tekrar basılması. Neden ve kişi kaydedilir.</value></data>
+  <data name="T3.26.Name" xml:space="preserve"><value>ZPL / TSPL</value></data>
+  <data name="T3.26.Text" xml:space="preserve"><value>Etiket yazıcılarının yaygın komut dilleri. Windows sürücüsü gerekmez.</value></data>
+  <data name="T3.26.InVyxum" xml:space="preserve"><value>Vyxum Agent yazıcıya bu dillerle yazar.</value></data>
+  <data name="T3.27.Name" xml:space="preserve"><value>dpi</value></data>
+  <data name="T3.27.Text" xml:space="preserve"><value>Yazıcının inç başına nokta sayısı. 203 dpi yaygındır, 300 dpi daha keskindir.</value></data>
+  <data name="T3.27.InVyxum" xml:space="preserve"><value>Şablon çözünürlüğü.</value></data>
+  <data name="T3.28.Name" xml:space="preserve"><value>Termal yazıcı / şerit</value></data>
+  <data name="T3.28.Text" xml:space="preserve"><value>Etiket yazıcıları ısıyla basar. Bazıları şerit (ribbon) kullanır; şerit bitince baskı durur.</value></data>
+  <data name="T3.28.InVyxum" xml:space="preserve"><value>Durum alanında "Kâğıt takın" ya da şerit bitti uyarısı.</value></data>
+  <data name="T3.29.Name" xml:space="preserve"><value>Sahte yazıcı</value></data>
+  <data name="T3.29.Text" xml:space="preserve"><value>Gerçek yazıcı yokken onun gibi davranan yazılım. Komutu üretir, göndermez; çıktıyı saklar.</value></data>
+  <data name="T3.29.InVyxum" xml:space="preserve"><value>Durum alanında "Basıldı" yerine "Gönderildi" yazar. Eğitim ve deneme için.</value></data>
+  <data name="T3.30.Name" xml:space="preserve"><value>Tavsiye edilen / son tüketim tarihi</value></data>
+  <data name="T3.30.Text" xml:space="preserve"><value>TETT kalite tarihidir; STT çabuk bozulan ürünlerde güvenlik tarihidir (bkz. En çok karıştırılanlar). Etikette tam ifade yazılır.</value></data>
+  <data name="T3.30.InVyxum" xml:space="preserve"><value>Ürün başına seçilir; GS1'de (15) ve (17).</value></data>
+  <data name="T3.30.Example" xml:space="preserve"><value>TETT: 20.05.2027.</value></data>
+  <data name="T3.31.Name" xml:space="preserve"><value>Beslenme bildirimi</value></data>
+  <data name="T3.31.Text" xml:space="preserve"><value>100 g'daki enerji (kJ ve kcal), yağ, doymuş yağ, karbonhidrat, şeker, protein ve tuzun tablosu.</value></data>
+  <data name="T3.31.InVyxum" xml:space="preserve"><value>Etiketteki beslenme tablosu.</value></data>
+  <data name="T3.32.Name" xml:space="preserve"><value>İşletme kayıt numarası</value></data>
+  <data name="T3.32.Text" xml:space="preserve"><value>Gıda işletmesine Tarım ve Orman Bakanlığı'nın verdiği numara. Etikette bulunması zorunludur.</value></data>
+  <data name="T3.32.InVyxum" xml:space="preserve"><value>Gıda etiketi kontrolü bu bilgiyi arar.</value></data>
+  <data name="T3.33.Name" xml:space="preserve"><value>Menşe</value></data>
+  <data name="T3.33.Text" xml:space="preserve"><value>Ürünün ya da ana malzemesinin geldiği ülke ya da yer.</value></data>
+  <data name="T3.33.Example" xml:space="preserve"><value>Menşe: Türkiye.</value></data>
+  <data name="T3.34.Name" xml:space="preserve"><value>Türk Gıda Kodeksi</value></data>
+  <data name="T3.34.Text" xml:space="preserve"><value>Türkiye'nin gıda kurallarını toplayan yönetmelikler. Etiketleme yönetmeliği zorunlu bilgileri ve yazı boylarını belirler.</value></data>
+  <data name="T3.34.InVyxum" xml:space="preserve"><value>Gıda etiketi kontrolünün dayanağı.</value></data>
+  <data name="T3.35.Name" xml:space="preserve"><value>x yüksekliği</value></data>
+  <data name="T3.35.Text" xml:space="preserve"><value>Küçük "x" harfinin boyu. Yönetmelik etiketteki en küçük yazıyı bununla ölçer: zorunlu bilgide en az 1,2 mm; ambalajın en geniş yüzeyi 80 cm²'den küçükse 0,9 mm. Ölçüye etiketin değil ambalajın yüzeyi esas alınır.</value></data>
+  <data name="T3.35.InVyxum" xml:space="preserve"><value>Gıda etiketi kontrolü yazı boyunu buna göre denetler.</value></data>
+  <data name="T3.35.Example" xml:space="preserve"><value>7 pt yazı ≈ 1,26 mm.</value></data>
+  <data name="T3.36.Name" xml:space="preserve"><value>Gıda etiketi kontrolü</value></data>
+  <data name="T3.36.Text" xml:space="preserve"><value>Vyxum'un şablonu zorunlu bilgi, yazı boyu, barkod okunurluğu ve sığma açısından denetlemesi. Uyarı vermek içindir; son onay gıda mühendisinindir.</value></data>
+  <data name="T3.36.InVyxum" xml:space="preserve"><value>Şablon düzenleyicide "2 uyarı" satırı.</value></data>
+  <data name="S4.Title" xml:space="preserve"><value>Net ağırlık kontrolü</value></data>
+  <data name="S4.Intro" xml:space="preserve"><value>Hazır ambalaj yönetmeliğinin dili: Qn, TNE, T1, T2.</value></data>
+  <data name="T4.01.Name" xml:space="preserve"><value>Hazır ambalajlı mamul</value></data>
+  <data name="T4.01.Text" xml:space="preserve"><value>Müşteri yokken önceden doldurulup kapatılmış, içindeki miktar açmadan değişmeyen paket.</value></data>
+  <data name="T4.01.InVyxum" xml:space="preserve"><value>Net ağırlık kontrolünün konusu.</value></data>
+  <data name="T4.01.Example" xml:space="preserve"><value>250 g'lık kuruyemiş paketi.</value></data>
+  <data name="T4.02.Name" xml:space="preserve"><value>Sabit miktarlı / değişken ağırlıklı</value></data>
+  <data name="T4.02.Text" xml:space="preserve"><value>Sabit miktarlıda her pakette aynı miktar yazar (250 g). Değişken ağırlıklıda her paket tartılıp fiyatlanır (1,248 kg).</value></data>
+  <data name="T4.02.InVyxum" xml:space="preserve"><value>Net ağırlık kontrolü yalnızca sabit miktarlı ürünle çalışır.</value></data>
+  <data name="T4.03.Name" xml:space="preserve"><value>Hazır ambalaj yönetmeliği (76/211/AT)</value></data>
+  <data name="T4.03.Text" xml:space="preserve"><value>Hazır ambalajlı mamullerin net miktar tespitine dair yönetmelik. Avrupa direktifi 76/211/EEC'nin karşılığıdır.</value></data>
+  <data name="T4.03.InVyxum" xml:space="preserve"><value>Net ağırlık kontrolünün kuralları buna dayanır.</value></data>
+  <data name="T4.04.Name" xml:space="preserve"><value>Qn (nominal miktar)</value></data>
+  <data name="T4.04.Text" xml:space="preserve"><value>Etikette yazan miktar.</value></data>
+  <data name="T4.04.InVyxum" xml:space="preserve"><value>Plan ekranında dolum hedefinden ayrı bir alandır.</value></data>
+  <data name="T4.04.Example" xml:space="preserve"><value>Qn = 250 g.</value></data>
+  <data name="T4.05.Name" xml:space="preserve"><value>Dolum hedefi</value></data>
+  <data name="T4.05.Text" xml:space="preserve"><value>Dolum makinesinin hedeflediği miktar; genelde Qn'den biraz fazladır.</value></data>
+  <data name="T4.05.InVyxum" xml:space="preserve"><value>Vyxum önerilen dolum hedefini hesaplar ama makineyi ayarlamaz.</value></data>
+  <data name="T4.05.Example" xml:space="preserve"><value>253 g.</value></data>
+  <data name="T4.06.Name" xml:space="preserve"><value>Fazla dolum</value></data>
+  <data name="T4.06.Text" xml:space="preserve"><value>Paketlere Qn'den fazla konan ürün. Yasal sorun değildir ama para kaybıdır.</value></data>
+  <data name="T4.06.InVyxum" xml:space="preserve"><value>Parti ayrıntısında fazla dolumun maliyeti.</value></data>
+  <data name="T4.06.Example" xml:space="preserve"><value>Paket başı +3 g × 1.000 paket = 3 kg bedava ürün.</value></data>
+  <data name="T4.07.Name" xml:space="preserve"><value>TNE</value></data>
+  <data name="T4.07.Text" xml:space="preserve"><value>İzin verilen eksi hata (tolerable negative error): bir paketin Qn'den ne kadar eksik olmasına izin verildiği. Yönetmelikteki tablodan Qn'ye göre hesaplanır, elle girilmez.</value></data>
+  <data name="T4.07.InVyxum" xml:space="preserve"><value>Plan ekranında hesaplanır.</value></data>
+  <data name="T4.07.Example" xml:space="preserve"><value>Qn 250 g → TNE 9 g.</value></data>
+  <data name="T4.08.Name" xml:space="preserve"><value>T1</value></data>
+  <data name="T4.08.Text" xml:space="preserve"><value>T1 = Qn − TNE. Bu sınırın altındaki paket "az"dır. Bir partide az paket sayısının sınırı vardır.</value></data>
+  <data name="T4.08.InVyxum" xml:space="preserve"><value>Durum alanında "Az, T1 altında".</value></data>
+  <data name="T4.08.Example" xml:space="preserve"><value>250 − 9 = 241 g.</value></data>
+  <data name="T4.09.Name" xml:space="preserve"><value>T2</value></data>
+  <data name="T4.09.Text" xml:space="preserve"><value>T2 = Qn − 2 × TNE. Bu sınırın altındaki paket "çok eksik"tir ve piyasaya çıkamaz. Tek bir tanesi bile hattı durdurma sebebidir.</value></data>
+  <data name="T4.09.InVyxum" xml:space="preserve"><value>Durum alanında "Dur"; parti beklemeye alınır, yetkili onayı gerekir.</value></data>
+  <data name="T4.09.Example" xml:space="preserve"><value>250 − 18 = 232 g.</value></data>
+  <data name="T4.10.Name" xml:space="preserve"><value>℮ işareti</value></data>
+  <data name="T4.10.Text" xml:space="preserve"><value>Etiketteki küçük "e" harfi: paketin yönetmelikteki usule göre doldurulduğunu beyan eder. İsteğe bağlıdır ama taşıyan pakette kurallar geçerlidir.</value></data>
+  <data name="T4.10.InVyxum" xml:space="preserve"><value>T2 altındaki pakete ℮ işaretli etiket basılmaz.</value></data>
+  <data name="T4.10.Example" xml:space="preserve"><value>"250 g ℮"</value></data>
+  <data name="T4.11.Name" xml:space="preserve"><value>Üç şart</value></data>
+  <data name="T4.11.Text" xml:space="preserve"><value>Bir partinin uygun sayılması için: (1) ortalama yeterli, (2) T1 altı paket sayısı izin verilen sınırda, (3) T2 altı paket yok.</value></data>
+  <data name="T4.11.InVyxum" xml:space="preserve"><value>Kalite ekranında üç satır, her biri "sağlandı" ya da "sağlanmadı".</value></data>
+  <data name="T4.12.Name" xml:space="preserve"><value>Parti (Net ağırlık)</value></data>
+  <data name="T4.12.Text" xml:space="preserve"><value>Yönetmeliğe göre birlikte değerlendirilen paket grubu: aynı ürün, hat ve yer. Hat sonunda en çok bir saatlik üretim, değilse en çok 10.000 paket.</value></data>
+  <data name="T4.12.InVyxum" xml:space="preserve"><value>Plan ekranında parti türü: saatlik ya da üretim lotu.</value></data>
+  <data name="T4.12.Example" xml:space="preserve"><value>Saatte 360 paket üreten hat: her saat bir parti.</value></data>
+  <data name="T4.13.Name" xml:space="preserve"><value>Örnekleme / örnek planı</value></data>
+  <data name="T4.13.Text" xml:space="preserve"><value>Partinin tamamı yerine belli sayıda paket tartıp karar vermek. Kaç paket tartılacağını parti büyüklüğü belirler.</value></data>
+  <data name="T4.13.InVyxum" xml:space="preserve"><value>Vyxum örneği saate yayar: 30 paket → 20 dakikada bir 10 paket.</value></data>
+  <data name="T4.13.Example" xml:space="preserve"><value>100–500 paketlik parti: 30 paket.</value></data>
+  <data name="T4.14.Name" xml:space="preserve"><value>Kabul ve ret sayısı / ikinci örnek</value></data>
+  <data name="T4.14.Text" xml:space="preserve"><value>Örnekte izin verilen T1 altı paket sayısı. Kabul sayısına kadar geçer, ret sayısından itibaren geçmez; aradaysa ikinci bir örnek alınır.</value></data>
+  <data name="T4.14.InVyxum" xml:space="preserve"><value>İstasyonda "İkinci örneği başlat".</value></data>
+  <data name="T4.14.Example" xml:space="preserve"><value>30'luk örnekte 1 az: geçer; 2 az: ikinci örnek; 3 az: geçmez.</value></data>
+  <data name="T4.15.Name" xml:space="preserve"><value>Tahribatsız / tahribatlı muayene</value></data>
+  <data name="T4.15.Text" xml:space="preserve"><value>Tahribatsızda paket açılmadan tartılır, ambalaj ağırlığı ortalama dara olarak düşülür. Tahribatlıda paket açılır.</value></data>
+  <data name="T4.15.InVyxum" xml:space="preserve"><value>Vyxum tahribatsız yöntemi kullanır.</value></data>
+  <data name="T4.16.Name" xml:space="preserve"><value>Dara örneği</value></data>
+  <data name="T4.16.Text" xml:space="preserve"><value>Vardiya başında birkaç boş ambalaj tartılıp ortalamasının o vardiyanın darası yapılması.</value></data>
+  <data name="T4.16.InVyxum" xml:space="preserve"><value>İstasyonda dara adımı: 6 / 10.</value></data>
+  <data name="T4.16.Example" xml:space="preserve"><value>10 boş poşet, ortalama 12 g.</value></data>
+  <data name="T4.17.Name" xml:space="preserve"><value>Ortalama ölçütü (k katsayısı)</value></data>
+  <data name="T4.17.Text" xml:space="preserve"><value>Örnek ortalamasının yeterli sayılması için istatistik formül: x̄ ≥ Qn − k · s. k örnek büyüklüğüne bağlı sabit bir sayıdır.</value></data>
+  <data name="T4.17.InVyxum" xml:space="preserve"><value>Yalnızca kalite ekranında; operatör hesap yapmaz.</value></data>
+  <data name="T4.17.Example" xml:space="preserve"><value>n = 30 için k = 0,503.</value></data>
+  <data name="T4.18.Name" xml:space="preserve"><value>Uygun / uygun, uyarılı / uygun değil</value></data>
+  <data name="T4.18.Text" xml:space="preserve"><value>Parti sonucu. Uyarılı: şartlar sağlandı ama ortalama Qn'nin altında; sıradaki kontrol erkene alınır.</value></data>
+  <data name="T4.18.InVyxum" xml:space="preserve"><value>Partiler listesi ve uygunluk raporu.</value></data>
+  <data name="T4.19.Name" xml:space="preserve"><value>Ayıkla / yeniden doldur / imha</value></data>
+  <data name="T4.19.Text" xml:space="preserve"><value>Uygun olmayan parti için karar seçenekleri. Ayıklamada her paket tartılıp eksikler ayrılır.</value></data>
+  <data name="T4.19.InVyxum" xml:space="preserve"><value>Karar formu, elektronik imzayla.</value></data>
+  <data name="T4.20.Name" xml:space="preserve"><value>Eğilim uyarısı</value></data>
+  <data name="T4.20.Text" xml:space="preserve"><value>Son paketlerde az olanlar artıyorsa dolum makinesinin kaydığını erken haber veren kural.</value></data>
+  <data name="T4.20.InVyxum" xml:space="preserve"><value>"Son 10 pakette 3 az. Dolum makinesini kontrol edin."</value></data>
+  <data name="T4.21.Name" xml:space="preserve"><value>Uygunluk raporu</value></data>
+  <data name="T4.21.Text" xml:space="preserve"><value>Denetçiye verilecek, partilerin sonuçlarını, yöntemi ve imzaları gösteren rapor.</value></data>
+  <data name="T4.21.InVyxum" xml:space="preserve"><value>PDF ve Excel olarak alınır.</value></data>
+  <data name="T4.22.Name" xml:space="preserve"><value>Metroloji / yasal metroloji</value></data>
+  <data name="T4.22.Text" xml:space="preserve"><value>Metroloji ölçüm bilimidir. Yasal metroloji ticarette kullanılan ölçümlerin devlet kurallarıdır. Türkiye'de miktar denetimi Sanayi ve Teknoloji Bakanlığı'ndadır.</value></data>
+  <data name="T4.23.Name" xml:space="preserve"><value>WELMEC / OIML</value></data>
+  <data name="T4.23.Text" xml:space="preserve"><value>Avrupa (WELMEC) ve uluslararası (OIML) yasal metroloji kuruluşları. Uygulama rehberleri yayınlarlar.</value></data>
+  <data name="T4.24.Name" xml:space="preserve"><value>Checkweigher (kontrol tartısı)</value></data>
+  <data name="T4.24.Text" xml:space="preserve"><value>Hat üstünde her paketi kendiliğinden tartıp eksikleri ayıran otomatik kontrol tartısı.</value></data>
+  <data name="S5.Title" xml:space="preserve"><value>Kalite, kayıt ve raporlar</value></data>
+  <data name="S5.Intro" xml:space="preserve"><value>Denetimde sorulan kayıt ve onay kavramları.</value></data>
+  <data name="T5.01.Name" xml:space="preserve"><value>Dört göz ilkesi</value></data>
+  <data name="T5.01.Text" xml:space="preserve"><value>Bir işi yapan kişi kendi işini onaylayamaz; ikinci bir kişi bakar.</value></data>
+  <data name="T5.01.InVyxum" xml:space="preserve"><value>Reçeteyi hazırlayan onu onaylayamaz. Ayardan kapatılabilir; varsayılan açık.</value></data>
+  <data name="T5.02.Name" xml:space="preserve"><value>Elektronik imza</value></data>
+  <data name="T5.02.Text" xml:space="preserve"><value>Onayın, kişinin şifresini yeniden girmesiyle kayda ad, zaman ve anlamla yazılması. Kâğıttaki ıslak imzanın karşılığı.</value></data>
+  <data name="T5.02.InVyxum" xml:space="preserve"><value>Reçete onayı, net ağırlık parti onayı ve kararı.</value></data>
+  <data name="T5.02.Example" xml:space="preserve"><value>"Reçete onayı, R-014 sürüm 4".</value></data>
+  <data name="T5.03.Name" xml:space="preserve"><value>Yetkili onayı / PIN</value></data>
+  <data name="T5.03.Text" xml:space="preserve"><value>Kuraldan sapmak gerektiğinde (tolerans dışı, T2 altı) vardiya amirinin kısa şifresiyle ve bir nedenle izin vermesi.</value></data>
+  <data name="T5.03.InVyxum" xml:space="preserve"><value>Ana tuşun altında küçük, kilitli "Yetkili onayı" tuşu.</value></data>
+  <data name="T5.04.Name" xml:space="preserve"><value>Değişiklik kaydı (audit trail)</value></data>
+  <data name="T5.04.Text" xml:space="preserve"><value>Kimin, ne zaman, neyi değiştirdiğinin silinemeyen listesi.</value></data>
+  <data name="T5.04.InVyxum" xml:space="preserve"><value>Kayıtlar yalnızca eklenir; iptal bile silme değil, bir işarettir.</value></data>
+  <data name="T5.05.Name" xml:space="preserve"><value>Hash zinciri / kayıt bütünlüğü</value></data>
+  <data name="T5.05.Text" xml:space="preserve"><value>Her kaydın bir öncekinin özetini taşıması. Biri eski bir kaydı değiştirirse zincir bozulur ve fark edilir.</value></data>
+  <data name="T5.05.InVyxum" xml:space="preserve"><value>"Kayıt bütünlüğü bozuk" uyarısı.</value></data>
+  <data name="T5.06.Name" xml:space="preserve"><value>GMP</value></data>
+  <data name="T5.06.Text" xml:space="preserve"><value>Good Manufacturing Practice: iyi üretim uygulamaları. Özellikle ilaçta zorunlu kalite kuralları.</value></data>
+  <data name="T5.07.Name" xml:space="preserve"><value>21 CFR Part 11 / EU GMP Annex 11</value></data>
+  <data name="T5.07.Text" xml:space="preserve"><value>ABD (FDA) ve AB'nin elektronik kayıt ve elektronik imza kuralları. İlaç firmaları yazılımdan bunlara uygunluk bekler.</value></data>
+  <data name="T5.08.Name" xml:space="preserve"><value>Validasyon</value></data>
+  <data name="T5.08.Text" xml:space="preserve"><value>Yazılımın amacına uygun çalıştığının belgelerle kanıtlanması. İlaç firmaları bunu ister.</value></data>
+  <data name="T5.09.Name" xml:space="preserve"><value>Gün sonu</value></data>
+  <data name="T5.09.Text" xml:space="preserve"><value>Günün tartımlarının özeti: kaç kayıt, toplam net, toplam tutar, iptaller.</value></data>
+  <data name="T5.09.InVyxum" xml:space="preserve"><value>Ücretli Raporlama modülü.</value></data>
+  <data name="T5.10.Name" xml:space="preserve"><value>Z raporu</value></data>
+  <data name="T5.10.Text" xml:space="preserve"><value>Yazar kasa dünyasından gelen terim: günün toplamlarını verip sayaçları sıfırlayan kapanış raporu. Sıfırlamadan alınan ara rapora X raporu denir.</value></data>
+  <data name="T5.10.InVyxum" xml:space="preserve"><value>Ücretli Raporlama modülü.</value></data>
+  <data name="T5.10.Example" xml:space="preserve"><value>Akşam 18.00'de Z raporu alınır, ertesi gün sayaçlar sıfırdan başlar.</value></data>
+  <data name="T5.11.Name" xml:space="preserve"><value>Dönem kapatma</value></data>
+  <data name="T5.11.Text" xml:space="preserve"><value>Bir dönemin (gün, hafta, ay) kayıtlarını kesinleştirip raporlamak.</value></data>
+  <data name="T5.11.InVyxum" xml:space="preserve"><value>Ücretli Raporlama modülü.</value></data>
+  <data name="T5.12.Name" xml:space="preserve"><value>Vardiya</value></data>
+  <data name="T5.12.Text" xml:space="preserve"><value>Çalışma dönemi (ör. 08.00–16.00). Dara örneği ve bazı partiler vardiyayla başlar ve biter.</value></data>
+  <data name="S6.Title" xml:space="preserve"><value>Ekranlar ve kullanım</value></data>
+  <data name="S6.Intro" xml:space="preserve"><value>Ekranlarda sık geçen kavramlar.</value></data>
+  <data name="T6.01.Name" xml:space="preserve"><value>Operatör</value></data>
+  <data name="T6.01.Text" xml:space="preserve"><value>İstasyonda tartan kişi. Çoğu zaman eldivenli, ayakta ve acele içindedir; ekranlar ona göre sade tutulur.</value></data>
+  <data name="T6.01.InVyxum" xml:space="preserve"><value>Kayıtlar ekranında Operatör sütunu.</value></data>
+  <data name="T6.02.Name" xml:space="preserve"><value>Vardiya amiri / kalite sorumlusu</value></data>
+  <data name="T6.02.Text" xml:space="preserve"><value>Vardiya amiri hattın yöneticisidir, yetkili onayını verir. Kalite sorumlusu planları yazar, partileri onaylar.</value></data>
+  <data name="T6.02.InVyxum" xml:space="preserve"><value>Kullanıcılar ve roller modülündeki yetkiler.</value></data>
+  <data name="T6.03.Name" xml:space="preserve"><value>Durum alanı</value></data>
+  <data name="T6.03.Text" xml:space="preserve"><value>Operatör ekranının en büyük renkli alanı: renk, simge ve tek kelime. Ne olduğunu üç saniyede anlatır.</value></data>
+  <data name="T6.03.InVyxum" xml:space="preserve"><value>"Basıldı", "Az", "Dur", "Tamam".</value></data>
+  <data name="T6.04.Name" xml:space="preserve"><value>Devam / tamam / dur renkleri</value></data>
+  <data name="T6.04.Text" xml:space="preserve"><value>Durum alanının üç rengi: devam (yapılacak iş var), tamam (iyi), dur (bir sorun var). Renk tek başına anlam taşımaz; simge ve kelime de vardır.</value></data>
+  <data name="T6.05.Name" xml:space="preserve"><value>Ana tuş</value></data>
+  <data name="T6.05.Text" xml:space="preserve"><value>Her operatör ekranındaki tek büyük tuş. Hep aynı yerde durur; kapalıyken eksik olanı söyler.</value></data>
+  <data name="T6.05.InVyxum" xml:space="preserve"><value>"Kaydet ve etiket bas", "258 g daha koyun".</value></data>
+  <data name="T6.06.Name" xml:space="preserve"><value>Odak modu</value></data>
+  <data name="T6.06.Text" xml:space="preserve"><value>Sol menünün gizlendiği, yalnızca o işin göründüğü ekran. Çıkış "Duraklat" iledir.</value></data>
+  <data name="T6.06.InVyxum" xml:space="preserve"><value>Formülasyon bileşen tartımı ve net ağırlık istasyonu.</value></data>
+  <data name="T6.07.Name" xml:space="preserve"><value>Görünüm: açık, koyu, büyük dokunmatik</value></data>
+  <data name="T6.07.Text" xml:space="preserve"><value>Ekranın üç görünümü. Büyük dokunmatikte tuşlar ve satırlar eldivenle basılacak kadar büyür.</value></data>
+  <data name="T6.08.Name" xml:space="preserve"><value>Otomatik baskı / kendiliğinden kayıt</value></data>
+  <data name="T6.08.Text" xml:space="preserve"><value>Ağırlık sabitlenince tuşa basmadan kaydetmek ve etiket basmak.</value></data>
+  <data name="T6.08.InVyxum" xml:space="preserve"><value>Etiket ve Net ağırlık istasyonları.</value></data>
+  <data name="T6.09.Name" xml:space="preserve"><value>Poka-yoke</value></data>
+  <data name="T6.09.Text" xml:space="preserve"><value>Japonca "hatayı önleme": yanlışı yapmayı imkânsız kılan tasarım.</value></data>
+  <data name="T6.09.InVyxum" xml:space="preserve"><value>Yanlış hammaddede ya da bant dışında "Onayla" açılmaz.</value></data>
+  <data name="T6.10.Name" xml:space="preserve"><value>Kilitli önizleme</value></data>
+  <data name="T6.10.Text" xml:space="preserve"><value>Lisansı olmayan ücretli modülün menüde kilitli görünmesi; tıklanınca bulanık örnek görüntü ve "Deneme lisansı iste" tuşu çıkar.</value></data>
+  <data name="T6.10.InVyxum" xml:space="preserve"><value>Menüde "Vyxum Pro" altında.</value></data>
+  <data name="S7.Title" xml:space="preserve"><value>ERP ve lisans</value></data>
+  <data name="S7.Intro" xml:space="preserve"><value>Muhasebe programıyla bağlantı ve Vyxum lisansı.</value></data>
+  <data name="T7.01.Name" xml:space="preserve"><value>ERP</value></data>
+  <data name="T7.01.Text" xml:space="preserve"><value>Firmanın stok, üretim, satış ve muhasebesini yöneten ana program.</value></data>
+  <data name="T7.01.InVyxum" xml:space="preserve"><value>Entegrasyon modülü tartım sonuçlarını ERP'ye gönderir.</value></data>
+  <data name="T7.02.Name" xml:space="preserve"><value>Entegrasyon / bağlayıcı</value></data>
+  <data name="T7.02.Text" xml:space="preserve"><value>Vyxum ile ERP arasında veri taşıyan modül. Bağlayıcı belli bir ERP'ye özel parçadır.</value></data>
+  <data name="T7.02.InVyxum" xml:space="preserve"><value>Ücretli modül.</value></data>
+  <data name="T7.03.Name" xml:space="preserve"><value>Alan eşleştirme</value></data>
+  <data name="T7.03.Text" xml:space="preserve"><value>Vyxum'daki bir alanı ERP'deki karşılığına bağlama. Kod yazmadan, ekrandan yapılır.</value></data>
+  <data name="T7.03.InVyxum" xml:space="preserve"><value>Entegrasyon modülünün ekranı.</value></data>
+  <data name="T7.03.Example" xml:space="preserve"><value>Vyxum "parti" → ERP "seri-lot no".</value></data>
+  <data name="T7.04.Name" xml:space="preserve"><value>Malzeme kartı</value></data>
+  <data name="T7.04.Text" xml:space="preserve"><value>ERP'deki ürün ya da hammadde kaydı. Vyxum'daki ürün kartının karşılığı.</value></data>
+  <data name="T7.04.InVyxum" xml:space="preserve"><value>ERP'den Vyxum'a aktarılabilir.</value></data>
+  <data name="T7.05.Name" xml:space="preserve"><value>Üretim emri</value></data>
+  <data name="T7.05.Text" xml:space="preserve"><value>ERP'de açılan "şunu üret" belgesi. Vyxum'daki iş emrinin karşılığı.</value></data>
+  <data name="T7.06.Name" xml:space="preserve"><value>Fiş: üretimden giriş, sarf, fire, ters fiş</value></data>
+  <data name="T7.06.Text" xml:space="preserve"><value>ERP'de stok hareketini kaydeden belgeler. Üretimden giriş mamulü stoğa ekler, sarf hammaddeyi düşer, fire kaybı yazar, ters fiş iptal eder.</value></data>
+  <data name="T7.06.InVyxum" xml:space="preserve"><value>Vyxum'dan ERP'ye gider; varsayılan olarak parti kapanınca toplu.</value></data>
+  <data name="T7.07.Name" xml:space="preserve"><value>Lisans dosyası (.vxlic)</value></data>
+  <data name="T7.07.Text" xml:space="preserve"><value>Firmanın hangi modülleri, kaç istasyonda, ne zamana kadar kullanabileceğini yazan imzalı dosya. İnternetsiz doğrulanır.</value></data>
+  <data name="T7.07.InVyxum" xml:space="preserve"><value>Ayarlar &gt; Modüller ve lisans; ücretli modülleri açar, yeniden kurulum gerekmez.</value></data>
+  <data name="T7.08.Name" xml:space="preserve"><value>İstasyon başına lisans</value></data>
+  <data name="T7.08.Text" xml:space="preserve"><value>Fiyatın ve sınırın terazili çalışma noktası sayısına göre belirlenmesi.</value></data>
+  <data name="T7.08.InVyxum" xml:space="preserve"><value>Ücretli modüller istasyon sayısına göre lisanslanır.</value></data>
+  <data name="T7.09.Name" xml:space="preserve"><value>Deneme lisansı / ek süre</value></data>
+  <data name="T7.09.Text" xml:space="preserve"><value>Deneme lisansı ücretli modülleri süreli açar. Ek süre, lisans bitince modül salt okunura geçmeden önce tanınan süredir. Veri silinmez.</value></data>
+  <data name="T7.09.InVyxum" xml:space="preserve"><value>Kilitli önizlemede "Deneme lisansı iste"; ek sürede ekranın üstünde uyarı şeridi.</value></data>
+  <data name="T7.10.Name" xml:space="preserve"><value>Açık çekirdek / Vyxum Pro</value></data>
+  <data name="T7.10.Text" xml:space="preserve"><value>Ücretsiz, açık kaynaklı temel (tartım, kayıtlar, ürünler) ve üstüne lisansla açılan ücretli modüller (Etiket, Formülasyon, Net ağırlık…).</value></data>
+  <data name="T7.10.InVyxum" xml:space="preserve"><value>Ücretli modüller menüde "Vyxum Pro" altında.</value></data>
+  <data name="S8.Title" xml:space="preserve"><value>Terazi ve yazıcı bağlantısı</value></data>
+  <data name="S8.Intro" xml:space="preserve"><value>Kurulumda ve Cihazlar ekranında geçen donanım kelimeleri.</value></data>
+  <data name="T8.01.Name" xml:space="preserve"><value>Seri port / COM / RS232</value></data>
+  <data name="T8.01.Text" xml:space="preserve"><value>Teraziyi bilgisayara bağlayan eski ama yaygın kablo bağlantısı. Windows'ta COM1, COM3 gibi adlarla görünür.</value></data>
+  <data name="T8.01.InVyxum" xml:space="preserve"><value>Cihaz ayarı; operatör ekranında port adı gösterilmez.</value></data>
+  <data name="T8.01.Example" xml:space="preserve"><value>Terazi → COM3.</value></data>
+  <data name="T8.02.Name" xml:space="preserve"><value>Baud, parite, dur biti (8N1)</value></data>
+  <data name="T8.02.Text" xml:space="preserve"><value>Seri bağlantının hız ve biçim ayarları. İki uç aynı ayarı kullanmazsa veri anlamsız gelir. 9600 8N1 yaygın bir ayardır.</value></data>
+  <data name="T8.02.InVyxum" xml:space="preserve"><value>Kurulum sihirbazı ve Cihazlar ekranı; terazi aranırken yaygın ayarlar denenir.</value></data>
+  <data name="T8.03.Name" xml:space="preserve"><value>TCP/IP, port 9100</value></data>
+  <data name="T8.03.Text" xml:space="preserve"><value>Ağ bağlantısı. Etiket yazıcıları ağda genelde 9100 numaralı porttan komut alır.</value></data>
+  <data name="T8.03.InVyxum" xml:space="preserve"><value>Yazıcı ve terazi ağdan da bağlanabilir.</value></data>
+  <data name="T8.04.Name" xml:space="preserve"><value>Vyxum Agent</value></data>
+  <data name="T8.04.Text" xml:space="preserve"><value>Terazinin ve yazıcının bağlı olduğu bilgisayarda çalışan küçük program. Ağırlığı okuyup sunucuya, etiketi sunucudan yazıcıya taşır.</value></data>
+  <data name="T8.04.InVyxum" xml:space="preserve"><value>Windows servisi olarak çalışır.</value></data>
+  <data name="T8.05.Name" xml:space="preserve"><value>Protokol</value></data>
+  <data name="T8.05.Text" xml:space="preserve"><value>Terazinin ağırlığı hangi biçimde gönderdiği. Bazı teraziler sorulunca cevap verir, bazıları ağırlığı sürekli yayınlar.</value></data>
+  <data name="T8.05.InVyxum" xml:space="preserve"><value>Cihaz ayarında terazinize uyan protokol seçilir.</value></data>
+  <data name="T8.06.Name" xml:space="preserve"><value>Simülatör</value></data>
+  <data name="T8.06.Text" xml:space="preserve"><value>Gerçek terazi yokken ağırlık üreten sahte terazi. Deneme, eğitim ve tanıtım için.</value></data>
+  <data name="T8.06.InVyxum" xml:space="preserve"><value>Cihaz ayarında bağlantı türü "Simülatör".</value></data>
+</root>

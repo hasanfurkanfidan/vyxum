@@ -12,6 +12,7 @@
   <data name="Core" xml:space="preserve"><value>ÇEKİRDEK</value></data>
   <data name="Modules" xml:space="preserve"><value>MODÜLLER</value></data>
   <data name="System" xml:space="preserve"><value>SİSTEM</value></data>
+  <data name="Help" xml:space="preserve"><value>YARDIM</value></data>
   <data name="Language" xml:space="preserve"><value>Dil</value></data>
   <data name="Turkish" xml:space="preserve"><value>Türkçe</value></data>
   <data name="English" xml:space="preserve"><value>English</value></data>

@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype"><value>text/microsoft-resx</value></resheader>
+  <resheader name="version"><value>2.0</value></resheader>
+  <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+  <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+  <data name="Title" xml:space="preserve"><value>Sözlük</value></data>
+  <data name="Intro" xml:space="preserve"><value>Ekranlarda ve işte geçen kelimeler, sade dille. Bir kelime yazın ya da bölümlere göz atın.</value></data>
+  <data name="SearchLabel" xml:space="preserve"><value>Sözlükte ara</value></data>
+  <data name="SearchPlaceholder" xml:space="preserve"><value>Örneğin dara, PLU, koli</value></data>
+  <data name="Clear" xml:space="preserve"><value>Temizle</value></data>
+  <data name="Sections" xml:space="preserve"><value>Bölümler</value></data>
+  <data name="All" xml:space="preserve"><value>Tümü</value></data>
+  <data name="TermCount" xml:space="preserve"><value>{0} terim</value></data>
+  <data name="ResultCount" xml:space="preserve"><value>{0} sonuç</value></data>
+  <data name="InVyxum" xml:space="preserve"><value>Vyxum'da</value></data>
+  <data name="Example" xml:space="preserve"><value>Örnek</value></data>
+  <data name="Language.en" xml:space="preserve"><value>İngilizcesi</value></data>
+  <data name="Language.tr" xml:space="preserve"><value>Türkçesi</value></data>
+  <data name="NoResults" xml:space="preserve"><value>“{0}” için bir şey bulunamadı.</value></data>
+  <data name="NoResultsHint" xml:space="preserve"><value>Daha kısa bir kelime deneyin ya da aramayı temizleyip bölümlere göz atın.</value></data>
+  <data name="Note" xml:space="preserve"><value>Mevzuat değerleri bilgi içindir; esas olan güncel yönetmeliktir. Örneklerdeki numara ve barkodlar örnek veridir.</value></data>
+</root>
