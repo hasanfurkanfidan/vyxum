@@ -30,6 +30,8 @@ public static partial class ModuleValidator
         CheckCycles(modules, problems);
         CheckEvents(modules, problems);
         CheckDbContexts(modules, problems);
+        CheckUi(modules, problems);
+        CheckPreview(modules, problems);
         return problems;
     }
 
@@ -231,6 +233,46 @@ public static partial class ModuleValidator
         {
             problems.Add($"DbContext '{group.Key.FullName}' is registered by more than one module: " +
                          string.Join(", ", group.Select(m => $"'{m.Manifest.Id}'")) + ".");
+        }
+    }
+
+    private static void CheckUi(IReadOnlyList<ModuleDescriptor> modules, List<string> problems)
+    {
+        foreach (var module in modules.Where(m => m.Manifest.Ui is not null))
+        {
+            var id = module.Manifest.Id;
+            var ui = module.Manifest.Ui!;
+            if (ui.SdkVersion < 1)
+            {
+                problems.Add($"Module '{id}' declares UI SDK version {ui.SdkVersion}; use 1 or more.");
+            }
+
+            var files = ModuleUiFiles.Index(module.Module.GetType().Assembly);
+            if (string.IsNullOrWhiteSpace(ui.Entry) || !files.ContainsKey(ui.Entry))
+            {
+                problems.Add($"Module '{id}' declares the UI entry '{ui.Entry}', but its assembly has no embedded resource " +
+                             $"'{ModuleUi.ResourcePrefix}{ui.Entry}'.");
+            }
+        }
+    }
+
+    private static void CheckPreview(IReadOnlyList<ModuleDescriptor> modules, List<string> problems)
+    {
+        foreach (var module in modules.Where(m => m.Manifest.Preview is not null))
+        {
+            var id = module.Manifest.Id;
+            var preview = module.Manifest.Preview!;
+            if (string.IsNullOrWhiteSpace(preview.DescriptionKey))
+            {
+                problems.Add($"Module '{id}' declares a preview without a description key.");
+            }
+
+            var files = ModuleUiFiles.IndexPreview(module.Module.GetType().Assembly);
+            if (string.IsNullOrWhiteSpace(preview.Image) || !files.ContainsKey(preview.Image))
+            {
+                problems.Add($"Module '{id}' declares the preview image '{preview.Image}', but its assembly has no embedded resource " +
+                             $"'{ModulePreview.ResourcePrefix}{preview.Image}'.");
+            }
         }
     }
 

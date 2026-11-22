@@ -88,7 +88,7 @@ public sealed class UiEndpointTests : IDisposable
         var en = (await GetStringsAsync(client, "en", null)).GetProperty("strings").EnumerateObject().ToList();
 
         tr.Select(p => p.Name).ShouldBe(en.Select(p => p.Name));
-        tr.ShouldAllBe(p => (p.Name.StartsWith("shell.") || p.Name.StartsWith("setup.") || p.Name.StartsWith("devices.") || p.Name.StartsWith("products.") || p.Name.StartsWith("weighing.")) && !string.IsNullOrWhiteSpace(p.Value.GetString()));
+        tr.ShouldAllBe(p => (p.Name.StartsWith("shell.") || p.Name.StartsWith("setup.") || p.Name.StartsWith("devices.") || p.Name.StartsWith("license.") || p.Name.StartsWith("products.") || p.Name.StartsWith("weighing.")) && !string.IsNullOrWhiteSpace(p.Value.GetString()));
         en.ShouldAllBe(p => !string.IsNullOrWhiteSpace(p.Value.GetString()));
     }
 
@@ -122,5 +122,41 @@ public sealed class UiEndpointTests : IDisposable
             .ShouldBe(["products", "weighing"]);
         json.RootElement.GetProperty("capabilities").EnumerateArray().Select(c => c.GetString())
             .ShouldBe(["products.catalog", "weighing.records"]);
+    }
+
+    [Theory]
+    [InlineData("tr", "Tartım", "Ürünler")]
+    [InlineData("en", "Weighing", "Products")]
+    public async Task Modules_endpoint_serves_the_display_names_of_the_current_culture(string culture, string weighing, string products)
+    {
+        var ct = TestContext.Current.CancellationToken;
+        await using var factory = CreateFactory();
+        using var client = factory.CreateClient();
+        using var request = new HttpRequestMessage(HttpMethod.Get, UiEndpointExtensions.ModulesPath);
+        request.Headers.AcceptLanguage.ParseAdd(culture);
+        using var response = await client.SendAsync(request, ct);
+        using var json = JsonDocument.Parse(await response.Content.ReadAsStringAsync(ct));
+
+        var modules = json.RootElement.GetProperty("modules").EnumerateArray()
+            .ToDictionary(m => m.GetProperty("id").GetString()!, m => m);
+        modules["weighing"].GetProperty("name").GetString().ShouldBe(weighing);
+        modules["products"].GetProperty("name").GetString().ShouldBe(products);
+    }
+
+    [Fact]
+    public async Task Modules_endpoint_lists_provided_required_and_optional_capabilities()
+    {
+        var ct = TestContext.Current.CancellationToken;
+        await using var factory = CreateFactory();
+        using var client = factory.CreateClient();
+
+        using var json = JsonDocument.Parse(await client.GetStringAsync(UiEndpointExtensions.ModulesPath, ct));
+
+        var weighing = json.RootElement.GetProperty("modules").EnumerateArray()
+            .Single(m => m.GetProperty("id").GetString() == "weighing");
+        weighing.GetProperty("provides").EnumerateArray().Select(c => c.GetString()).ShouldBe(["weighing.records"]);
+        weighing.GetProperty("requires").GetArrayLength().ShouldBe(0);
+        weighing.GetProperty("optional").EnumerateArray().Select(c => c.GetString())
+            .ShouldBe(["products.catalog", "labels.print", "identity.users"], ignoreOrder: true);
     }
 }

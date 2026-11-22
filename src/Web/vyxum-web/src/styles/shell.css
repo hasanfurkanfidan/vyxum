@@ -153,3 +153,19 @@
     padding: 20px 16px 28px;
   }
 }
+
+/* "Vyxum Pro" group: locked paid modules, muted, with a padlock at the end of the entry. */
+.sidebar__link--locked {
+  color: var(--color-ink-muted);
+}
+
+.sidebar__link-name {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.sidebar__lock {
+  flex: none;
+  margin-left: 8px;
+}

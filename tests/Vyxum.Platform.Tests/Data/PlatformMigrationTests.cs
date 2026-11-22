@@ -32,6 +32,27 @@ public class PlatformMigrationTests
     [Theory]
     [InlineData(DatabaseProvider.Sqlite)]
     [InlineData(DatabaseProvider.SqlServer)]
+    public async Task Test_database_always_has_an_isolated_data_directory(DatabaseProvider provider)
+    {
+        var reason = TestDatabase.GetUnavailableReason(provider);
+        if (reason is not null)
+        {
+            Assert.Skip(reason);
+        }
+
+        await using var database = TestDatabase.Create(provider);
+
+        var directory = Path.GetFullPath(database.DataDirectory);
+        var productFolder = Path.GetFullPath(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData));
+        directory.StartsWith(productFolder, StringComparison.OrdinalIgnoreCase).ShouldBeFalse(
+            "Tests must never read or write the real product data folder.");
+        Directory.Exists(directory).ShouldBeTrue();
+        database.Settings[DatabaseSettings.DataDirectoryKey].ShouldBe(database.DataDirectory);
+    }
+
+    [Theory]
+    [InlineData(DatabaseProvider.Sqlite)]
+    [InlineData(DatabaseProvider.SqlServer)]
     public async Task Platform_tables_are_migrated_with_their_own_history_table(DatabaseProvider provider)
     {
         var reason = TestDatabase.GetUnavailableReason(provider);

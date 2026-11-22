@@ -8,7 +8,10 @@ public abstract class ModuleContext
     /// <summary>Application configuration.</summary>
     public abstract IConfiguration Configuration { get; }
 
-    /// <summary>Capabilities provided by the loaded modules; use it for optional capabilities.</summary>
+    /// <summary>
+    /// Capabilities provided by the installed modules, while services are registered. It does not follow the license;
+    /// at run time check optional capabilities with the <see cref="ICapabilityRegistry"/> from dependency injection.
+    /// </summary>
     public abstract ICapabilityRegistry Capabilities { get; }
 
     /// <summary>

@@ -9,13 +9,14 @@ import { useSetup } from '../../shell/SetupProvider';
 import { CompanyStep } from './CompanyStep';
 import { DatabaseStep } from './DatabaseStep';
 import { DoneStep } from './DoneStep';
+import { LicenseStep } from './LicenseStep';
 import { ProductsStep } from './ProductsStep';
 import { ScaleStep } from './ScaleStep';
 import { StepLayout, WizardStepContext, type WizardStepContextValue } from './StepLayout';
 import { watchRestart } from './restart';
 import '../../styles/setup.css';
 
-export type SetupStepId = 'database' | 'scale' | 'company' | 'products';
+export type SetupStepId = 'database' | 'scale' | 'company' | 'license' | 'products';
 type ScreenId = SetupStepId | 'done';
 
 interface StepDefinition {
@@ -27,6 +28,7 @@ const allSteps: readonly StepDefinition[] = [
   { id: 'database', labelKey: 'setup.StepDatabase' },
   { id: 'scale', labelKey: 'setup.StepScale' },
   { id: 'company', labelKey: 'setup.StepCompany' },
+  { id: 'license', labelKey: 'license.StepTitle' },
   { id: 'products', labelKey: 'setup.StepProducts' },
 ];
 
@@ -174,6 +176,9 @@ export function SetupWizard() {
         break;
       case 'company':
         body = <CompanyStep initialName={status.company.name} onDone={companyDone} />;
+        break;
+      case 'license':
+        body = <LicenseStep onDone={() => go(1)} />;
         break;
       case 'products':
         body = <ProductsStep onDone={() => go(1)} />;

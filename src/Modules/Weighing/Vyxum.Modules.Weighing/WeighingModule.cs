@@ -23,6 +23,7 @@ public sealed class WeighingModule : IModule
     public ModuleManifest Manifest { get; } = new()
     {
         Id = "weighing",
+        DisplayNameKey = WeighingStrings.KeyPrefix + ".ModuleName",
         Version = new Version(1, 0),
         Provides = [RecordsCapability],
         Optional = [ProductsCapability, LabelsCapability, UsersCapability],

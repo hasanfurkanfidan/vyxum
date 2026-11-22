@@ -88,6 +88,17 @@ export function formatDate(value: string | Date, culture: string, options: DateF
   return formatWith(value, culture, { year: 'numeric', month: '2-digit', day: '2-digit' }, options);
 }
 
+/**
+ * A calendar date without a time (`yyyy-MM-dd`, for example a license's last valid day), shown as a date of the
+ * culture: tr "31.10.2027". It is not shifted by the time zone; a value of another shape is returned unchanged.
+ */
+export function formatDateOnly(value: string, culture: string): string {
+  const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(value);
+  if (!match) return value;
+  const date = new Date(Date.UTC(Number(match[1]), Number(match[2]) - 1, Number(match[3])));
+  return formatWith(date, culture, { year: 'numeric', month: '2-digit', day: '2-digit' }, { timeZone: 'UTC' });
+}
+
 /** Time of day with hours and minutes, 24-hour clock in tr. */
 export function formatTime(value: string | Date, culture: string, options: DateFormatOptions = {}): string {
   return formatWith(value, culture, { hour: '2-digit', minute: '2-digit' }, options);

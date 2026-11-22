@@ -12,6 +12,10 @@ Bu depo Vyxum'un açık çekirdeğidir ve Apache Lisansı 2.0 ile lisanslanmış
 
 Windows 10 ya da 11 (64 bit). İnternet bağlantısı, veritabanı sunucusu ya da ek bir program gerekmez. `VyxumSetup-<sürüm>.exe` dosyasını çalıştırın ve adım adım kılavuzu izleyin: [Kurulum kılavuzu](docs/KURULUM.md) (English: [docs/INSTALL.md](docs/INSTALL.md)).
 
+## Lisans dosyası / License file
+
+Tartım, Ürünler ve Kayıtlar lisans istemez. Ücretli modüller `.vxlic` uzantılı bir lisans dosyasıyla açılır; dosyayı Ayarlar, Modüller ve lisans bölümünden yüklersiniz. Bkz. [lisans kılavuzu](docs/LISANS.md) (English: [docs/LICENSING.md](docs/LICENSING.md)).
+
 ## Depo yapısı
 
 | Yol | İçerik |

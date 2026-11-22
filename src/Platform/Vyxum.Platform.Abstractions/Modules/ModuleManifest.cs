@@ -23,4 +23,27 @@ public sealed class ModuleManifest
     /// An event name and version can be published by only one module.
     /// </summary>
     public IReadOnlyList<Type> Publishes { get; init; } = [];
+
+    /// <summary>
+    /// Whether the module works only with a license that names its <see cref="Id"/>. Default false (a free module).
+    /// Without such a license the platform answers the module's endpoints with 403 and holds its integration event
+    /// handlers; the module reads the details through <see cref="ILicenseState"/>.
+    /// </summary>
+    public bool RequiresLicense { get; init; }
+
+    /// <summary>
+    /// Full UI string key (prefix included, for example <c>weighing.ModuleName</c>) of the module's display name. The key
+    /// must be in a string set the module registers itself (<c>AddUiStrings</c>); the platform checks at startup that it
+    /// exists and serves the name of the current culture in <c>GET /api/ui/modules</c>. Null: the UI shows the id.
+    /// </summary>
+    public string? DisplayNameKey { get; init; }
+
+    /// <summary>The module's screens, embedded in its assembly, or null when the module has none.</summary>
+    public ModuleUi? Ui { get; init; }
+
+    /// <summary>
+    /// What the shell shows while the module is locked (a description and a sample image), or null for none. See
+    /// <see cref="ModulePreview"/>.
+    /// </summary>
+    public ModulePreview? Preview { get; init; }
 }

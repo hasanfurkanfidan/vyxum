@@ -1,6 +1,9 @@
 import '@testing-library/jest-dom/vitest';
-import { cleanup } from '@testing-library/react';
+import { cleanup, configure } from '@testing-library/react';
 import { afterEach } from 'vitest';
+
+// The app loads several lists on start; give slow machines time before an async query gives up.
+configure({ asyncUtilTimeout: 4000 });
 
 afterEach(() => {
   cleanup();

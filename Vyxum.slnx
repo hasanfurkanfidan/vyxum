@@ -23,6 +23,7 @@
     <Project Path="src/Modules/Weighing/Vyxum.Modules.Weighing/Vyxum.Modules.Weighing.csproj" />
   </Folder>
   <Folder Name="/src/Platform/">
+    <Project Path="src/Platform/Vyxum.Licensing/Vyxum.Licensing.csproj" />
     <Project Path="src/Platform/Vyxum.Platform.Abstractions/Vyxum.Platform.Abstractions.csproj" />
     <Project Path="src/Platform/Vyxum.Platform.Testing/Vyxum.Platform.Testing.csproj" />
     <Project Path="src/Platform/Vyxum.Platform/Vyxum.Platform.csproj" />
@@ -32,11 +33,13 @@
     <Project Path="tests/Vyxum.Desktop.Tests/Vyxum.Desktop.Tests.csproj" />
     <Project Path="tests/Vyxum.Devices.Tests/Vyxum.Devices.Tests.csproj" />
     <Project Path="tests/Vyxum.IntegrationTests/Vyxum.IntegrationTests.csproj" />
+    <Project Path="tests/Vyxum.Licensing.Tests/Vyxum.Licensing.Tests.csproj" />
     <Project Path="tests/Vyxum.Modules.Tests/Vyxum.Modules.Tests.csproj" />
     <Project Path="tests/Vyxum.Platform.Tests/Vyxum.Platform.Tests.csproj" />
   </Folder>
   <Folder Name="/tests/SampleModules/">
     <Project Path="tests/SampleModules/Vyxum.Samples.Notifications/Vyxum.Samples.Notifications.csproj" />
     <Project Path="tests/SampleModules/Vyxum.Samples.Orders/Vyxum.Samples.Orders.csproj" />
+    <Project Path="tests/SampleModules/Vyxum.Samples.Paid/Vyxum.Samples.Paid.csproj" />
   </Folder>
 </Solution>

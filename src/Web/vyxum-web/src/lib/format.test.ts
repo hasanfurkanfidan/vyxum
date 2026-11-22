@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import {
   decimalPlaces,
   formatDate,
+  formatDateOnly,
   formatDateTime,
   formatDecimal,
   formatMoney,
@@ -119,5 +120,16 @@ describe('formatRecordNumber', () => {
   it('pads to six digits', () => {
     expect(formatRecordNumber(142)).toBe('000142');
     expect(formatRecordNumber('1234567')).toBe('1234567');
+  });
+});
+
+describe('formatDateOnly', () => {
+  it('shows a calendar date by culture without a time zone shift', () => {
+    expect(formatDateOnly('2027-10-31', 'tr')).toBe('31.10.2027');
+    expect(formatDateOnly('2027-01-01', 'en')).toBe('01/01/2027');
+  });
+
+  it('returns a value of another shape unchanged', () => {
+    expect(formatDateOnly('soon', 'tr')).toBe('soon');
   });
 });

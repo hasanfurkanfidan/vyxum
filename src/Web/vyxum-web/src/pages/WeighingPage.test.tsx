@@ -185,8 +185,11 @@ function postBodies(fetchMock: ReturnType<typeof installFakeApi>, path: string):
     .map(([, init]) => bodyOf(init));
 }
 
+// The reading is on screen before the devices load; wait until the live stream is open too.
 async function liveNet() {
-  return screen.findByTestId('live-net');
+  const net = await screen.findByTestId('live-net');
+  await waitFor(() => expect(FakeEventSource.instances.length).toBeGreaterThan(0));
+  return net;
 }
 
 async function expectNet(text: string) {
@@ -208,6 +211,7 @@ describe('weighing screen', () => {
     setup();
     renderWeighing();
 
+    await liveNet();
     await expectNet('1,260');
     const live = screen.getByRole('region', { name: 'Canlı ağırlık' });
     expect(within(live).getByText('kg')).toBeInTheDocument();

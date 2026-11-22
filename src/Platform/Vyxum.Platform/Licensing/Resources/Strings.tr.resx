@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype"><value>text/microsoft-resx</value></resheader>
+  <resheader name="version"><value>2.0</value></resheader>
+  <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+  <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+  <data name="Title" xml:space="preserve"><value>Modüller ve lisans</value></data>
+  <data name="Description" xml:space="preserve"><value>Tartım ve Ürünler açık kaynaktır, lisans istemez. Diğer modüller lisans dosyasıyla açılır; yeni modül eklemek yeniden kurulum gerektirmez.</value></data>
+  <data name="SectionLicense" xml:space="preserve"><value>Lisans</value></data>
+  <data name="StatusNone" xml:space="preserve"><value>lisans yok</value></data>
+  <data name="StatusValid" xml:space="preserve"><value>imza doğrulandı</value></data>
+  <data name="StatusInvalid" xml:space="preserve"><value>geçersiz: {0}</value></data>
+  <data name="StatusNotYetValid" xml:space="preserve"><value>henüz geçerli değil</value></data>
+  <data name="StatusGrace" xml:space="preserve"><value>süresi doldu, ek süre {0} gün</value></data>
+  <data name="StatusReadOnly" xml:space="preserve"><value>süresi doldu, salt okunur</value></data>
+  <data name="NoLicenseText" xml:space="preserve"><value>Lisans yüklenmedi. Tartım ve Ürünler lisanssız çalışır.</value></data>
+  <data name="Licensee" xml:space="preserve"><value>Lisans sahibi</value></data>
+  <data name="Type" xml:space="preserve"><value>Lisans türü</value></data>
+  <data name="Validity" xml:space="preserve"><value>Geçerlilik</value></data>
+  <data name="ValidFrom" xml:space="preserve"><value>Başlangıç</value></data>
+  <data name="Perpetual" xml:space="preserve"><value>süresiz</value></data>
+  <data name="Stations" xml:space="preserve"><value>İstasyon</value></data>
+  <data name="OpenedModules" xml:space="preserve"><value>Açılan modül</value></data>
+  <data name="LicenseId" xml:space="preserve"><value>Lisans no</value></data>
+  <data name="TypeTrial" xml:space="preserve"><value>deneme</value></data>
+  <data name="TypeSubscription" xml:space="preserve"><value>abonelik</value></data>
+  <data name="TypePerpetual" xml:space="preserve"><value>kalıcı</value></data>
+  <data name="TypeNfr" xml:space="preserve"><value>tanıtım (NFR)</value></data>
+  <data name="ClockBehind" xml:space="preserve"><value>Bu bilgisayarın saati, Vyxum'un daha önce gördüğü bir zamanın gerisinde. Lisans süresi en son görülen zamana göre sayılır; saati geri almak süreyi uzatmaz.</value></data>
+  <data name="Upload" xml:space="preserve"><value>Lisans dosyası yükle</value></data>
+  <data name="ChooseFile" xml:space="preserve"><value>Dosya seç</value></data>
+  <data name="FileInput" xml:space="preserve"><value>Lisans dosyası</value></data>
+  <data name="Uploading" xml:space="preserve"><value>Yükleniyor…</value></data>
+  <data name="Uploaded" xml:space="preserve"><value>Lisans yüklendi.</value></data>
+  <data name="LoadedFor" xml:space="preserve"><value>Lisans yüklendi: {0}</value></data>
+  <data name="ReadFailed" xml:space="preserve"><value>Dosya okunamadı.</value></data>
+  <data name="Remove" xml:space="preserve"><value>Lisansı kaldır</value></data>
+  <data name="RemoveConfirm" xml:space="preserve"><value>Lisans kaldırılsın mı? Ücretli modüller yeniden kilitlenir; kayıtlarınız silinmez.</value></data>
+  <data name="RemoveYes" xml:space="preserve"><value>Kaldır</value></data>
+  <data name="Cancel" xml:space="preserve"><value>Vazgeç</value></data>
+  <data name="Removed" xml:space="preserve"><value>Lisans kaldırıldı.</value></data>
+  <data name="Error.invalid_format" xml:space="preserve"><value>Bu bir Vyxum lisans dosyası değil.</value></data>
+  <data name="Error.unsupported_format" xml:space="preserve"><value>Bu lisans dosyası Vyxum’un daha yeni bir sürümü için hazırlanmış. Vyxum’u güncelleyin ya da güncel biçimde yeni bir dosya isteyin.</value></data>
+  <data name="Error.unknown_key" xml:space="preserve"><value>Dosya, bu Vyxum sürümünün tanımadığı bir anahtarla imzalanmış.</value></data>
+  <data name="Error.invalid_signature" xml:space="preserve"><value>İmza tutmuyor: dosya değiştirilmiş ya da bozulmuş. Yeni bir dosya isteyin.</value></data>
+  <data name="Error.invalid_payload" xml:space="preserve"><value>Lisans dosyasının içeriği eksik ya da okunamıyor.</value></data>
+  <data name="Error.too_large" xml:space="preserve"><value>Dosya bir lisans dosyası olamayacak kadar büyük.</value></data>
+  <data name="Error.no_license" xml:space="preserve"><value>Yüklü bir lisans yok.</value></data>
+  <data name="Error.unknown_device" xml:space="preserve"><value>Seçilen cihazlardan biri artık yok. Sayfayı yenileyip yeniden seçin.</value></data>
+  <data name="Error.station_limit_exceeded" xml:space="preserve"><value>Lisans, seçilenden az istasyona izin veriyor. Bir cihazın seçimini kaldırıp yeniden kaydedin.</value></data>
+  <data name="Error.stations_too_long" xml:space="preserve"><value>Saklanamayacak kadar çok cihaz seçildi.</value></data>
+  <data name="Error.unknown" xml:space="preserve"><value>İstek tamamlanamadı.</value></data>
+  <data name="ReplaceTitle" xml:space="preserve"><value>Lisansı değiştir</value></data>
+  <data name="ReplaceConfirm" xml:space="preserve"><value>Şu an çalışan bir lisans var. Yeni dosya onun yerine geçer; dosyanın süresi dolmuşsa ya da henüz başlamamışsa ücretli modüller salt okunur olur ya da kilitlenir. Devam edilsin mi?</value></data>
+  <data name="ReplaceYes" xml:space="preserve"><value>Değiştir</value></data>
+  <data name="UploadedReadOnly" xml:space="preserve"><value>Dosya yüklendi ama lisansın süresi dolmuş ve ek süresi de bitmiş: ücretli modüller salt okunur. Güncel bir lisans dosyası yükleyin.</value></data>
+  <data name="UploadedNotYetValid" xml:space="preserve"><value>Dosya yüklendi ama lisans {0} tarihinde başlıyor: o güne kadar ücretli modüller kilitli.</value></data>
+  <data name="UploadedGrace" xml:space="preserve"><value>Dosya yüklendi ama lisansın süresi dolmuş: {0} gün ek süre var, sonra ücretli modüller salt okunur olur. Güncel bir lisans dosyası yükleyin.</value></data>
+  <data name="Error.license_required" xml:space="preserve"><value>Bu işlem için geçerli bir lisans gerekiyor. Lisans durumu yenilendi.</value></data>
+  <data name="Error.license_read_only" xml:space="preserve"><value>Lisansın süresi dolduğu için modül salt okunur; kayıt değiştirilemez. Lisans durumu yenilendi.</value></data>
+  <data name="SectionSystem" xml:space="preserve"><value>Bu kurulum</value></data>
+  <data name="SectionModules" xml:space="preserve"><value>Modüller</value></data>
+  <data name="ColModule" xml:space="preserve"><value>Modül</value></data>
+  <data name="ColKind" xml:space="preserve"><value>Tür</value></data>
+  <data name="ColStatus" xml:space="preserve"><value>Durum</value></data>
+  <data name="KindOpen" xml:space="preserve"><value>açık kaynak</value></data>
+  <data name="KindPaid" xml:space="preserve"><value>ücretli</value></data>
+  <data name="ModuleOpen" xml:space="preserve"><value>açık</value></data>
+  <data name="ModuleLocked" xml:space="preserve"><value>lisans yok</value></data>
+  <data name="ModuleGrace" xml:space="preserve"><value>ek süre</value></data>
+  <data name="ModuleReadOnly" xml:space="preserve"><value>salt okunur</value></data>
+  <data name="ModuleNotInstalled" xml:space="preserve"><value>kurulu değil</value></data>
+  <data name="StationsTitle" xml:space="preserve"><value>İstasyonlar</value></data>
+  <data name="StationsHint" xml:space="preserve"><value>Her lisanslı istasyon bir cihazdır (terazi). Ücretli modülleri kullanabilecek cihazları seçin; tartımın kendisi hiçbir zaman sınırlanmaz.</value></data>
+  <data name="StationsNoDevices" xml:space="preserve"><value>Henüz cihaz eklenmedi. Cihazlar ekranından ekleyin.</value></data>
+  <data name="StationsDevices" xml:space="preserve"><value>Cihazlar</value></data>
+  <data name="StationsSave" xml:space="preserve"><value>İstasyonları kaydet</value></data>
+  <data name="StationsSaved" xml:space="preserve"><value>İstasyonlar kaydedildi.</value></data>
+  <data name="StationsDisabled" xml:space="preserve"><value>kapalı</value></data>
+  <data name="BannerGrace" xml:space="preserve"><value>Lisans süresi doldu; ücretli modüller {0} gün daha çalışır.</value></data>
+  <data name="BannerReadOnly" xml:space="preserve"><value>Lisans süresi bitti; ücretli modüller salt okunur.</value></data>
+  <data name="BannerLink" xml:space="preserve"><value>Lisans ayarları</value></data>
+  <data name="StepTitle" xml:space="preserve"><value>Lisans</value></data>
+  <data name="StepHeading" xml:space="preserve"><value>Lisans dosyanız var mı?</value></data>
+  <data name="StepDescription" xml:space="preserve"><value>Tartım ve Ürünler ücretsizdir. Lisans dosyası ücretli modülleri açar; dosyayı sonra Ayarlar’dan da yükleyebilirsiniz.</value></data>
+  <data name="OptionFree" xml:space="preserve"><value>Ücretsiz devam et</value></data>
+  <data name="OptionFreeHint" xml:space="preserve"><value>Tartım, Ürünler ve Kayıtlar lisanssız çalışır.</value></data>
+  <data name="OptionFile" xml:space="preserve"><value>Lisans dosyası yükle</value></data>
+  <data name="OptionFileHint" xml:space="preserve"><value>Bizden aldığınız, uzantısı .vxlic olan dosya.</value></data>
+  <data name="ColProvides" xml:space="preserve"><value>Sağladığı</value></data>
+  <data name="ColNeeds" xml:space="preserve"><value>İhtiyaç duyduğu</value></data>
+  <data name="NeedsOptional" xml:space="preserve"><value>isteğe bağlı: {0}</value></data>
+  <data name="ClockAheadNote" xml:space="preserve"><value>Bilgisayar saati son görülen zamandan çok ileride; saat doğruysa bu not birkaç saat içinde kaybolur.</value></data>
+  <data name="TrialTitle" xml:space="preserve"><value>Deneme lisansı iste</value></data>
+  <data name="TrialIntro" xml:space="preserve"><value>Bu metni Vyxum'a ya da bayinize iletin.</value></data>
+  <data name="TrialHeading" xml:space="preserve"><value>Deneme lisansı isteği</value></data>
+  <data name="TrialCompany" xml:space="preserve"><value>Firma</value></data>
+  <data name="TrialModule" xml:space="preserve"><value>Modül</value></data>
+  <data name="TrialVersion" xml:space="preserve"><value>Sürüm</value></data>
+  <data name="TrialLicenseId" xml:space="preserve"><value>Mevcut lisans</value></data>
+  <data name="TrialDate" xml:space="preserve"><value>Tarih</value></data>
+  <data name="TrialContact" xml:space="preserve"><value>İletişim</value></data>
+  <data name="TrialNoContact" xml:space="preserve"><value>Vyxum'a ya da bayinize iletin.</value></data>
+  <data name="TrialCopy" xml:space="preserve"><value>Kopyala</value></data>
+  <data name="TrialCopied" xml:space="preserve"><value>Kopyalandı.</value></data>
+  <data name="TrialClose" xml:space="preserve"><value>Kapat</value></data>
+  <data name="TrialRequestLabel" xml:space="preserve"><value>İstek metni</value></data>
+</root>

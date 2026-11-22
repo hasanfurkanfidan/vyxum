@@ -2,7 +2,7 @@ import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } fro
 import { Link } from 'react-router-dom';
 import { TargetGauge } from '../components/weighing/TargetGauge';
 import { useCulture, useT } from '../i18n/I18nProvider';
-import { ApiError, RuleError, ValidationError } from '../lib/api';
+import { ApiError, RuleError, ruleErrorKey, ValidationError } from '../lib/api';
 import { formatDecimal, formatMoney, formatTime, formatWeight } from '../lib/format';
 import { targetView } from '../lib/target';
 import {
@@ -185,7 +185,7 @@ function isRetryable(error: unknown): boolean {
 
 /** Resource key for a failed save that is not retried. */
 function saveErrorKey(error: unknown): string {
-  if (error instanceof RuleError) return error.code;
+  if (error instanceof RuleError) return ruleErrorKey(error);
   if (error instanceof ValidationError) {
     const first = Object.values(error.errors).flat()[0];
     if (first) return first;

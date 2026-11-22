@@ -44,3 +44,11 @@ yarn-error.log*
 # OS files
 .DS_Store
 Thumbs.db
+
+# Keys and certificates never belong in the repository
+*.pem
+*.key
+*.pfx
+*.p12
+
+*.tsbuildinfo
