@@ -32,6 +32,7 @@ public static partial class ModuleValidator
         CheckDbContexts(modules, problems);
         CheckUi(modules, problems);
         CheckPreview(modules, problems);
+        CheckPermissions(modules, problems);
         return problems;
     }
 
@@ -53,6 +54,47 @@ public static partial class ModuleValidator
         {
             problems.Add($"Module id '{group.Key}' is used by more than one module: " +
                          string.Join(", ", group.Select(m => m.Module.GetType().FullName)) + ".");
+        }
+    }
+
+    private static void CheckPermissions(IReadOnlyList<ModuleDescriptor> modules, List<string> problems)
+    {
+        foreach (var module in modules)
+        {
+            foreach (var permission in module.Manifest.Permissions)
+            {
+                if (permission is null)
+                {
+                    problems.Add($"Module '{module.Manifest.Id}' declares a null permission.");
+                    continue;
+                }
+
+                if (!IsValidId(permission.Id.Id))
+                {
+                    problems.Add($"Module '{module.Manifest.Id}' declares an invalid permission id '{permission.Id}'.");
+                }
+
+                if (string.IsNullOrWhiteSpace(permission.NameKey))
+                {
+                    problems.Add($"Permission '{permission.Id}' of module '{module.Manifest.Id}' has no name key.");
+                }
+
+                foreach (var role in (permission.DefaultRoles ?? []).Where(r => !IsValidId(r)))
+                {
+                    problems.Add($"Permission '{permission.Id}' of module '{module.Manifest.Id}' names an invalid role id '{role}'.");
+                }
+            }
+        }
+
+        var duplicates = modules
+            .SelectMany(m => m.Manifest.Permissions.Where(p => p is not null).Select(p => (Id: p.Id.Id, Module: m.Manifest.Id)))
+            .Where(p => p.Id is not null)
+            .GroupBy(p => p.Id, StringComparer.Ordinal)
+            .Where(g => g.Count() > 1);
+        foreach (var group in duplicates)
+        {
+            problems.Add($"Permission '{group.Key}' is declared more than once: " +
+                         string.Join(", ", group.Select(p => $"'{p.Module}'")) + ".");
         }
     }
 
