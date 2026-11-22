@@ -114,6 +114,27 @@ public sealed class AgentHubTests : IDisposable
         return json.RootElement.EnumerateArray().Single(d => d.GetProperty("deviceId").GetString() == DeviceId).Clone();
     }
 
+    [Fact]
+    public async Task Reports_without_registering_the_device_are_ignored()
+    {
+        var ct = TestContext.Current.CancellationToken;
+        await using var factory = CreateFactory();
+        await using var connection = CreateConnection(factory.Server);
+        await connection.StartAsync(ct);
+        var store = factory.Services.GetRequiredService<LiveWeightStore>();
+
+        // Not registered at all.
+        await connection.InvokeAsync(AgentHubContract.ReportReading, DeviceId, new AgentReading(0.5m, "kg", LiveWeightState.Stable, null, null, "x", DateTimeOffset.UtcNow), ct);
+        store.GetLatest(DeviceId).ShouldBeNull();
+
+        // Registered, but with other devices.
+        await connection.InvokeAsync(AgentHubContract.Register, new AgentRegistration("PC-1", "1.0.0", ["scale-2"]), ct);
+        await connection.InvokeAsync(AgentHubContract.ReportReading, DeviceId, new AgentReading(0.5m, "kg", LiveWeightState.Stable, null, null, "x", DateTimeOffset.UtcNow), ct);
+        await connection.InvokeAsync(AgentHubContract.ReportStatus, DeviceId, new AgentDeviceStatus(DeviceConnectionState.Connected, null, null, DateTimeOffset.UtcNow), ct);
+        store.GetLatest(DeviceId).ShouldBeNull();
+        store.GetDevice(DeviceId).ShouldBeNull();
+    }
+
     [Theory]
     [InlineData(HttpTransportType.LongPolling)]
     [InlineData(HttpTransportType.WebSockets)]

@@ -132,6 +132,51 @@ public class LiveWeightStoreTests
     }
 
     [Fact]
+    public void A_second_agent_reporting_the_same_device_id_does_not_take_the_device()
+    {
+        _store.RegisterAgent("c1", "PC-1", ["s"]);
+        _store.ReportReading("c1", "s", Reading(1m));
+
+        var conflicts = _store.RegisterAgent("c2", "PC-2", ["s", "t"]);
+
+        conflicts.ShouldBe([("s", "PC-1")]);
+        _store.Serves("c1", "s").ShouldBeTrue();
+        _store.Serves("c2", "s").ShouldBeFalse();
+        _store.Serves("c2", "t").ShouldBeTrue();
+        var device = _store.GetDevice("s").ShouldNotBeNull();
+        device.AgentName.ShouldBe("PC-1");
+        device.LastWeight.ShouldNotBeNull().Value.ShouldBe(1m);
+    }
+
+    [Fact]
+    public void A_waiting_agent_gets_the_device_when_the_holder_disconnects()
+    {
+        _store.RegisterAgent("c1", "PC-1", ["s"]);
+        _store.ReportReading("c1", "s", Reading(1m));
+        _store.RegisterAgent("c2", "PC-2", ["s"]);
+
+        _store.DisconnectAgent("c1");
+
+        _store.Serves("c2", "s").ShouldBeTrue();
+        var device = _store.GetDevice("s").ShouldNotBeNull();
+        device.AgentName.ShouldBe("PC-2");
+        device.State.ShouldBe(DeviceConnectionState.Connecting);
+        device.LastWeight.ShouldBeNull();
+    }
+
+    [Fact]
+    public void Only_the_connection_that_registered_a_device_serves_it()
+    {
+        _store.Serves("c1", "s").ShouldBeFalse();
+        _store.RegisterAgent("c1", "PC-1", ["s"]);
+        _store.Serves("c1", "s").ShouldBeTrue();
+        _store.Serves("c9", "s").ShouldBeFalse();
+
+        _store.DisconnectAgent("c1");
+        _store.Serves("c1", "s").ShouldBeFalse();
+    }
+
+    [Fact]
     public void Reregistering_after_disconnect_returns_to_connecting()
     {
         _store.RegisterAgent("c1", "PC-1", ["s"]);
