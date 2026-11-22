@@ -177,7 +177,7 @@ public sealed class ProductService(ProductsDbContext db)
         db.Publish(new ProductSaved(
             product.Id, product.Code, product.Name, product.UnitPrice, product.PackageTare,
             product.ShelfLifeDays, product.BarcodePrefix, product.IsActive,
-            product.TargetWeight, product.LowerTolerance, product.UpperTolerance));
+            product.TargetWeight, product.LowerTolerance, product.UpperTolerance, product.Ingredients));
         try
         {
             await db.SaveChangesAsync(cancellationToken);
