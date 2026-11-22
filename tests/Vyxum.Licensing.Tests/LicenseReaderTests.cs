@@ -133,7 +133,8 @@ public class LicenseReaderTests
         var der = Convert.FromBase64String(TrustedKeys.PublicKeys["vx-2026-1"]);
         using var ecdsa = ECDsa.Create();
         ecdsa.ImportSubjectPublicKeyInfo(der, out _);
-        ecdsa.ExportParameters(false).Curve.Oid.FriendlyName.ShouldBe("nistP256");
+        // Compare the OID: the friendly name differs by platform (nistP256 on Windows, ECDSA_P256 on Linux).
+        ecdsa.ExportParameters(false).Curve.Oid.Value.ShouldBe("1.2.840.10045.3.1.7");
         LicenseKeyRing.Trusted.ShouldNotBeNull();
     }
 
