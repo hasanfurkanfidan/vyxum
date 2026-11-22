@@ -44,4 +44,10 @@
   <data name="ModuleName" xml:space="preserve"><value>Products</value></data>
   <data name="PermissionEdit" xml:space="preserve"><value>Add and change products</value></data>
   <data name="NotAllowed" xml:space="preserve"><value>You do not have permission for this.</value></data>
+  <data name="SaleUnit" xml:space="preserve"><value>Sold by</value></data>
+  <data name="SaleUnitKg" xml:space="preserve"><value>kg (by weight)</value></data>
+  <data name="SaleUnitPiece" xml:space="preserve"><value>piece</value></data>
+  <data name="SaleUnitHint" xml:space="preserve"><value>Sold by the piece: the target weight is the net weight of one piece.</value></data>
+  <data name="PieceNeedsWeight" xml:space="preserve"><value>A product sold by the piece needs the weight of one piece as its target weight.</value></data>
+  <data name="UnitCostPerKg" xml:space="preserve"><value>Unit cost per kg</value></data>
 </root>

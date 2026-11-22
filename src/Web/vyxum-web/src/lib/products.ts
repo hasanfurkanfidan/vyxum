@@ -18,7 +18,13 @@ export interface Product {
   upperTolerance: string | null;
   isActive: boolean;
   updatedAt: string;
+  /** How the product is sold and ordered; a piece weighs the target weight. */
+  saleUnit: SaleUnit;
+  /** Cost per kg, e.g. "412.50". */
+  unitCost: string | null;
 }
+
+export type SaleUnit = 'Kg' | 'Piece';
 
 export interface ProductInput {
   code: string;
@@ -31,10 +37,12 @@ export interface ProductInput {
   targetWeight: string | null;
   lowerTolerance: string | null;
   upperTolerance: string | null;
+  saleUnit: SaleUnit;
+  unitCost: string | null;
 }
 
 /** Fields of the product card that the API validates. */
-export const productFields = ['code', 'name', 'unitPrice', 'packageTare', 'shelfLifeDays', 'barcodePrefix', 'ingredients', 'targetWeight', 'lowerTolerance', 'upperTolerance'] as const;
+export const productFields = ['code', 'name', 'unitPrice', 'packageTare', 'shelfLifeDays', 'barcodePrefix', 'ingredients', 'targetWeight', 'lowerTolerance', 'upperTolerance', 'saleUnit', 'unitCost'] as const;
 export type ProductField = (typeof productFields)[number];
 
 export function listProducts(search: string, includeInactive: boolean, options?: RequestOptions): Promise<Product[]> {

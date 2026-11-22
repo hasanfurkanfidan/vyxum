@@ -159,7 +159,7 @@ public class MigrationTests
         // The backup is a working copy of the database as it was before the upgrade.
         var options = new DbContextOptionsBuilder<ProductsDbContext>().UseSqlite($"Data Source={latest.Path};Pooling=False").Options;
         await using var copy = new ProductsDbContext(options);
-        (await copy.Products.SingleAsync(Ct)).Name.ShouldBe("Flour");
+        (await copy.Products.Select(p => p.Name).SingleAsync(Ct)).ShouldBe("Flour");
         (await copy.Database.GetAppliedMigrationsAsync(Ct)).ShouldBeEmpty();
     }
 
@@ -265,6 +265,20 @@ public class MigrationTests
                     UpdatedAtUtc = DateTime.UtcNow,
                 });
                 await products.SaveChangesAsync(cancellationToken);
+
+                // The same for the products table: drop what later migrations add.
+                var productsAddedLater = new MigrationOperation[]
+                {
+                    new DropColumnOperation { Table = "prd_Products", Name = "SaleUnit" },
+                    new DropColumnOperation { Table = "prd_Products", Name = "UnitCost" },
+                };
+                var productMigrations = products.GetService<IMigrationsAssembly>();
+                var productsFirst = productMigrations.CreateMigration(productMigrations.Migrations.First().Value, products.Database.ProviderName!);
+                var productsFirstModel = products.GetService<IModelRuntimeInitializer>()
+                    .Initialize(productsFirst.TargetModel!, designTime: true, validationLogger: null);
+                var productCommands = products.GetService<IMigrationsSqlGenerator>().Generate(productsAddedLater, productsFirstModel);
+                await products.GetService<IMigrationCommandExecutor>()
+                    .ExecuteNonQueryAsync(productCommands, products.GetService<IRelationalConnection>(), cancellationToken);
             }
 
             await using (var weighing = new WeighingDbContext(Options<WeighingDbContext>(settings)))

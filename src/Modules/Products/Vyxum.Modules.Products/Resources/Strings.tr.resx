@@ -44,4 +44,10 @@
   <data name="ModuleName" xml:space="preserve"><value>Ürünler</value></data>
   <data name="PermissionEdit" xml:space="preserve"><value>Ürün kartlarını ekler ve değiştirir</value></data>
   <data name="NotAllowed" xml:space="preserve"><value>Bunun için yetkiniz yok.</value></data>
+  <data name="SaleUnit" xml:space="preserve"><value>Satış birimi</value></data>
+  <data name="SaleUnitKg" xml:space="preserve"><value>kg (ağırlıkla)</value></data>
+  <data name="SaleUnitPiece" xml:space="preserve"><value>adet</value></data>
+  <data name="SaleUnitHint" xml:space="preserve"><value>Adetle satılan üründe hedef ağırlık bir adedin net ağırlığıdır.</value></data>
+  <data name="PieceNeedsWeight" xml:space="preserve"><value>Adetle satılan üründe bir adedin ağırlığını hedef ağırlık olarak girin.</value></data>
+  <data name="UnitCostPerKg" xml:space="preserve"><value>Birim maliyet (kg başına)</value></data>
 </root>

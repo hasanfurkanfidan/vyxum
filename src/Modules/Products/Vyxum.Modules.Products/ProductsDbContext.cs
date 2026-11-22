@@ -27,6 +27,8 @@ public sealed class ProductsDbContext(DbContextOptions<ProductsDbContext> option
             entity.Property(p => p.TargetWeight).HasPrecision(18, 4);
             entity.Property(p => p.LowerTolerance).HasPrecision(18, 4);
             entity.Property(p => p.UpperTolerance).HasPrecision(18, 4);
+            entity.Property(p => p.UnitCost).HasPrecision(18, 4);
+            entity.Property(p => p.SaleUnit).HasConversion<string>().HasMaxLength(16);
             entity.Property(p => p.BarcodePrefix).HasMaxLength(ProductLimits.BarcodePrefixMaxLength);
             entity.Property(p => p.Ingredients).HasMaxLength(ProductLimits.IngredientsMaxLength);
             entity.HasIndex(p => p.Code).IsUnique();
@@ -89,9 +91,26 @@ public sealed class Product
     /// <summary>Whether the product can be used; products are never deleted.</summary>
     public bool IsActive { get; set; }
 
+    /// <summary>How the product is sold and ordered: by weight or by the piece. A piece weighs <see cref="TargetWeight"/>.</summary>
+    public SaleUnit SaleUnit { get; set; } = SaleUnit.Kg;
+
+    /// <summary>Cost per kg, for example of a raw material; optional.</summary>
+    public decimal? UnitCost { get; set; }
+
     /// <summary>UTC creation time.</summary>
     public DateTime CreatedAtUtc { get; init; }
 
     /// <summary>UTC time of the last change.</summary>
     public DateTime UpdatedAtUtc { get; set; }
+}
+
+/// <summary>How a product is sold and ordered.</summary>
+[System.Text.Json.Serialization.JsonConverter(typeof(System.Text.Json.Serialization.JsonStringEnumConverter<SaleUnit>))]
+public enum SaleUnit
+{
+    /// <summary>By weight, in kg.</summary>
+    Kg,
+
+    /// <summary>By the piece; one piece weighs the product's target weight.</summary>
+    Piece,
 }

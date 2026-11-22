@@ -21,6 +21,8 @@ function product(overrides: Partial<Product> = {}): Product {
     upperTolerance: null,
     isActive: true,
     updatedAt: '2026-11-21T10:00:00Z',
+    saleUnit: 'Kg',
+    unitCost: null,
     ...overrides,
   };
 }
@@ -167,6 +169,9 @@ describe('products screen', () => {
     await user.type(screen.getByLabelText('Hedef ağırlık (kg)'), '0,25');
     await user.type(screen.getByLabelText('Alt tolerans (kg)'), '0,005');
     await user.type(screen.getByLabelText('Üst tolerans (kg)'), '0,01');
+    await user.type(screen.getByLabelText('Birim maliyet (kg başına)'), '8,75');
+    await user.selectOptions(screen.getByLabelText('Satış birimi'), 'adet');
+    expect(screen.getByText('Adetle satılan üründe hedef ağırlık bir adedin net ağırlığıdır.')).toBeInTheDocument();
     await user.click(screen.getByRole('button', { name: 'Kaydet' }));
 
     expect(await screen.findByText('Kaydedildi')).toBeInTheDocument();
@@ -182,6 +187,8 @@ describe('products screen', () => {
       targetWeight: '0.25',
       lowerTolerance: '0.005',
       upperTolerance: '0.01',
+      saleUnit: 'Piece',
+      unitCost: '8.75',
     });
     expect(await screen.findByText('Ürünler / 1 ürün')).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Ürünü pasifleştir' })).toBeInTheDocument();

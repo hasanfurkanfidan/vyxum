@@ -18,6 +18,8 @@ namespace Vyxum.Modules.Weighing;
 /// <param name="LowerTolerance">Allowed amount below the target in kg, if set.</param>
 /// <param name="UpperTolerance">Allowed amount above the target in kg, if set.</param>
 /// <param name="Ingredients">Ingredients, if set (not used by Weighing).</param>
+/// <param name="SaleUnit">Kg or Piece (not used by Weighing).</param>
+/// <param name="UnitCost">Cost per kg, if set (not used by Weighing).</param>
 [IntegrationEvent("products.product-saved", 1)]
 public sealed record ProductSaved(
     Guid ProductId,
@@ -31,4 +33,6 @@ public sealed record ProductSaved(
     decimal? TargetWeight = null,
     decimal? LowerTolerance = null,
     decimal? UpperTolerance = null,
-    string? Ingredients = null) : IIntegrationEvent;
+    string? Ingredients = null,
+    string? SaleUnit = null,
+    decimal? UnitCost = null) : IIntegrationEvent;

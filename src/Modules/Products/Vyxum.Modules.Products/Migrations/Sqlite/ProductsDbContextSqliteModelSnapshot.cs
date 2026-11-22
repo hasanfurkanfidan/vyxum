@@ -54,10 +54,19 @@ namespace Vyxum.Modules.Products.Migrations.Sqlite
                         .HasPrecision(18, 4)
                         .HasColumnType("TEXT");
 
+                    b.Property<string>("SaleUnit")
+                        .IsRequired()
+                        .HasMaxLength(16)
+                        .HasColumnType("TEXT");
+
                     b.Property<int?>("ShelfLifeDays")
                         .HasColumnType("INTEGER");
 
                     b.Property<decimal?>("TargetWeight")
+                        .HasPrecision(18, 4)
+                        .HasColumnType("TEXT");
+
+                    b.Property<decimal?>("UnitCost")
                         .HasPrecision(18, 4)
                         .HasColumnType("TEXT");
 

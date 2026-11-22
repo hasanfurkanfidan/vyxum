@@ -109,6 +109,40 @@ public class ProductsApiTests
     [Theory]
     [InlineData(DatabaseProvider.Sqlite)]
     [InlineData(DatabaseProvider.SqlServer)]
+    public async Task Sale_unit_and_unit_cost_round_trip_and_a_piece_needs_its_weight(DatabaseProvider provider)
+    {
+        await using var app = await ProductsTestApp.StartAsync(provider);
+
+        // Older clients send neither: the product is sold by weight and has no cost.
+        var (_, plain) = await app.SendAsync(HttpMethod.Post, "/api/products", Body("101"));
+        plain.GetProperty("saleUnit").GetString().ShouldBe("Kg");
+        plain.GetProperty("unitCost").ValueKind.ShouldBe(JsonValueKind.Null);
+
+        var (needsWeight, needsWeightJson) = await app.SendAsync(HttpMethod.Post, "/api/products", new { code = "102", name = "Cookies", saleUnit = "Piece" });
+        needsWeight.StatusCode.ShouldBe(HttpStatusCode.BadRequest);
+        ErrorKeys(needsWeightJson, "targetWeight").ShouldBe(["products.PieceNeedsWeight"]);
+
+        var (badCost, badCostJson) = await app.SendAsync(HttpMethod.Post, "/api/products", new { code = "102", name = "Cookies", unitCost = "-1" });
+        badCost.StatusCode.ShouldBe(HttpStatusCode.BadRequest);
+        ErrorKeys(badCostJson, "unitCost").ShouldBe(["products.NegativeNotAllowed"]);
+
+        var (created, json) = await app.SendAsync(HttpMethod.Post, "/api/products", new { code = "102", name = "Cookies", saleUnit = "Piece", targetWeight = "0.020", unitCost = "412.5" });
+        created.StatusCode.ShouldBe(HttpStatusCode.Created);
+        json.GetProperty("saleUnit").GetString().ShouldBe("Piece");
+        json.GetProperty("unitCost").GetString().ShouldBe("412.50");
+        var id = json.GetProperty("id").GetGuid();
+        var (_, got) = await app.SendAsync(HttpMethod.Get, $"/api/products/{id}");
+        got.GetProperty("saleUnit").GetString().ShouldBe("Piece");
+        got.GetProperty("targetWeight").GetString().ShouldBe("0.02");
+
+        var saved = (await app.OutboxAsync()).Select(m => JsonSerializer.Deserialize<ProductSaved>(m.Payload, JsonSerializerOptions.Web)!).Last();
+        saved.SaleUnit.ShouldBe("Piece");
+        saved.UnitCost.ShouldBe(412.5m);
+    }
+
+    [Theory]
+    [InlineData(DatabaseProvider.Sqlite)]
+    [InlineData(DatabaseProvider.SqlServer)]
     public async Task Target_weight_and_tolerances_are_validated(DatabaseProvider provider)
     {
         await using var app = await ProductsTestApp.StartAsync(provider);
