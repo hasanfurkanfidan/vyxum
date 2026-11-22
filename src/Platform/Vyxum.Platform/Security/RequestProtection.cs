@@ -18,7 +18,7 @@ namespace Vyxum.Platform;
 /// This stops DNS rebinding, where a site's own domain name is made to point at this computer so that the browser
 /// treats the web application as part of that site.</para>
 /// <para><b>Same origin check:</b> a request that may change data (anything but GET, HEAD and OPTIONS) is refused with
-/// 403 when the browser says it comes from another site: <c>Sec-Fetch-Site</c> is <c>cross-site</c> or
+/// 403 (problem <c>code</c> <c>cross_origin_request</c>, as <see cref="SameOriginRequestFilter"/>) when the browser says it comes from another site: <c>Sec-Fetch-Site</c> is <c>cross-site</c> or
 /// <c>same-site</c>, or, for browsers without that header, <c>Origin</c> names another host than <c>Host</c>.
 /// Requests without these headers do not come from a web page (the agent, scripts, tests) and pass.</para>
 /// <para>The agent hub additionally refuses every request with an <c>Origin</c> header (see
@@ -53,7 +53,10 @@ public static partial class RequestProtection
             if (!IsSafeMethod(request.Method) && IsCrossSite(request))
             {
                 LogCrossSite(logger, request.Method, request.Path, request.Headers.Origin.ToString());
-                context.Response.StatusCode = StatusCodes.Status403Forbidden;
+                await Results.Problem(
+                    statusCode: StatusCodes.Status403Forbidden,
+                    title: "The request was not sent by this application.",
+                    extensions: new Dictionary<string, object?> { ["code"] = SameOriginRequestFilter.CrossOrigin }).ExecuteAsync(context);
                 return;
             }
 
