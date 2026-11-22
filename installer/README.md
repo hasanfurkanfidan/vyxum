@@ -28,6 +28,7 @@ The script builds the web UI (`npm ci`, `npm run build`), publishes Host, Agent 
 
 ## What the installer does
 
+- Requires Windows 10 or 11, 64-bit. `MinVersion=10.0.14393` (Windows 10 version 1607, the oldest Windows that .NET 10 supports) and `ArchitecturesAllowed=x64compatible` stop the setup on Windows 7, 8, 8.1 and on 32-bit Windows before anything is copied; the message (Turkish and English) is set in `[Messages]`.
 - Installs to `Program Files\Vyxum` (`Web\`, `Agent\`, `Vyxum.exe`); needs administrator rights; Turkish and English (chosen from the Windows language).
 - Creates `%ProgramData%\Vyxum\vyxum.json` only if it does not exist (default address `http://localhost:5000`), then runs `Vyxum.Host.exe --ensure-agent-key`, which adds a random agent key for the web application and the agent unless one is set.
 - Registers the Windows services **Vyxum Web** and **Vyxum Agent** (automatic start), each running as its own virtual account (`NT SERVICE\Vyxum Web`, `NT SERVICE\Vyxum Agent`) instead of LocalSystem.

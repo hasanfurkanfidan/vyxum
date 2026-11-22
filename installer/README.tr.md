@@ -28,6 +28,7 @@ Betik web arayüzünü derler (`npm ci`, `npm run build`), Host, Agent ve Deskto
 
 ## Kurulum dosyası ne yapar
 
+- Windows 10 ya da 11, 64 bit gerektirir. `MinVersion=10.0.14393` (Windows 10 sürüm 1607, .NET 10'un desteklediği en eski Windows) ve `ArchitecturesAllowed=x64compatible`, kurulumu Windows 7, 8, 8.1'de ve 32 bit Windows'ta hiçbir dosya kopyalanmadan durdurur; mesaj (Türkçe ve İngilizce) `[Messages]` bölümündedir.
 - `Program Files\Vyxum` içine kurar (`Web\`, `Agent\`, `Vyxum.exe`); yönetici hakkı ister; Türkçe ve İngilizce (Windows diline göre seçilir).
 - `%ProgramData%\Vyxum\vyxum.json` dosyasını yalnızca yoksa oluşturur (varsayılan adres `http://localhost:5000`), sonra `Vyxum.Host.exe --ensure-agent-key` çalıştırır; bu, anahtar yoksa web uygulaması ve agent için rastgele bir agent anahtarı ekler.
 - **Vyxum Web** ve **Vyxum Agent** Windows servislerini kaydeder (otomatik başlar); her biri LocalSystem yerine kendi sanal hesabıyla çalışır (`NT SERVICE\Vyxum Web`, `NT SERVICE\Vyxum Agent`).

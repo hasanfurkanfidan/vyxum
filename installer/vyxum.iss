@@ -26,6 +26,9 @@ DefaultDirName={autopf}\Vyxum
 DefaultGroupName=Vyxum
 OutputBaseFilename=VyxumSetup-{#AppVersion}
 VersionInfoVersion={#AppVersion}
+; Windows 10 version 1607 (build 14393) is the oldest Windows that .NET 10 supports. Older Windows
+; (7, 8, 8.1) and 32-bit Windows stop here with the clear message in [Messages] before anything is copied.
+MinVersion=10.0.14393
 ArchitecturesAllowed=x64compatible
 ArchitecturesInstallIn64BitMode=x64compatible
 PrivilegesRequired=admin
@@ -49,6 +52,13 @@ SolidCompression=yes
 [Languages]
 Name: "tr"; MessagesFile: "compiler:Languages\Turkish.isl"
 Name: "en"; MessagesFile: "compiler:Default.isl"
+
+[Messages]
+; Inno Setup's own texts name only a build number ("10.0.14393") or a processor type. Say plainly what is needed.
+tr.WinVersionTooLowError=Vyxum için Windows 10 ya da 11, 64 bit gerekir. Windows 7, 8 ve 8.1 desteklenmez.%n%nBu bilgisayara Vyxum kurulamaz. Bilgisayarı Windows 10 ya da 11'e yükseltin veya Vyxum'u başka bir bilgisayara kurun.
+en.WinVersionTooLowError=Vyxum requires Windows 10 or 11, 64-bit. Windows 7, 8 and 8.1 are not supported.%n%nVyxum cannot be installed on this computer. Upgrade it to Windows 10 or 11, or install Vyxum on another computer.
+tr.OnlyOnTheseArchitectures=Vyxum için Windows 10 ya da 11, 64 bit gerekir. Bu bilgisayardaki Windows 32 bit.%n%nBu bilgisayara Vyxum kurulamaz. 64 bit Windows 10 ya da 11 yüklü bir bilgisayar kullanın.
+en.OnlyOnTheseArchitectures=Vyxum requires Windows 10 or 11, 64-bit. The Windows on this computer is 32-bit.%n%nVyxum cannot be installed on this computer. Use a computer with 64-bit Windows 10 or 11.
 
 [CustomMessages]
 tr.LaunchVyxum=Vyxum'u aç
