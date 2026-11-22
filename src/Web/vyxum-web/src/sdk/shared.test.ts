@@ -3,7 +3,7 @@ import * as ReactDOMClient from 'react-dom/client';
 import * as JsxRuntime from 'react/jsx-runtime';
 import * as ReactRouterDom from 'react-router-dom';
 import { describe, expect, it } from 'vitest';
-import { SDK_EXPORTS, SHARED_GLOBAL, SHARED_MODULES, importMap, shimSource } from './contract';
+import { SDK_EXPORTS, SDK_VERSION, SHARED_GLOBAL, SHARED_MODULES, importMap, shimSource } from './contract';
 import { sdk } from './index';
 import { installShared } from './shared';
 
@@ -61,7 +61,7 @@ describe('shared modules for module screens', () => {
 
     const sdkShim = await importShim('sdk', SDK_EXPORTS);
     expect(sdkShim.useT).toBe(sdk.useT);
-    expect(sdkShim.sdkVersion).toBe(1);
+    expect(sdkShim.sdkVersion).toBe(SDK_VERSION);
   });
 
   it('fails clearly when the application has not set the global', async () => {

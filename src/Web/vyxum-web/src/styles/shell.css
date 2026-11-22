@@ -169,3 +169,18 @@
   flex: none;
   margin-left: 8px;
 }
+
+/* A component a module shows in the menu (SDK 2), for example who is signed in. */
+.sidebar__module {
+  margin-top: auto;
+}
+
+.sidebar__module + .sidebar__module {
+  margin-top: 0;
+}
+
+/* A module screen on the whole window, without the menu (SDK 2), for example a sign-in screen. */
+.module-page {
+  min-height: 100vh;
+  background: var(--color-bg, Canvas);
+}

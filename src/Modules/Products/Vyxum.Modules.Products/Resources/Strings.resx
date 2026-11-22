@@ -42,4 +42,6 @@
   <data name="Empty" xml:space="preserve"><value>No products yet</value></data>
   <data name="SearchPlaceholder" xml:space="preserve"><value>PLU or name</value></data>
   <data name="ModuleName" xml:space="preserve"><value>Products</value></data>
+  <data name="PermissionEdit" xml:space="preserve"><value>Add and change products</value></data>
+  <data name="NotAllowed" xml:space="preserve"><value>You do not have permission for this.</value></data>
 </root>

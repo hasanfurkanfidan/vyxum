@@ -38,6 +38,12 @@ public sealed class ModuleManifest
     /// </summary>
     public string? DisplayNameKey { get; init; }
 
+    /// <summary>
+    /// Permissions this module checks with <see cref="IAuthorization"/>. Ids are unique across modules; each name key must
+    /// be in a string set the module registers. A users module lists them on its role screen.
+    /// </summary>
+    public IReadOnlyList<PermissionDefinition> Permissions { get; init; } = [];
+
     /// <summary>The module's screens, embedded in its assembly, or null when the module has none.</summary>
     public ModuleUi? Ui { get; init; }
 

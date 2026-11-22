@@ -160,6 +160,11 @@ public sealed class WeighingResult
     /// <summary>True when the rejection is a conflict with the record's state (409) rather than a rule (422).</summary>
     public bool IsConflict { get; private init; }
 
+    /// <summary>True when the current person may not do this (403).</summary>
+    public bool IsForbidden { get; private init; }
+
+    internal static WeighingResult Forbidden() => new() { RejectionCode = WeighingErrors.NotAllowed, IsForbidden = true };
+
     internal static WeighingResult Ok(WeighingRecordDto record, bool created) => new() { Record = record, Created = created };
 
     internal static WeighingResult Missing() => new() { NotFound = true };
@@ -174,6 +179,9 @@ public sealed class WeighingResult
 /// <summary>Resx keys of errors, with the module prefix, as returned in <c>{ code }</c> and validation problems.</summary>
 public static class WeighingErrors
 {
+    /// <summary>The signed-in person lacks the permission.</summary>
+    public const string NotAllowed = "weighing.NotAllowed";
+
     /// <summary>The scale has not sent a weight.</summary>
     public const string NoReading = "weighing.NoReading";
 

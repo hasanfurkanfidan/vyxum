@@ -30,6 +30,12 @@ public sealed class WeighingOptions
     /// </summary>
     public TimeSpan MaxSaveDelay { get; set; } = TimeSpan.FromSeconds(10);
 
+    /// <summary>
+    /// How long after saving a person with only <c>weighing.cancel.own</c> may cancel their own record. Applies only with a
+    /// users module; without one everybody may cancel. Default 10 minutes.
+    /// </summary>
+    public TimeSpan CancelOwnWindow { get; set; } = TimeSpan.FromMinutes(10);
+
     /// <summary>A cancel needs a reason. Default true.</summary>
     public bool RequireCancelReason { get; set; } = true;
 

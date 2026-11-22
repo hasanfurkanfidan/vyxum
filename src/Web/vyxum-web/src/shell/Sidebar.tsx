@@ -5,12 +5,13 @@ import { useModules } from './ModulesProvider';
 import { useModuleUi } from './ModuleUiProvider';
 import '../styles/license.css';
 import { LockIcon } from '../components/LockIcon';
+import { ModuleErrorBoundary } from './ModuleScreen';
 import { modulePath, navGroups, previewModules, visibleNavGroups, withModuleNav } from './navigation';
 
 export function Sidebar() {
   const t = useT();
   const { hasModule, companyName, license, modules } = useModules();
-  const { navItems } = useModuleUi();
+  const { navItems, sidebarItems } = useModuleUi();
   const groups = visibleNavGroups(hasModule, withModuleNav(navGroups, navItems));
   const pro = previewModules(modules);
 
@@ -63,6 +64,14 @@ export function Sidebar() {
           </ul>
         </section>
       ) : null}
+
+      {sidebarItems.map(({ moduleId, component: Item }) => (
+        <div key={moduleId} className="sidebar__module" data-module={moduleId}>
+          <ModuleErrorBoundary moduleId={moduleId}>
+            <Item />
+          </ModuleErrorBoundary>
+        </div>
+      ))}
 
       {license.licensee ? (
         <div className="sidebar__licensee">

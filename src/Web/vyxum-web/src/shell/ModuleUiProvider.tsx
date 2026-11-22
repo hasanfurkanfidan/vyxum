@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
+import { createContext, useContext, useEffect, useMemo, useRef, useState, type ComponentType, type ReactNode } from 'react';
 import { browserImporter, isLoadable, loadModuleUi, type LoadedModuleUi, type ModuleImporter } from './moduleLoader';
 import { useModules } from './ModulesProvider';
 import type { ModuleNavItem } from './navigation';
@@ -8,6 +8,8 @@ export interface ModuleUiContextValue {
   get: (moduleId: string) => LoadedModuleUi | undefined;
   /** Menu entries of the loaded modules that may show their screens now (not locked). */
   navItems: readonly ModuleNavItem[];
+  /** Components the loaded, not locked modules show in the menu (SDK 2). */
+  sidebarItems: readonly { moduleId: string; component: ComponentType }[];
 }
 
 const ModuleUiContext = createContext<ModuleUiContextValue | null>(null);
@@ -41,7 +43,10 @@ export function ModuleUiProvider({ children, importer = browserImporter }: { chi
     const navItems = [...loaded.values()]
       .filter((result) => visible.has(result.id))
       .flatMap((result) => (result.status === 'loaded' ? result.nav : []));
-    return { get: (moduleId) => loaded.get(moduleId), navItems };
+    const sidebarItems = [...loaded.values()]
+      .filter((result) => visible.has(result.id))
+      .flatMap((result) => (result.status === 'loaded' && result.sidebar ? [{ moduleId: result.id, component: result.sidebar }] : []));
+    return { get: (moduleId) => loaded.get(moduleId), navItems, sidebarItems };
   }, [loaded, modules]);
 
   return <ModuleUiContext.Provider value={value}>{children}</ModuleUiContext.Provider>;

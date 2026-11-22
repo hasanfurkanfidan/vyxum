@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.DependencyInjection;
+using Vyxum.Platform.Abstractions;
 
 namespace Vyxum.Modules.Weighing;
 
@@ -43,6 +44,11 @@ internal static class WeighingEndpoints
             bool? includeCancelled,
             CancellationToken ct) =>
         {
+            if (!http.RequestServices.GetRequiredService<IAuthorization>().IsAllowed(WeighingPermissions.Export))
+            {
+                return Results.Json(new { code = WeighingErrors.NotAllowed }, statusCode: StatusCodes.Status403Forbidden);
+            }
+
             var filter = new WeighingRecordFilter(from?.UtcDateTime, to?.UtcDateTime, productId, lot, includeCancelled ?? true);
             if (await queries.CountItemsAsync(filter, ct) > WeighingQueries.MaxExportRows)
             {
@@ -78,6 +84,6 @@ internal static class WeighingEndpoints
     private static IResult ToHttp(WeighingResult result) =>
         result.NotFound ? Results.NotFound()
         : result.Errors is { } errors ? Results.ValidationProblem(errors.ToDictionary(e => e.Key, e => e.Value))
-        : result.RejectionCode is { } code ? Results.Json(new { code }, statusCode: result.IsConflict ? StatusCodes.Status409Conflict : StatusCodes.Status422UnprocessableEntity)
+        : result.RejectionCode is { } code ? Results.Json(new { code }, statusCode: result.IsForbidden ? StatusCodes.Status403Forbidden : result.IsConflict ? StatusCodes.Status409Conflict : StatusCodes.Status422UnprocessableEntity)
         : Results.Ok(result.Record);
 }

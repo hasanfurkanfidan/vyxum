@@ -1,5 +1,5 @@
 import { Component, type ErrorInfo, type ReactNode } from 'react';
-import { Link, Navigate, Route, Routes, useParams } from 'react-router-dom';
+import { Link, Navigate, Route, Routes, matchPath, useLocation, useParams } from 'react-router-dom';
 import { useT } from '../i18n/I18nProvider';
 import { LockedPreview } from './LockedPreview';
 import { useModules } from './ModulesProvider';
@@ -87,5 +87,34 @@ export function ModuleScreen() {
         })}
       <Route path="*" element={<Navigate to={routes.weighing} replace />} />
     </Routes>
+  );
+}
+
+/**
+ * Outside the shell: a screen a module shows on the whole window (`pages`, SDK 2) at `/m/{moduleId}/{path}`, for
+ * example a sign-in screen; every other address goes to `fallback`, the shell with its screens. It reads the address
+ * itself instead of being a `/m/:moduleId/*` route, so the shell's routes in `fallback` stay relative to the root.
+ */
+export function ModulePage({ fallback }: { fallback: ReactNode }) {
+  const { pathname } = useLocation();
+  const match = matchPath({ path: routes.module, end: false }, pathname);
+  const moduleId = match?.params.moduleId ?? '';
+  const rest = match?.params['*'] ?? '';
+  const { modules, hasCapability } = useModules();
+  const moduleUi = useModuleUi();
+  const module = modules.find((m) => m.id === moduleId);
+  const result = moduleUi.get(moduleId);
+  if (!module || module.license === 'locked' || result?.status !== 'loaded') return fallback;
+
+  const relative = '/' + rest.replace(/\/+$/, '');
+  const page = result.pages.find(
+    (p) => (p.capability === undefined || hasCapability(p.capability)) && matchPath({ path: '/' + p.path, end: true }, relative) !== null,
+  );
+  if (!page) return fallback;
+  const Screen = page.component;
+  return (
+    <main className="module-page">
+      <ModuleErrorBoundary moduleId={moduleId}>{Screen ? <Screen /> : page.element}</ModuleErrorBoundary>
+    </main>
   );
 }

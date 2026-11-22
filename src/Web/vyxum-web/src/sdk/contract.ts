@@ -4,8 +4,10 @@
 /**
  * Version of the module SDK (`@vyxum/sdk` and the `register(host)` contract). Raise it when the SDK gains something;
  * never remove or change what an earlier version offered, so modules built for an older version keep working.
+ * Version 2: `register` may return `pages` (screens on the whole window) and `sidebar` (a component in the menu),
+ * and a 401 answer with `signInPath` sends the user to that screen.
  */
-export const SDK_VERSION = 1;
+export const SDK_VERSION = 2;
 
 /** Oldest SDK version this application still serves. */
 export const MIN_SDK_VERSION = 1;
