@@ -34,6 +34,7 @@ Build settings in `Directory.Build.props`: `Nullable`, `ImplicitUsings`, `TreatW
 ## Product rules
 
 - The product works offline. Do not add CDN links, remote fonts, or calls to external services.
+  - The one approved exception: the paid Reports module may send report e-mails through the customer's own e-mail server (SMTP). It is off by default, the customer enters their own server and turns it on, and no Vyxum server sits in between. Nothing else may connect out.
 - Installation must be simple and possible without help. Do not add a database server, an extra program, or a hand-edited configuration file as a requirement without asking first.
 - Do not commit signing private keys, or any secret, to this repository, to tests, or to examples.
 - Before adding a NuGet or npm package, check its license. Only MIT, BSD, and Apache-2.0 compatible packages are allowed.
