@@ -52,7 +52,7 @@ public sealed class WeighingService(
             await using var transaction = await db.Database.BeginTransactionAsync(cancellationToken);
             db.Records.Add(record);
             await db.SaveChangesAsync(cancellationToken);
-            db.Publish(WeighingMapper.ToRecordedEvent(record));
+            db.Publish(WeighingMapper.ToRecordedEvent(record, request.PrintLabel));
             await db.SaveChangesAsync(cancellationToken);
             await transaction.CommitAsync(cancellationToken);
         }
@@ -439,7 +439,7 @@ internal static class WeighingMapper
         FormatPrice(r.LowerTolerance),
         FormatPrice(r.UpperTolerance));
 
-    public static WeighingRecorded ToRecordedEvent(WeighingRecord r) => new(
+    public static WeighingRecorded ToRecordedEvent(WeighingRecord r, bool labelRequested = false) => new(
         r.Id,
         Number(r.Id),
         r.RequestId,
@@ -460,5 +460,6 @@ internal static class WeighingMapper
         r.Operator,
         r.TargetWeight,
         r.LowerTolerance,
-        r.UpperTolerance);
+        r.UpperTolerance,
+        labelRequested);
 }

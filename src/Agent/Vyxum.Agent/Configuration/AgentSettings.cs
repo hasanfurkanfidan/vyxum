@@ -40,8 +40,33 @@ public sealed class AgentSettings
     /// <summary>The devices this agent reads.</summary>
     public List<DeviceSettings> Devices { get; set; } = [];
 
+    /// <summary>Label printers connected to this computer.</summary>
+    public PrintingSettings Printing { get; set; } = new();
+
     /// <summary>The agent name to use: <see cref="AgentName"/>, or the computer name when it is empty.</summary>
     public string EffectiveAgentName => string.IsNullOrWhiteSpace(AgentName) ? Environment.MachineName : AgentName.Trim();
+}
+
+/// <summary>How this agent sends print jobs from the web application to printers.</summary>
+public sealed class PrintingSettings
+{
+    /// <summary>The TCP ports a network printer may use when <see cref="AllowedTcpPorts"/> is not set.</summary>
+    public static IReadOnlyList<int> DefaultTcpPorts { get; } = [9100];
+
+    /// <summary>Whether the agent takes print jobs. Default: true.</summary>
+    public bool Enabled { get; set; } = true;
+
+    /// <summary>
+    /// The TCP ports a network printer may use. Jobs to any other port are refused, so that the agent cannot be used to
+    /// send data to other services. Default: 9100.
+    /// </summary>
+    public int[]? AllowedTcpPorts { get; set; }
+
+    /// <summary>How long connecting to a network printer may take. Default: 5 seconds.</summary>
+    public TimeSpan ConnectTimeout { get; set; } = TimeSpan.FromSeconds(5);
+
+    /// <summary>The TCP ports in effect.</summary>
+    public IReadOnlyList<int> EffectiveTcpPorts => AllowedTcpPorts is { Length: > 0 } ports ? ports : DefaultTcpPorts;
 }
 
 /// <summary>One device: how to reach it (transport) and how to talk to it (protocol).</summary>

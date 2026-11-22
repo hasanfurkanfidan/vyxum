@@ -65,6 +65,7 @@ a message that names the setting.
 | `ReconnectDelay` | First wait before reconnecting to a scale or to the server; doubles after each failure | `00:00:01` |
 | `MaxReconnectDelay` | Longest wait between attempts | `00:00:30` |
 | `Devices` | Local list of devices, see below. When it is not empty, the devices from the web application are ignored. | empty |
+| `Printing` | Label printers on this computer, see "Printing" below | on, TCP port 9100 |
 
 Each device has an `Id`, a `Transport` and a `Protocol`. Any transport works with any protocol. The device settings
 in the web application have the same `transport` and `protocol` fields (in camel case).
@@ -124,3 +125,20 @@ and `I4`). There is no network sweep.
 
 A found device is returned with transport and protocol settings in the same shape as the device settings above, a sample
 reading and the serial number, so it can be saved as it is.
+
+## Printing
+
+The web application can send print jobs (for example labels) to printers connected to this computer, over the
+network or a serial port. The agent does not look into the job: it opens the connection, writes the bytes once, reads
+the printer's answer when the job asks for one (a status query), and closes the connection. A job is never resent by
+the agent; when the answer to the web application is lost, the job is reported as uncertain and is not printed again
+without asking. One job runs at a time.
+
+| Setting (`Printing:`) | Meaning | Default |
+|---|---|---|
+| `Enabled` | Whether the agent takes print jobs | `true` |
+| `AllowedTcpPorts` | The only TCP ports a network printer may use. Jobs to other ports are refused, so the agent cannot be used to send data to other services. | `[9100]` |
+| `ConnectTimeout` | How long connecting to a network printer may take | `00:00:05` |
+
+A serial port that one of the agent's scales uses is never opened for printing. Serial printers use 8 data bits, no
+parity and one stop bit at the baud rate of the job. USB printers are not supported yet.

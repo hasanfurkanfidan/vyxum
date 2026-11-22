@@ -312,6 +312,7 @@ public class ProductsApiTests
         events[0].PackageTare.ShouldBe(0.012m);
         events[0].ShelfLifeDays.ShouldBe(30);
         events[0].BarcodePrefix.ShouldBe("28");
+        events[0].Ingredients.ShouldBe("Milk*, salt");
         events[0].TargetWeight.ShouldBeNull();
         events[1].TargetWeight.ShouldBe(0.25m);
         events[1].LowerTolerance.ShouldBe(0.005m);
@@ -324,6 +325,9 @@ public class ProductsApiTests
         JsonSerializer.Deserialize<ProductSaved>(
             """{"productId":"0e7d3f7a-5d0e-4a39-9f0e-000000000417","code":"1","name":"N","unitPrice":null,"packageTare":null,"shelfLifeDays":null,"barcodePrefix":null,"isActive":true}""",
             JsonSerializerOptions.Web)!.TargetWeight.ShouldBeNull();
+        JsonSerializer.Deserialize<ProductSaved>(
+            """{"productId":"0e7d3f7a-5d0e-4a39-9f0e-000000000417","code":"1","name":"N","isActive":true}""",
+            JsonSerializerOptions.Web)!.Ingredients.ShouldBeNull();
     }
 
     [Fact]

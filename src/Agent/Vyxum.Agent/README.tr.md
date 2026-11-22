@@ -64,6 +64,7 @@ hangi ayarın hatalı olduğunu yazar.
 | `ReconnectDelay` | Teraziye ya da sunucuya yeniden bağlanmadan önceki ilk bekleme; her başarısızlıkta iki katına çıkar | `00:00:01` |
 | `MaxReconnectDelay` | Denemeler arasındaki en uzun bekleme | `00:00:30` |
 | `Devices` | Yerel cihaz listesi, aşağıya bakın. Boş değilse web uygulamasındaki cihazlar yok sayılır. | boş |
+| `Printing` | Bu bilgisayardaki etiket yazıcıları, aşağıda "Yazdırma" bölümüne bakın | açık, TCP port 9100 |
 
 Her cihazın bir `Id`, bir `Transport` (taşıma) ve bir `Protocol` ayarı vardır. Her taşıma her protokolle çalışır.
 Web uygulamasındaki cihaz ayarlarında aynı `transport` ve `protocol` alanları (küçük harfle başlayarak) bulunur.
@@ -125,3 +126,19 @@ Ağ taraması yapılmaz.
 
 Bulunan cihaz, yukarıdaki cihaz ayarlarıyla aynı biçimde taşıma ve protokol ayarları, örnek bir okuma ve seri numarasıyla
 döner; olduğu gibi kaydedilebilir.
+
+## Yazdırma
+
+Web uygulaması, bu bilgisayara ağdan ya da seri porttan bağlı yazıcılara baskı işi (örneğin etiket) gönderebilir.
+Agent işin içine bakmaz: bağlantıyı açar, baytları bir kez yazar, iş isterse yazıcının cevabını okur (durum sorgusu) ve
+bağlantıyı kapatır. Agent bir işi asla yeniden göndermez; web uygulamasına cevap ulaşmazsa iş "belirsiz" olarak
+bildirilir ve sorulmadan yeniden basılmaz. Aynı anda tek iş çalışır.
+
+| Ayar (`Printing:`) | Anlamı | Varsayılan |
+|---|---|---|
+| `Enabled` | Agent baskı işi alır mı | `true` |
+| `AllowedTcpPorts` | Ağ yazıcısının kullanabileceği TCP portları. Başka porta giden iş reddedilir; böylece Agent başka hizmetlere veri göndermek için kullanılamaz. | `[9100]` |
+| `ConnectTimeout` | Ağ yazıcısına bağlanmanın en uzun süresi | `00:00:05` |
+
+Agent'ın bir terazisinin kullandığı seri port baskı için asla açılmaz. Seri yazıcılar işte verilen hızda 8 veri biti,
+eşliksiz ve bir dur biti ile kullanılır. USB yazıcılar henüz desteklenmiyor.

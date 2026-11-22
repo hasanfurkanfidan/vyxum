@@ -59,8 +59,12 @@ public sealed record WeighingRecordDto(
 /// it; otherwise it is rejected with <see cref="WeighingErrors.ReadingChanged"/>. A retried request then never records
 /// the next load on the scale.
 /// </param>
+/// <param name="PrintLabel">
+/// True for "Save and print label": the saved record's event asks a label module to print. Ignored for a repeated
+/// request, so a retry never asks for a second label.
+/// </param>
 public sealed record CreateRecordRequest(
-    Guid? RequestId, string? DeviceId, Guid? ProductId, string? Lot, string? Tare, ObservedReading? Reading = null);
+    Guid? RequestId, string? DeviceId, Guid? ProductId, string? Lot, string? Tare, ObservedReading? Reading = null, bool PrintLabel = false);
 
 /// <summary>A reading as the weighing screen showed it, sent with <see cref="CreateRecordRequest"/>.</summary>
 /// <param name="Value">The value as an invariant decimal string, as the device endpoints sent it.</param>

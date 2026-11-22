@@ -53,7 +53,7 @@ public static class AgentHost
     }
 
     /// <summary>
-    /// Registers the agent: settings from <c>Vyxum:Agent</c>, the device fleet, device discovery, the device worker and the hub worker.
+    /// Registers the agent: settings from <c>Vyxum:Agent</c>, the device fleet, device discovery, printing, the device worker and the hub worker.
     /// Configure <see cref="AgentHubClientOptions"/> to change how the hub connection is made, and
     /// <see cref="Vyxum.Devices.Discovery.PortScannerOptions"/> to change which ports discovery sees and how it opens them.
     /// </summary>
@@ -70,6 +70,9 @@ public static class AgentHost
         // Device discovery (decision V-40). Tests replace the port list and transports through PortScannerOptions.
         services.AddOptions<Vyxum.Devices.Discovery.PortScannerOptions>();
         services.AddSingleton<Discovery.DeviceDiscovery>();
+
+        // Print jobs from the web application, to printers on this computer's network or serial ports.
+        services.AddSingleton<RawPrinter>();
         services.AddHostedService<DeviceWorker>();
         services.AddHostedService<HubWorker>();
         return services;
