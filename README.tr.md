@@ -10,7 +10,7 @@ Bu depo Vyxum'un açık çekirdeğidir ve Apache Lisansı 2.0 ile lisanslanmış
 
 ## Kurulum / Installation
 
-Windows 10 ya da 11 (64 bit). İnternet bağlantısı, veritabanı sunucusu ya da ek bir program gerekmez. `VyxumSetup-<sürüm>.exe` dosyasını çalıştırın ve adım adım kılavuzu izleyin: [Kurulum kılavuzu](docs/KURULUM.md) (English: [docs/INSTALL.md](docs/INSTALL.md)).
+Windows 10 ya da 11, 64 bit (Windows 7, 8 ve 8.1 desteklenmez). İnternet bağlantısı, veritabanı sunucusu ya da ek bir program gerekmez. `VyxumSetup-<sürüm>.exe` dosyasını çalıştırın ve adım adım kılavuzu izleyin: [Kurulum kılavuzu](docs/KURULUM.md) (English: [docs/INSTALL.md](docs/INSTALL.md)).
 
 ## Lisans dosyası / License file
 

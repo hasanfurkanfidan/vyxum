@@ -59,6 +59,8 @@
   <data name="Settings" xml:space="preserve"><value>Settings</value></data>
   <data name="AboutTitle" xml:space="preserve"><value>About</value></data>
   <data name="AboutVersion" xml:space="preserve"><value>Version</value></data>
+  <data name="AboutSystem" xml:space="preserve"><value>System requirement</value></data>
+  <data name="AboutSystemValue" xml:space="preserve"><value>Windows 10 or 11, 64-bit</value></data>
   <data name="AboutCompany" xml:space="preserve"><value>Company</value></data>
   <data name="AboutNoCompany" xml:space="preserve"><value>Not entered</value></data>
   <data name="AboutDatabase" xml:space="preserve"><value>Database</value></data>

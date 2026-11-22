@@ -6,7 +6,7 @@ This guide is for the person who installs Vyxum on a Windows computer. No techni
 
 ## 1. What you need
 
-- A computer with Windows 10 or Windows 11, 64-bit.
+- A computer with Windows 10 or 11, 64-bit. Windows 7, 8 and 8.1 are not supported; on them the setup stops with a message before it installs anything. To see your Windows version, right-click Start and open **System**: the version is under "Windows specifications", and "System type" must say "64-bit operating system".
 - An administrator account on that computer. Windows asks for confirmation during the installation.
 - The scale, connected with a serial cable or a USB-serial cable, or a scale on the network (its IP address and port).
 
@@ -83,6 +83,10 @@ Your records and settings are kept. The backups folder keeps the last 10 backups
 3. At the end, Vyxum asks: "Do you also want to delete the database, settings and backups?" The default answer is **No**, and your data is kept. Click **Yes** only if you want to delete all records. This cannot be undone.
 
 ## 8. Troubleshooting
+
+**The setup says "Vyxum requires Windows 10 or 11, 64-bit".**
+- This computer has Windows 7, 8, 8.1 or a 32-bit Windows. Vyxum cannot be installed on it.
+- Upgrade the computer to Windows 10 or 11, or install Vyxum on another computer with 64-bit Windows 10 or 11.
 
 **The scale is not found.**
 - Check that the scale is switched on and the cable is firmly plugged in at both ends.

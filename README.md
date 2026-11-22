@@ -10,7 +10,7 @@ This repository is the open core of Vyxum, licensed under the Apache License 2.0
 
 ## Kurulum / Installation
 
-Windows 10 or 11 (64-bit). No internet connection, database server or extra program is needed. Run `VyxumSetup-<version>.exe` and follow the step-by-step guide: [Installation guide](docs/INSTALL.md) (Türkçe: [docs/KURULUM.md](docs/KURULUM.md)).
+Windows 10 or 11, 64-bit (Windows 7, 8 and 8.1 are not supported). No internet connection, database server or extra program is needed. Run `VyxumSetup-<version>.exe` and follow the step-by-step guide: [Installation guide](docs/INSTALL.md) (Türkçe: [docs/KURULUM.md](docs/KURULUM.md)).
 
 ## License file / Lisans dosyası
 

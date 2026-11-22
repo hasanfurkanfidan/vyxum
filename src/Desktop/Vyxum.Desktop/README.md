@@ -2,7 +2,7 @@
 
 The desktop window of Vyxum on a single PC: a WinForms shell around WebView2 that shows the web application. The product itself stays a web application; this window only removes the browser chrome (no address bar, own icon, optional full screen).
 
-- Output: `Vyxum.exe` (assembly name `Vyxum`), `net10.0-windows`. It builds on Linux too (`EnableWindowsTargeting`) but runs on Windows 10/11 only.
+- Output: `Vyxum.exe` (assembly name `Vyxum`), `net10.0-windows`. It builds on Linux too (`EnableWindowsTargeting`) but runs only on Windows 10 or 11, 64-bit.
 - Address: `Urls` in `%ProgramData%\Vyxum\vyxum.json` (first entry; `*`, `+`, `0.0.0.0` and `[::]` hosts become `localhost`). `--url <address>` on the command line overrides it. Default `http://localhost:5000`.
 - Full screen: F11 toggles. `--full-screen` on the command line (for example in the desktop shortcut) or `Vyxum:Desktop:FullScreen` (`true`) in `vyxum.json` starts full screen, for touch terminals.
 - `vyxum.json` holds the database password and the agent key, so the installer lets only administrators and the Vyxum services read it. A window started by a standard user cannot read it and uses the defaults and the command line.

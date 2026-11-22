@@ -6,7 +6,7 @@ Bu kılavuz Vyxum'u bir Windows bilgisayara kuracak kişi içindir. Teknik bilgi
 
 ## 1. Gerekenler
 
-- Windows 10 ya da Windows 11 yüklü, 64 bit bir bilgisayar.
+- Windows 10 ya da 11, 64 bit yüklü bir bilgisayar. Windows 7, 8 ve 8.1 desteklenmez; bu sürümlerde kurulum dosyası bir şey kurmadan bir uyarıyla durur. Windows'un sürümünü görmek için Başlat'a sağ tıklayın ve **Sistem**'i açın: "Windows belirtimleri" altında sürüm, "Sistem türü" satırında "64 bit işletim sistemi" yazmalıdır.
 - Bu bilgisayarda yönetici hesabı. Kurulum sırasında Windows onayınızı isteyecek.
 - Terazi: seri kablo ya da USB-seri kablo ile bağlı bir terazi, ya da ağdaki bir terazi (IP adresi ve port).
 
@@ -83,6 +83,10 @@ Kayıtlarınız ve ayarlarınız korunur. Yedek klasöründe son 10 yedek tutulu
 3. Sonunda Vyxum şu soruyu sorar: "Veritabanı, ayarlar ve yedekler de silinsin mi?" Varsayılan cevap **Hayır**'dır ve verileriniz korunur. Tüm kayıtları silmek istiyorsanız **Evet**'e tıklayın. Bu işlem geri alınamaz.
 
 ## 8. Sorun giderme
+
+**Kurulum dosyası "Vyxum için Windows 10 ya da 11, 64 bit gerekir" diyor.**
+- Bu bilgisayarda Windows 7, 8, 8.1 ya da 32 bit bir Windows var. Vyxum bu bilgisayara kurulamaz.
+- Bilgisayarı Windows 10 ya da 11'e yükseltin veya Vyxum'u 64 bit Windows 10 ya da 11 yüklü başka bir bilgisayara kurun.
 
 **Terazi bulunamıyor.**
 - Terazinin açık olduğunu ve kablonun iki ucunun da sağlam takılı olduğunu kontrol edin.
