@@ -68,6 +68,8 @@ interface Fixtures {
   t: Translate;
   shot: Shot;
   scale: FakeScale;
+  /** A second simulated scale on the next port, for scenarios with two scales at a station; not added by setup. */
+  scale2: FakeScale;
   licenses: LicenseFiles;
 }
 
@@ -75,6 +77,25 @@ async function control(pathAndQuery: string, init?: RequestInit): Promise<Respon
   const response = await fetch(`${baseUrl}/e2e/${pathAndQuery}`, init);
   if (!response.ok) throw new Error(`${init?.method ?? 'GET'} /e2e/${pathAndQuery} returned ${response.status}: ${await response.text()}`);
   return response;
+}
+
+/** Controls the simulated scale behind `/e2e/<name>`. */
+function fakeScale(name: string): FakeScale {
+  return {
+    async set(weight) {
+      const query = new URLSearchParams();
+      if (weight.value !== undefined) query.set('value', String(weight.value));
+      if (weight.unit) query.set('unit', weight.unit);
+      if (weight.state) query.set('state', weight.state);
+      await control(`${name}?${query}`, { method: 'POST' });
+    },
+    async silent(silent) {
+      await control(`${name}?silent=${silent}`, { method: 'POST' });
+    },
+    async status() {
+      return (await (await control(name)).json()) as { commands: string[]; forbiddenCommands: string[] };
+    },
+  };
 }
 
 export const test = base.extend<Fixtures & VyxumOptions>({
@@ -122,22 +143,13 @@ export const test = base.extend<Fixtures & VyxumOptions>({
   },
 
   scale: async ({}, use) => {
-    await use({
-      async set(weight) {
-        const query = new URLSearchParams();
-        if (weight.value !== undefined) query.set('value', String(weight.value));
-        if (weight.unit) query.set('unit', weight.unit);
-        if (weight.state) query.set('state', weight.state);
-        await control(`scale?${query}`, { method: 'POST' });
-      },
-      async silent(silent) {
-        await control(`scale?silent=${silent}`, { method: 'POST' });
-      },
-      async status() {
-        return (await (await control('scale')).json()) as { commands: string[]; forbiddenCommands: string[] };
-      },
-    });
+    await use(fakeScale('scale'));
   },
+
+  scale2: async ({}, use) => {
+    await use(fakeScale('scale2'));
+  },
+
 
   licenses: async ({}, use) => {
     await use({

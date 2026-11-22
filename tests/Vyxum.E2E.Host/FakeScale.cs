@@ -14,9 +14,9 @@ internal sealed class FakeScale : IAsyncDisposable
     private readonly MtSicsScaleSimulator _device;
     private readonly SimulatorTcpServer _server;
 
-    public FakeScale(int port)
+    public FakeScale(int port, string serialNumber)
     {
-        _device = new MtSicsScaleSimulator(_source, "E2E0000001");
+        _device = new MtSicsScaleSimulator(_source, serialNumber);
         _server = new SimulatorTcpServer(_device, port).Start();
     }
 

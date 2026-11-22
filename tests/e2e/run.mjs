@@ -28,6 +28,7 @@ const isWindows = process.platform === 'win32';
 const { options, passthrough } = parseArguments(process.argv.slice(2));
 const port = Number(options.port ?? 5390);
 const scalePort = port + 1;
+const scale2Port = port + 2;
 const stamp = new Date().toISOString().replace(/[-:]/g, '').replace('T', '-').slice(0, 15);
 const out = path.resolve(options.out ?? path.join(repo, 'artifacts', 'e2e', stamp));
 const hostProject = path.resolve(options['host-project'] ?? path.join(repo, 'tests', 'Vyxum.E2E.Host', 'Vyxum.E2E.Host.csproj'));
@@ -46,6 +47,7 @@ try {
   ensureNodeModules(here);
   await ensurePortFree(port);
   await ensurePortFree(scalePort);
+  await ensurePortFree(scale2Port);
 
   step(`Starting the test server on ${url} (empty database in ${path.join(out, 'data')})`);
   const host = start('host', 'dotnet', [outputDll(hostProject), '--port', String(port), '--data', path.join(out, 'data')], { stdin: 'pipe' });
@@ -72,6 +74,7 @@ try {
       ...process.env,
       VYXUM_E2E_URL: url,
       VYXUM_E2E_SCALE_PORT: String(scalePort),
+      VYXUM_E2E_SCALE2_PORT: String(scale2Port),
       VYXUM_E2E_OUT: out,
       VYXUM_E2E_SHOTS: path.join(out, 'shots'),
       ...(realUrl ? { VYXUM_E2E_REAL_URL: realUrl } : {}),

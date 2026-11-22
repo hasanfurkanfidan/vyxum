@@ -80,6 +80,8 @@ never part of a release.
 - `POST /e2e/scale?value=1250&unit=g&state=stable|motion|overload|underload` changes what the simulated scale shows;
   `silent=true` makes it stop answering (a pulled cable). `GET /e2e/scale` returns the commands it received, so a
   scenario can prove that no tare or reset command reached the scale.
+- `/e2e/scale2` does the same for a second simulated scale on the port after it (`VYXUM_E2E_SCALE2_PORT`). Setup does
+  not add it; a scenario that needs two scales at a station adds it as a network scale.
 
 ## Add a scenario
 
@@ -110,7 +112,8 @@ test('Products: a product can be deactivated', async ({ page, t, shot, scale, li
   project's language. Never write interface text into a scenario; an unknown key fails the test.
 - `shot('name')` takes a screenshot for the report. Take one after every step a person would look at. Names are short
   Turkish slugs: the report is read in Turkish.
-- `scale.set({ value, unit, state })`, `scale.silent(true)`, `scale.status()` control the simulated scale.
+- `scale.set({ value, unit, state })`, `scale.silent(true)`, `scale.status()` control the simulated scale; `scale2`
+  controls the second one.
 - `licenses.get('valid', { modules: ['samples.paid'] })` returns a file for `setInputFiles`.
 - `expectCleanScreen(page)` fails on raw resource keys (a missing translation) and on sideways scrolling.
 - Any script error or console error fails the scenario. When a screen logs an error on purpose (the weighing screen
