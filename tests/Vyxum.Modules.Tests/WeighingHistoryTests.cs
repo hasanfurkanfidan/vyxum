@@ -17,7 +17,7 @@ public class WeighingHistoryTests
     [Theory]
     [InlineData(DatabaseProvider.Sqlite)]
     [InlineData(DatabaseProvider.SqlServer)]
-    public async Task A_history_request_sends_every_record_in_pages_with_its_cancel(DatabaseProvider provider)
+    public async Task History_requests_send_every_record_page_by_page_with_its_cancel(DatabaseProvider provider)
     {
         await using var app = await WeighingTestApp.StartAsync(provider);
         var ids = new List<long>();
@@ -31,19 +31,29 @@ public class WeighingHistoryTests
 
         (await app.SendAsync(HttpMethod.Post, $"/api/weighing/records/{ids[1]}/cancel", new { reason = "Wrong product" })).Response.StatusCode.ShouldBe(HttpStatusCode.OK);
 
+        // The requester asks for the next page after each page that is not the last; each answer is one page.
         var requestId = Guid.NewGuid();
-        await using (var scope = app.Services.CreateAsyncScope())
+        var pages = new List<WeighingHistoryPage>();
+        var request = new WeighingHistoryRequested(requestId);
+        while (true)
         {
-            var db = scope.ServiceProvider.GetRequiredService<WeighingDbContext>();
-            var handler = scope.ServiceProvider.GetRequiredService<WeighingHistoryRequestedHandler>();
-            await handler.HandleAsync(new WeighingHistoryRequested(requestId), new IntegrationEventContext(Guid.NewGuid(), DateTime.UtcNow, "weighing.history-requested", 1), TestContext.Current.CancellationToken);
+            await using (var scope = app.Services.CreateAsyncScope())
+            {
+                var handler = scope.ServiceProvider.GetRequiredService<WeighingHistoryRequestedHandler>();
+                await handler.HandleAsync(request, new IntegrationEventContext(Guid.NewGuid(), DateTime.UtcNow, "weighing.history-requested", 1), TestContext.Current.CancellationToken);
+            }
+
+            var answers = (await app.OutboxAsync())
+                .Where(m => m.EventName == "weighing.history-page")
+                .Select(m => JsonSerializer.Deserialize<WeighingHistoryPage>(m.Payload, JsonSerializerOptions.Web)!)
+                .ToList();
+            answers.Count.ShouldBe(pages.Count + 1);
+            var page = answers.Single(a => a.Page == request.Page);
+            pages.Add(page);
+            if (page.IsLast) break;
+            request = new WeighingHistoryRequested(requestId, page.Records[^1].Recorded.RecordId, page.Page + 1);
         }
 
-        var pages = (await app.OutboxAsync())
-            .Where(m => m.EventName == "weighing.history-page")
-            .Select(m => JsonSerializer.Deserialize<WeighingHistoryPage>(m.Payload, JsonSerializerOptions.Web)!)
-            .OrderBy(p => p.Page)
-            .ToList();
         pages.Select(p => (p.Page, p.IsLast, p.Records.Count)).ShouldBe([(1, false, WeighingHistoryRequestedHandler.PageSize), (2, true, 2)]);
         pages.ShouldAllBe(p => p.RequestId == requestId);
         var records = pages.SelectMany(p => p.Records).ToList();

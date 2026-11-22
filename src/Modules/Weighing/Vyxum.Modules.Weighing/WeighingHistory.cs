@@ -4,14 +4,18 @@ using Vyxum.Platform.Abstractions;
 namespace Vyxum.Modules.Weighing;
 
 /// <summary>
-/// Asks the Weighing module to send every record saved so far once more, as <see cref="WeighingHistoryPage"/> events.
+/// Asks the Weighing module for one page of the records saved so far, as a <see cref="WeighingHistoryPage"/> event.
 /// A module that starts after records already exist and needs them from the start publishes it (today the paid
-/// Reports module, design decision "Geçmiş tartımlar yüklenir"); the Weighing module does not know who asks. Only one
-/// module may publish an event name, so a second such module would ask through its own event.
+/// Reports module, design decision "Geçmiş tartımlar yüklenir"); the Weighing module does not know who asks. The
+/// requester asks for the next page after each page that is not the last, so every answer is one short transaction
+/// even with hundreds of thousands of records. Only one module may publish an event name, so a second such module would
+/// ask through its own event.
 /// </summary>
 /// <param name="RequestId">Id the requester chooses; repeated on every page of the answer.</param>
+/// <param name="AfterRecordId">The page starts after this record id: 0 for the first page, then the last record id of the page before.</param>
+/// <param name="Page">The page number to give the answer, from 1.</param>
 [IntegrationEvent("weighing.history-requested", 1)]
-public sealed record WeighingHistoryRequested(Guid RequestId) : IIntegrationEvent;
+public sealed record WeighingHistoryRequested(Guid RequestId, long AfterRecordId = 0, int Page = 1) : IIntegrationEvent;
 
 /// <summary>
 /// One page of the records saved before a <see cref="WeighingHistoryRequested"/> arrived, oldest first. A separate event
@@ -31,7 +35,7 @@ public sealed record WeighingHistoryPage(Guid RequestId, int Page, bool IsLast, 
 /// <param name="CancelReason">Reason of the cancel, if any.</param>
 public sealed record WeighingHistoryRecord(WeighingRecorded Recorded, DateTime? CancelledAt, string? CancelReason);
 
-/// <summary>Answers <see cref="WeighingHistoryRequested"/> with the records in pages, in the same transaction.</summary>
+/// <summary>Answers <see cref="WeighingHistoryRequested"/> with one page of the records.</summary>
 public sealed class WeighingHistoryRequestedHandler(WeighingDbContext db) : IIntegrationEventHandler<WeighingHistoryRequested>
 {
     /// <summary>Records per page.</summary>
@@ -41,27 +45,18 @@ public sealed class WeighingHistoryRequestedHandler(WeighingDbContext db) : IInt
     public async Task HandleAsync(WeighingHistoryRequested integrationEvent, IntegrationEventContext context, CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(integrationEvent);
-        var page = 0;
-        var afterId = 0L;
-        while (true)
-        {
-            var records = await db.Records.AsNoTracking()
-                .Where(r => r.Id > afterId)
-                .OrderBy(r => r.Id)
-                .Take(PageSize + 1)
-                .ToListAsync(cancellationToken);
-            var isLast = records.Count <= PageSize;
-            var items = records.Take(PageSize)
-                .Select(r => new WeighingHistoryRecord(
-                    WeighingMapper.ToRecordedEvent(r),
-                    r.Status == WeighingStatus.Cancelled ? r.CancelledAtUtc ?? r.CreatedAtUtc : null,
-                    r.Status == WeighingStatus.Cancelled ? r.CancelReason : null))
-                .ToList();
-            db.Publish(new WeighingHistoryPage(integrationEvent.RequestId, ++page, isLast, items));
-            if (isLast) break;
-            afterId = items[^1].Recorded.RecordId;
-        }
-
+        var records = await db.Records.AsNoTracking()
+            .Where(r => r.Id > integrationEvent.AfterRecordId)
+            .OrderBy(r => r.Id)
+            .Take(PageSize + 1)
+            .ToListAsync(cancellationToken);
+        var items = records.Take(PageSize)
+            .Select(r => new WeighingHistoryRecord(
+                WeighingMapper.ToRecordedEvent(r),
+                r.Status == WeighingStatus.Cancelled ? r.CancelledAtUtc ?? r.CreatedAtUtc : null,
+                r.Status == WeighingStatus.Cancelled ? r.CancelReason : null))
+            .ToList();
+        db.Publish(new WeighingHistoryPage(integrationEvent.RequestId, Math.Max(1, integrationEvent.Page), records.Count <= PageSize, items));
         await db.SaveChangesAsync(cancellationToken);
     }
 }
