@@ -84,8 +84,9 @@ export function searchGlossary(sections: readonly GlossarySection[], query: stri
       const name = foldForSearch(term.name);
       const other = foldForSearch(term.otherNames.map((n) => n.name).join(' / '));
       const body = foldForSearch([term.text, term.inVyxum ?? '', term.example ?? ''].join(' '));
-      // The exact name comes before longer names that start with it ("Dara" before "Dara ve sıfırlama").
-      let score = name.trim() === words.join(' ') ? -1 : 0;
+      // The exact name, in any language, comes before longer names that start with it ("Dara" before "Dara ve sıfırlama").
+      const whole = words.join(' ');
+      let score = name.trim() === whole || term.otherNames.some((n) => foldForSearch(n.name).trim() === whole) ? -1 : 0;
       let all = true;
       for (const word of words) {
         if (startsAWord(name, word)) score += 0;

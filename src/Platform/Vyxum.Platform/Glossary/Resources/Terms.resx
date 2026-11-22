@@ -178,7 +178,7 @@
   <data name="S3.Title" xml:space="preserve"><value>Labels and barcodes</value></data>
   <data name="S3.Intro" xml:space="preserve"><value>Labels, GS1 barcodes, printers and food label rules.</value></data>
   <data name="T3.01.Name" xml:space="preserve"><value>GS1</value></data>
-  <data name="T3.01.Text" xml:space="preserve"><value>The organisation that gives out barcode numbers worldwide and writes the barcode rules. All supermarket barcodes follow GS1 rules. Companies join their national GS1 office (GS1 Türkiye in Turkey).</value></data>
+  <data name="T3.01.Text" xml:space="preserve"><value>The organisation that gives out barcode numbers worldwide and writes the barcode rules. All supermarket barcodes follow GS1 rules. Companies join their national GS1 office (in Turkey, GS1 Turkey).</value></data>
   <data name="T3.01.InVyxum" xml:space="preserve"><value>Once the GS1 company prefix is entered, GS1 barcodes and templates become available. Vyxum does not issue numbers; the company gets them from GS1.</value></data>
   <data name="T3.01.Example" xml:space="preserve"><value>A supermarket chain asks its supplier for GS1 case labels.</value></data>
   <data name="T3.02.Name" xml:space="preserve"><value>GS1 company prefix</value></data>

@@ -33,6 +33,9 @@ describe('glossary search', () => {
   it('finds a term without Turkish letters and by its English name', () => {
     expect(searchGlossary(sections, 'sifir').map((h) => h.term.id)).toEqual(['T1.03']);
     expect(searchGlossary(sections, 'tare').map((h) => h.term.id)).toEqual(['T1.02', 'T2.01']);
+    // An exact English name wins over a longer Turkish name found by its English name.
+    const pair = { id: 'S0', title: '', intro: '', terms: [term('T0.01', 'Dara ve sıfırlama', '', 'Tare and zero')] };
+    expect(searchGlossary([pair, ...sections], 'tare').map((h) => h.term.id)).toEqual(['T1.02', 'T0.01', 'T2.01']);
   });
 
   it('needs every word to match and returns nothing for an empty search', () => {
