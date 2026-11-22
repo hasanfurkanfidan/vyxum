@@ -15,6 +15,7 @@
   <data name="HostRequired" xml:space="preserve"><value>IP address or host name is required.</value></data>
   <data name="PortInvalid" xml:space="preserve"><value>Port must be a number between 1 and 65535.</value></data>
   <data name="ProtocolRequired" xml:space="preserve"><value>Choose the device protocol.</value></data>
+  <data name="ReadCommandOnly" xml:space="preserve"><value>Only a command that reads the weight can be sent to the scale.</value></data>
   <data name="SettingsTooLong" xml:space="preserve"><value>The settings are too long.</value></data>
   <data name="InvalidNumber" xml:space="preserve"><value>Enter a number with at most 6 decimal places.</value></data>
   <data name="MustBePositive" xml:space="preserve"><value>The value must be greater than zero.</value></data>

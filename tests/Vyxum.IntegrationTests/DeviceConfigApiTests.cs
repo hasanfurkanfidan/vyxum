@@ -188,6 +188,10 @@ public sealed class DeviceConfigApiTests : IDisposable
     [InlineData("""{ "id": "scale-1", "transport": { "type": "simulator" }, "protocol": { "type": "mt-sics" }, "division": "-1" }""", "division", "devices.MustBePositive")]
     [InlineData("""{ "id": "scale-1", "transport": { "type": "simulator" }, "protocol": { "type": "mt-sics" }, "capacity": "6", "division": "10" }""", "division", "devices.DivisionAboveCapacity")]
     [InlineData("""{ "id": "scale-1", "transport": { "type": "simulator" }, "protocol": { "type": "mt-sics" }, "unit": "kilograms-per-unit" }""", "unit", "devices.UnitTooLong")]
+    [InlineData("""{ "id": "scale-1", "transport": { "type": "simulator" }, "protocol": { "type": "generic-ascii", "pattern": "x", "requestCommand": "T" } }""", "protocol.requestCommand", "devices.ReadCommandOnly")]
+    [InlineData("""{ "id": "scale-1", "transport": { "type": "simulator" }, "protocol": { "type": "Generic-ASCII", "pattern": "x", "RequestCommand": "Z" } }""", "protocol.requestCommand", "devices.ReadCommandOnly")]
+    [InlineData("""{ "id": "scale-1", "transport": { "type": "simulator" }, "protocol": { "type": "generic-ascii", "pattern": "x", "requestCommand": 7 } }""", "protocol.requestCommand", "devices.ReadCommandOnly")]
+    [InlineData("""{ "id": "scale-1", "transport": { "type": "simulator" }, "protocol": { "type": "mt-sics", "command": "T" } }""", "protocol.command", "devices.ReadCommandOnly")]
     public async Task Invalid_input_is_a_validation_problem_with_ui_string_keys(string json, string field, string key)
     {
         await using var factory = CreateFactory(database: null);
@@ -203,6 +207,24 @@ public sealed class DeviceConfigApiTests : IDisposable
         var tr = await client.GetFromJsonAsync<JsonElement>("/api/ui/strings?culture=tr", Ct);
         en.GetProperty("strings").TryGetProperty(key, out _).ShouldBeTrue(key);
         tr.GetProperty("strings").TryGetProperty(key, out _).ShouldBeTrue(key);
+    }
+
+    [Theory]
+    [InlineData("""{ "type": "generic-ascii", "pattern": "x", "requestCommand": "SI" }""")]
+    [InlineData("""{ "type": "generic-ascii", "pattern": "x", "requestCommand": "\u0005" }""")]
+    [InlineData("""{ "type": "generic-ascii", "pattern": "x", "requestCommand": "" }""")]
+    [InlineData("""{ "type": "generic-ascii", "pattern": "x", "requestCommand": null }""")]
+    [InlineData("""{ "type": "generic-ascii", "pattern": "x" }""")]
+    [InlineData("""{ "type": "mt-sics", "command": "SIR" }""")]
+    public async Task Read_commands_and_listen_only_mode_are_accepted(string protocol)
+    {
+        await using var factory = CreateFactory(database: null);
+        using var client = factory.CreateClient();
+
+        var (status, body) = await SendAsync(client, HttpMethod.Post, DeviceEndpointExtensions.ConfigPath,
+            "{ \"id\": \"scale-1\", \"transport\": { \"type\": \"simulator\" }, \"protocol\": " + protocol + " }");
+
+        status.ShouldBe(HttpStatusCode.Created, body.ToString());
     }
 
     [Fact]

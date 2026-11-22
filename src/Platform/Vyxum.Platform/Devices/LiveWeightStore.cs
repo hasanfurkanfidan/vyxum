@@ -15,12 +15,20 @@ public sealed class LiveWeightStore(TimeProvider time) : ILiveWeightSource
     private readonly Lock _lock = new();
     private readonly Dictionary<string, DeviceEntry> _devices = new(StringComparer.Ordinal);
     private readonly Dictionary<string, string> _agentNames = new(StringComparer.Ordinal);
+    private readonly Dictionary<string, HashSet<string>> _registeredDevices = new(StringComparer.Ordinal);
 
     /// <summary>
     /// Records an agent connection, the devices it serves and the commands each supports; new devices start as connecting.
     /// A device missing from <paramref name="deviceCommands"/> supports no command.
     /// </summary>
-    public void RegisterAgent(
+    /// <remarks>
+    /// A device that a connected agent with another name already serves stays with that agent: two agents reporting
+    /// the same device id would otherwise make the device jump between two scales. The new connection gets the device
+    /// once the other agent disconnects. An agent with the same name (the same agent after a restart, before its old
+    /// connection timed out) takes the device over.
+    /// </remarks>
+    /// <returns>The listed devices that stay with another agent, with that agent's name.</returns>
+    public IReadOnlyList<(string DeviceId, string HeldBy)> RegisterAgent(
         string connectionId,
         string agentName,
         IEnumerable<string> deviceIds,
@@ -32,9 +40,11 @@ public sealed class LiveWeightStore(TimeProvider time) : ILiveWeightSource
 
         var ids = deviceIds as IReadOnlyCollection<string> ?? [.. deviceIds];
         var now = time.GetUtcNow();
+        var conflicts = new List<(string DeviceId, string HeldBy)>();
         lock (_lock)
         {
             _agentNames[connectionId] = agentName;
+            _registeredDevices[connectionId] = new HashSet<string>(ids, StringComparer.Ordinal);
 
             // A registration lists every device the agent serves now; the ones it dropped are released.
             var listed = new HashSet<string>(ids, StringComparer.Ordinal);
@@ -52,6 +62,12 @@ public sealed class LiveWeightStore(TimeProvider time) : ILiveWeightSource
 
             foreach (var deviceId in ids)
             {
+                if (HeldByOtherAgent(deviceId, agentName) is { } heldBy)
+                {
+                    conflicts.Add((deviceId, heldBy));
+                    continue;
+                }
+
                 var before = Snapshot(deviceId);
                 var entry = Claim(connectionId, deviceId, now);
                 if (entry.State == DeviceConnectionState.Disconnected)
@@ -68,6 +84,23 @@ public sealed class LiveWeightStore(TimeProvider time) : ILiveWeightSource
 
                 PublishIfChanged(entry, before);
             }
+        }
+
+        return conflicts;
+    }
+
+    /// <summary>
+    /// True when the connection serves the device: it listed the device when it registered and no other agent holds it.
+    /// Readings and status changes from any other connection are not stored.
+    /// </summary>
+    public bool Serves(string connectionId, string deviceId)
+    {
+        ArgumentNullException.ThrowIfNull(connectionId);
+        ArgumentNullException.ThrowIfNull(deviceId);
+
+        lock (_lock)
+        {
+            return _devices.TryGetValue(deviceId, out var entry) && entry.ConnectionId == connectionId;
         }
     }
 
@@ -173,15 +206,27 @@ public sealed class LiveWeightStore(TimeProvider time) : ILiveWeightSource
     {
         ArgumentNullException.ThrowIfNull(connectionId);
 
+        var now = time.GetUtcNow();
         lock (_lock)
         {
             _agentNames.Remove(connectionId);
+            _registeredDevices.Remove(connectionId);
             var count = 0;
-            foreach (var entry in _devices.Values.Where(e => e.ConnectionId == connectionId))
+            foreach (var entry in _devices.Values.Where(e => e.ConnectionId == connectionId).ToList())
             {
                 var before = entry.ToSnapshot();
                 entry.ConnectionId = null;
                 entry.State = DeviceConnectionState.Disconnected;
+
+                // Another connected agent that listed the device and waited for it gets it now.
+                if (_registeredDevices.FirstOrDefault(r => r.Value.Contains(entry.DeviceId)).Key is { } waiting)
+                {
+                    Claim(waiting, entry.DeviceId, now);
+                    entry.State = DeviceConnectionState.Connecting;
+                    entry.LastWeight = null;
+                    entry.LastError = null;
+                }
+
                 PublishIfChanged(entry, before);
                 count++;
             }
@@ -373,6 +418,18 @@ public sealed class LiveWeightStore(TimeProvider time) : ILiveWeightSource
         LastSeen = default,
         LastWeight = device.LastWeight is { } weight ? weight with { Timestamp = default, ReceivedAt = default } : null,
     };
+
+    /// <summary>
+    /// The name of another connected agent that serves the device, or null when the device is free or served by an
+    /// agent named <paramref name="agentName"/>. Call under the lock.
+    /// </summary>
+    private string? HeldByOtherAgent(string deviceId, string agentName) =>
+        _devices.TryGetValue(deviceId, out var entry)
+            && entry.ConnectionId is { } holder
+            && _agentNames.TryGetValue(holder, out var holderName)
+            && !string.Equals(holderName, agentName, StringComparison.OrdinalIgnoreCase)
+                ? holderName
+                : null;
 
     private DeviceEntry Claim(string connectionId, string deviceId, DateTimeOffset now)
     {

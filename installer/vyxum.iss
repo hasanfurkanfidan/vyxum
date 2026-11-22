@@ -65,6 +65,7 @@ tr.ServiceFailed=Vyxum servisi oluşturulamadı veya başlatılamadı: %1%n%nKur
 en.ServiceFailed=The Vyxum service could not be created or started: %1%n%nSetup has finished; you can start the service from the Windows Services screen.
 
 [Dirs]
+; Rights are set in SecureDataDirectory (only SYSTEM, administrators and the Vyxum services).
 Name: "{commonappdata}\Vyxum"; Flags: uninsneveruninstall
 
 [InstallDelete]
@@ -188,13 +189,16 @@ end;
 
 procedure ConfigureService(const Name, Exe, Description: String);
 var
-  Quoted: String;
+  Quoted, Account: String;
 begin
   Quoted := '"\"' + Exe + '\""';
+  { Each service runs as its own virtual account (NT SERVICE\<name>) instead of LocalSystem, so a flaw in the
+    web application does not give full control of the computer. Updates move older installations over too. }
+  Account := ' obj= "NT SERVICE\' + Name + '"';
   if ServiceExists(Name) then
-    { Already installed: only refresh the binary path, keep everything else. }
-    RunSc('config "' + Name + '" binPath= ' + Quoted + ' start= auto')
-  else if RunSc('create "' + Name + '" binPath= ' + Quoted + ' start= auto DisplayName= "' + Name + '"') <> 0 then
+    { Already installed: refresh the binary path and the account, keep everything else. }
+    RunSc('config "' + Name + '" binPath= ' + Quoted + ' start= auto' + Account)
+  else if RunSc('create "' + Name + '" binPath= ' + Quoted + ' start= auto' + Account + ' DisplayName= "' + Name + '"') <> 0 then
   begin
     MsgBox(FmtMessage(CustomMessage('ServiceFailed'), [Name]), mbError, MB_OK);
     Exit;
@@ -207,12 +211,44 @@ begin
   RunSc('failureflag "' + Name + '" 1');
 end;
 
+{ Gives the installation its own agent key in vyxum.json (web and agent) unless it has one. Without a key, any
+  program on this computer, a web page in the browser included, could report weights. An existing key is kept. }
+procedure EnsureAgentKey;
+var
+  ResultCode: Integer;
+begin
+  if not Exec(ExpandConstant('{app}\Web\Vyxum.Host.exe'), '--ensure-agent-key', ExpandConstant('{app}\Web'), SW_HIDE, ewWaitUntilTerminated, ResultCode) or (ResultCode <> 0) then
+    Log('Writing the agent key failed with code ' + IntToStr(ResultCode) + '.');
+end;
+
+{ The data folder holds the database, the backups and vyxum.json (database password, agent key). It must not inherit
+  the ProgramData rights, which let every Windows user read it and create files in it. Afterwards only SYSTEM,
+  administrators and the two services have access: the web service may change files, the agent may only read.
+  Runs after the services exist, because their accounts are only known then. }
+procedure SecureDataDirectory;
+var
+  DataDir: String;
+  ResultCode: Integer;
+begin
+  DataDir := ExpandConstant('{commonappdata}\Vyxum');
+  ForceDirectories(DataDir);
+  if not Exec(ExpandConstant('{sys}\icacls.exe'),
+    '"' + DataDir + '" /inheritance:r /grant:r *S-1-5-18:(OI)(CI)F *S-1-5-32-544:(OI)(CI)F "NT SERVICE\' + WebServiceName + ':(OI)(CI)M" "NT SERVICE\' + AgentServiceName + ':(OI)(CI)RX" /Q',
+    '', SW_HIDE, ewWaitUntilTerminated, ResultCode) or (ResultCode <> 0) then
+    Log('Setting the rights of the data folder failed with code ' + IntToStr(ResultCode) + '.');
+  { Files written before (by an older version) get only the rights inherited from the folder. }
+  if not Exec(ExpandConstant('{sys}\icacls.exe'), '"' + DataDir + '\*" /reset /T /C /Q', '', SW_HIDE, ewWaitUntilTerminated, ResultCode) then
+    Log('Resetting the rights of the data files failed.');
+end;
+
 procedure CurStepChanged(CurStep: TSetupStep);
 begin
   if CurStep = ssPostInstall then
   begin
+    EnsureAgentKey;
     ConfigureService(WebServiceName, ExpandConstant('{app}\Web\Vyxum.Host.exe'), ExpandConstant('{cm:ServiceWebDescription}'));
     ConfigureService(AgentServiceName, ExpandConstant('{app}\Agent\Vyxum.Agent.exe'), ExpandConstant('{cm:ServiceAgentDescription}'));
+    SecureDataDirectory;
     RunSc('start "' + WebServiceName + '"');
     RunSc('start "' + AgentServiceName + '"');
   end;

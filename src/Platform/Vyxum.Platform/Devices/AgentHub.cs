@@ -30,8 +30,12 @@ public sealed partial class AgentHub(
             throw new HubException("Device ids must not be empty.");
         }
 
-        store.RegisterAgent(Context.ConnectionId, registration.AgentName, deviceIds, registration.DeviceCommands);
+        var conflicts = store.RegisterAgent(Context.ConnectionId, registration.AgentName, deviceIds, registration.DeviceCommands);
         LogRegistered(logger, registration.AgentName, registration.Version, deviceIds.Count);
+        foreach (var (deviceId, heldBy) in conflicts)
+        {
+            LogDeviceConflict(logger, deviceId, heldBy, registration.AgentName);
+        }
     }
 
     /// <summary>
@@ -61,6 +65,13 @@ public sealed partial class AgentHub(
             throw new HubException("The reading is missing or has an unknown state.");
         }
 
+        // Only the connection that registered the device and holds it may report for it.
+        if (!store.Serves(Context.ConnectionId, deviceId))
+        {
+            LogIgnored(logger, deviceId, Context.ConnectionId);
+            return;
+        }
+
         store.ReportReading(Context.ConnectionId, deviceId, reading);
     }
 
@@ -71,6 +82,12 @@ public sealed partial class AgentHub(
         if (status is null || !Enum.IsDefined(status.Status))
         {
             throw new HubException("The status is missing or unknown.");
+        }
+
+        if (!store.Serves(Context.ConnectionId, deviceId))
+        {
+            LogIgnored(logger, deviceId, Context.ConnectionId);
+            return;
         }
 
         store.ReportStatus(Context.ConnectionId, deviceId, status);
@@ -112,6 +129,12 @@ public sealed partial class AgentHub(
 
     [LoggerMessage(Level = LogLevel.Information, Message = "Agent {AgentName} {Version} registered with {DeviceCount} device(s).")]
     private static partial void LogRegistered(ILogger logger, string agentName, string? version, int deviceCount);
+
+    [LoggerMessage(Level = LogLevel.Warning, Message = "Device {DeviceId} is already served by agent {HeldBy}; agent {AgentName} reports the same device id and is ignored for it until that agent disconnects. Give every scale its own device id.")]
+    private static partial void LogDeviceConflict(ILogger logger, string deviceId, string heldBy, string agentName);
+
+    [LoggerMessage(Level = LogLevel.Debug, Message = "Ignored a report for device {DeviceId} from connection {ConnectionId}, which does not serve it.")]
+    private static partial void LogIgnored(ILogger logger, string deviceId, string connectionId);
 
     [LoggerMessage(Level = LogLevel.Information, Message = "Agent {AgentName} gets {DeviceCount} device(s) from the device settings (default agent: {IsDefault}).")]
     private static partial void LogDevicesSent(ILogger logger, string agentName, int deviceCount, bool isDefault);

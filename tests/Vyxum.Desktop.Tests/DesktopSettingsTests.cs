@@ -65,6 +65,15 @@ public sealed class DesktopSettingsTests
         DesktopSettings.Parse("{\"Urls\":\"http://*:5088\"}", args).Url.ShouldBe(new Uri("http://localhost:5099/"));
     }
 
+    [Theory]
+    [InlineData("--full-screen")]
+    [InlineData("--FULL-SCREEN")]
+    public void Full_screen_can_come_from_the_command_line_without_the_file(string flag)
+    {
+        DesktopSettings.Parse(null, [flag]).FullScreen.ShouldBeTrue();
+        DesktopSettings.Parse(null, []).FullScreen.ShouldBeFalse();
+    }
+
     [Fact]
     public void Invalid_command_line_address_falls_back_to_the_file()
     {

@@ -15,6 +15,21 @@ public sealed class WeighingOptions
     /// </summary>
     public decimal MinimumNet { get; set; }
 
+    /// <summary>
+    /// Oldest reading that can be recorded, measured from when the web application received it. The agent sends the
+    /// latest reading at least once a second, so an older one means the agent or its network stopped while the
+    /// connection still looks open. A record is then rejected with <c>weighing.NoReading</c>. Zero or less turns the
+    /// check off. Default 3 seconds.
+    /// </summary>
+    public TimeSpan MaxReadingAge { get; set; } = TimeSpan.FromSeconds(3);
+
+    /// <summary>
+    /// Longest time between the reading the operator saw (sent with the save) and the save reaching the server. A later
+    /// save, for example one retried after a network error, is rejected with <c>weighing.ReadingChanged</c> so that it
+    /// cannot record whatever is on the scale by then. Zero or less turns the check off. Default 10 seconds.
+    /// </summary>
+    public TimeSpan MaxSaveDelay { get; set; } = TimeSpan.FromSeconds(10);
+
     /// <summary>A cancel needs a reason. Default true.</summary>
     public bool RequireCancelReason { get; set; } = true;
 

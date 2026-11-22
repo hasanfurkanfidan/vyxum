@@ -261,6 +261,17 @@ public class ArchitectureTests
         }
     }
 
+    /// <summary>
+    /// Only read commands are ever sent to a scale. The web application validates device settings against its own copy
+    /// of the agent's lists (it may not reference the device assemblies), so the copies must stay equal.
+    /// </summary>
+    [Fact]
+    public void Web_and_agent_allow_the_same_read_commands()
+    {
+        DeviceConfigLimits.GenericAsciiRequestCommands.ShouldBe(GenericAsciiOptions.AllowedRequestCommands);
+        DeviceConfigLimits.MtSicsReadCommands.ShouldBe(MtSicsProtocolOptions.AllowedCommands);
+    }
+
     [Fact]
     public void Licensing_references_no_other_vyxum_assembly()
     {

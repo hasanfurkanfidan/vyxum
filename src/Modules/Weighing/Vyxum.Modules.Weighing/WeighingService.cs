@@ -127,7 +127,7 @@ public sealed class WeighingService(
         }
 
         var reading = weights.GetLatest(input.DeviceId);
-        if (reading is null)
+        if (reading is null || IsTooOld(reading))
         {
             return (null, WeighingErrors.NoReading);
         }
@@ -135,6 +135,11 @@ public sealed class WeighingService(
         if (device.State != DeviceConnectionState.Connected)
         {
             return (null, WeighingErrors.DeviceNotConnected);
+        }
+
+        if (input.Observed is { } observed && !StillShows(reading, observed))
+        {
+            return (null, WeighingErrors.ReadingChanged);
         }
 
         switch (reading.State)
@@ -287,6 +292,25 @@ public sealed class WeighingService(
         return (record, null);
     }
 
+    /// <summary>
+    /// True when the latest reading still has the value and unit the operator saw, and the operator's reading is recent
+    /// enough (<see cref="WeighingOptions.MaxSaveDelay"/>).
+    /// </summary>
+    private bool StillShows(LiveWeight reading, Observed observed)
+    {
+        if (_options.MaxSaveDelay > TimeSpan.Zero && time.GetUtcNow() - observed.ReceivedAt > _options.MaxSaveDelay)
+        {
+            return false;
+        }
+
+        return reading.Value == observed.Value
+            && string.Equals(WeightUnits.Normalize(reading.Unit), WeightUnits.Normalize(observed.Unit), StringComparison.Ordinal);
+    }
+
+    /// <summary>True when the reading is older than <see cref="WeighingOptions.MaxReadingAge"/> allows.</summary>
+    private bool IsTooOld(LiveWeight reading) =>
+        _options.MaxReadingAge > TimeSpan.Zero && time.GetUtcNow() - reading.ReceivedAt > _options.MaxReadingAge;
+
     private static decimal RoundWeight(decimal value) =>
         value.Scale > WeighingLimits.WeightMaxDecimals
             ? decimal.Round(value, WeighingLimits.WeightMaxDecimals, MidpointRounding.AwayFromZero)
@@ -316,10 +340,11 @@ public sealed class WeighingService(
         }
 
         var tare = ParseWeight(request.Tare, "tare", errors);
+        var observed = ParseObserved(request.Reading, errors);
 
         return errors.Count > 0
             ? null
-            : new Input(request.RequestId!.Value, deviceId, request.ProductId, lot, tare);
+            : new Input(request.RequestId!.Value, deviceId, request.ProductId, lot, tare, observed);
     }
 
     private static decimal? ParseWeight(string? text, string field, Dictionary<string, string[]> errors)
@@ -348,7 +373,37 @@ public sealed class WeighingService(
         return value;
     }
 
-    private sealed record Input(Guid RequestId, string DeviceId, Guid? ProductId, string? Lot, decimal? Tare);
+    private static Observed? ParseObserved(ObservedReading? reading, Dictionary<string, string[]> errors)
+    {
+        if (reading is null)
+        {
+            return null;
+        }
+
+        // Same strict format as the tare, but a reading may be negative (below zero on the scale).
+        decimal? value = null;
+        if (!decimal.TryParse(reading.Value?.Trim(), NumberStyles.AllowLeadingSign | NumberStyles.AllowDecimalPoint, CultureInfo.InvariantCulture, out var parsed)
+            || Math.Abs(parsed) >= 1_000_000_000_000m)
+        {
+            errors["reading.value"] = [WeighingErrors.InvalidNumber];
+        }
+        else
+        {
+            value = parsed;
+        }
+
+        if (reading.ReceivedAt is not { } receivedAt)
+        {
+            errors["reading.receivedAt"] = [WeighingErrors.InvalidNumber];
+            return null;
+        }
+
+        return value is { } v ? new Observed(v, reading.Unit, receivedAt) : null;
+    }
+
+    private sealed record Observed(decimal Value, string? Unit, DateTimeOffset ReceivedAt);
+
+    private sealed record Input(Guid RequestId, string DeviceId, Guid? ProductId, string? Lot, decimal? Tare, Observed? Observed);
 }
 
 /// <summary>Maps records to DTOs and events.</summary>

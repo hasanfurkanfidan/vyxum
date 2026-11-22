@@ -7,9 +7,12 @@ using Vyxum.Platform;
 using Vyxum.Platform.Abstractions;
 
 var runningAsService = WindowsServiceHelpers.IsWindowsService();
+
+// The installer runs "Vyxum.Host.exe --ensure-agent-key" once to give the installation its own agent key.
+var ensureAgentKey = args.Contains(AgentKeyProvisioning.Argument, StringComparer.OrdinalIgnoreCase);
 var builder = WebApplication.CreateBuilder(new WebApplicationOptions
 {
-    Args = args,
+    Args = [.. args.Where(a => !a.Equals(AgentKeyProvisioning.Argument, StringComparison.OrdinalIgnoreCase))],
 
     // A service starts in the system folder; wwwroot and appsettings.json live next to the executable.
     ContentRootPath = runningAsService ? AppContext.BaseDirectory : null,
@@ -17,7 +20,12 @@ var builder = WebApplication.CreateBuilder(new WebApplicationOptions
 
 // The shared settings file <DataDirectory>yxum.json (decision V-37) overrides appsettings.json;
 // environment variables and the command line still override it.
-VyxumSettingsFile.AddTo(builder.Configuration);
+var settingsFile = VyxumSettingsFile.AddTo(builder.Configuration);
+if (ensureAgentKey)
+{
+    AgentKeyProvisioning.EnsureKey(settingsFile, builder.Configuration);
+    return;
+}
 
 // Runs as the "Vyxum Web" Windows service when started by the service control manager; no effect otherwise.
 builder.Services.AddWindowsService(options => options.ServiceName = "Vyxum Web");
@@ -32,6 +40,9 @@ builder.Services.AddLocalization(options => options.ResourcesPath = "Resources")
 builder.Services.AddUiStrings(Strings.UiPrefix, Strings.ResourceManager);
 
 var app = builder.Build();
+
+// Refuses unknown host names (DNS rebinding) and data changes sent by pages of other sites, before anything else runs.
+app.UseVyxumRequestProtection();
 
 string[] supportedCultures = ["tr", "en"];
 app.UseRequestLocalization(new RequestLocalizationOptions()

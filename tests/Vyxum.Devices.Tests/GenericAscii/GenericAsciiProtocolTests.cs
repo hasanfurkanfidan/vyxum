@@ -160,6 +160,31 @@ public class GenericAsciiProtocolTests
     }
 
     [Theory]
+    [InlineData("T")]
+    [InlineData("Z")]
+    [InlineData("R")]
+    [InlineData("p")]
+    [InlineData("SI ")]
+    [InlineData("CAL")]
+    public void Request_command_that_is_not_a_known_read_command_is_rejected(string command)
+    {
+        Should.Throw<ArgumentException>(() => new GenericAsciiProtocol(Demand with { RequestCommand = command }))
+            .ParamName.ShouldBe(nameof(GenericAsciiOptions.RequestCommand));
+    }
+
+    [Fact]
+    public void Every_allowed_read_command_and_listen_only_mode_are_accepted()
+    {
+        foreach (var command in GenericAsciiOptions.AllowedRequestCommands)
+        {
+            Should.NotThrow(() => new GenericAsciiProtocol(Demand with { RequestCommand = command }));
+        }
+
+        Should.NotThrow(() => new GenericAsciiProtocol(Demand with { RequestCommand = null }));
+        Should.NotThrow(() => new GenericAsciiProtocol(Demand with { RequestCommand = "" }));
+    }
+
+    [Theory]
     [InlineData("P\r\nT")]
     [InlineData("T\n")]
     public void Request_command_with_line_breaks_is_rejected(string command)

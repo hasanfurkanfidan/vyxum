@@ -379,6 +379,88 @@ public class WeighingApiTests
     [Theory]
     [InlineData(DatabaseProvider.Sqlite)]
     [InlineData(DatabaseProvider.SqlServer)]
+    public async Task A_reading_older_than_the_limit_is_not_recorded(DatabaseProvider provider)
+    {
+        await using var app = await WeighingTestApp.StartAsync(provider);
+
+        // The agent stopped sending, but the connection still looks open.
+        app.Scale.Set(Scale, 1.250m, age: TimeSpan.FromSeconds(4));
+        await RejectedAsync(app, Body(), WeighingErrors.NoReading);
+
+        app.Scale.Set(Scale, 1.250m, age: TimeSpan.FromSeconds(2));
+        await CreateAsync(app, Body());
+    }
+
+    [Theory]
+    [InlineData(DatabaseProvider.Sqlite)]
+    [InlineData(DatabaseProvider.SqlServer)]
+    public async Task A_save_carrying_the_seen_reading_is_rejected_when_the_scale_shows_another_weight(DatabaseProvider provider)
+    {
+        await using var app = await WeighingTestApp.StartAsync(provider);
+        app.Scale.Set(Scale, 2.40m);
+        var seen = app.Scale.GetLatest(Scale)!;
+        var requestId = Guid.NewGuid();
+        object WithSeen() => new { requestId, deviceId = Scale, reading = new { value = "2.400", unit = "kg", receivedAt = seen.ReceivedAt } };
+
+        // The first try never reached the server; the operator put the next crate on the scale meanwhile.
+        app.Scale.Set(Scale, 2.95m);
+        await RejectedAsync(app, WithSeen(), WeighingErrors.ReadingChanged);
+
+        // Same weight again (trailing zeros do not matter) but the save comes too late to be sure.
+        app.Clock.Advance(TimeSpan.FromSeconds(11));
+        app.Scale.Set(Scale, 2.4m);
+        await RejectedAsync(app, WithSeen(), WeighingErrors.ReadingChanged);
+
+        // A unit change is a different reading as well.
+        app.Scale.Set(Scale, 2.4m, "lb");
+        await RejectedAsync(app, new { requestId, deviceId = Scale, reading = new { value = "2.4", unit = "kg", receivedAt = app.Clock.GetUtcNow() } }, WeighingErrors.ReadingChanged);
+
+        // In time and unchanged: saved with the weight the operator saw.
+        app.Scale.Set(Scale, 2.4m);
+        var json = await CreateAsync(app, new { requestId, deviceId = Scale, reading = new { value = "2.400", unit = "KG", receivedAt = app.Clock.GetUtcNow() } });
+        Str(json, "gross").ShouldBe("2.4");
+
+        // A repeat of a saved request still returns the first record, whatever the scale shows now.
+        app.Clock.Advance(TimeSpan.FromMinutes(1));
+        app.Scale.Set(Scale, 7m);
+        var (response, again) = await app.SendAsync(HttpMethod.Post, "/api/weighing/records", WithSeen());
+        response.StatusCode.ShouldBe(HttpStatusCode.OK);
+        again.GetProperty("id").GetInt64().ShouldBe(json.GetProperty("id").GetInt64());
+    }
+
+    [Theory]
+    [InlineData(DatabaseProvider.Sqlite)]
+    [InlineData(DatabaseProvider.SqlServer)]
+    public async Task An_invalid_seen_reading_is_a_validation_problem(DatabaseProvider provider)
+    {
+        await using var app = await WeighingTestApp.StartAsync(provider);
+        app.Scale.Set(Scale, 1m);
+
+        var (response, problem) = await app.SendAsync(HttpMethod.Post, "/api/weighing/records",
+            new { requestId = Guid.NewGuid(), deviceId = Scale, reading = new { value = "1,0", unit = "kg" } });
+
+        response.StatusCode.ShouldBe(HttpStatusCode.BadRequest);
+        ErrorKeys(problem, "reading.value").ShouldBe([WeighingErrors.InvalidNumber]);
+        ErrorKeys(problem, "reading.receivedAt").ShouldBe([WeighingErrors.InvalidNumber]);
+    }
+
+    [Theory]
+    [InlineData(DatabaseProvider.Sqlite)]
+    [InlineData(DatabaseProvider.SqlServer)]
+    public async Task The_reading_age_limit_comes_from_options(DatabaseProvider provider)
+    {
+        await using var app = await WeighingTestApp.StartAsync(provider, settings: Settings(("MaxReadingAge", "00:00:10")));
+        app.Scale.Set(Scale, 1.250m, age: TimeSpan.FromSeconds(8));
+        await CreateAsync(app, Body());
+
+        await using var off = await WeighingTestApp.StartAsync(provider, settings: Settings(("MaxReadingAge", "00:00:00")));
+        off.Scale.Set(Scale, 1.250m, age: TimeSpan.FromMinutes(5));
+        await CreateAsync(off, Body());
+    }
+
+    [Theory]
+    [InlineData(DatabaseProvider.Sqlite)]
+    [InlineData(DatabaseProvider.SqlServer)]
     public async Task Invalid_requests_are_validation_problems_with_resx_keys(DatabaseProvider provider)
     {
         await using var app = await WeighingTestApp.StartAsync(provider);

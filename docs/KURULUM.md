@@ -100,6 +100,6 @@ Bütün veriler `C:\ProgramData\Vyxum` klasöründedir:
 - `vyxum.json`: kurulum sırasında yazılan ayarlar. Bu dosyayı elle düzenlemeniz gerekmez;
 - `backups`: otomatik yedekler.
 
-Tüm verileri silmek istemiyorsanız bu klasörü silmeyin.
+Bu klasörü yalnızca yöneticiler açabilir, çünkü kayıtlarınızı ve veritabanı parolasını tutar. Tüm verileri silmek istemiyorsanız bu klasörü silmeyin.
 
 **"Windows bilgisayarınızı korudu" uyarısı yine çıkıyor.** Kurulum dosyası dijital olarak imzalanana kadar bu normaldir. 2. bölüme bakın.

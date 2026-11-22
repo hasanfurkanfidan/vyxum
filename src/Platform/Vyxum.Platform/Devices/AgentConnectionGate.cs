@@ -18,6 +18,12 @@ public enum AgentConnectionDecision
 
     /// <summary>No key is configured and the request does not come from this computer.</summary>
     RemoteNotAllowed,
+
+    /// <summary>
+    /// The request comes from a web browser (it has an <c>Origin</c> header). The agent never sends one; a web page
+    /// open on this computer would, and must not report weights.
+    /// </summary>
+    BrowserNotAllowed,
 }
 
 /// <summary>Decides whether a request may reach the agent hub (decision V-26).</summary>
@@ -27,6 +33,13 @@ public sealed partial class AgentConnectionGate(IOptionsMonitor<AgentOptions> op
     public AgentConnectionDecision Check(HttpContext context)
     {
         ArgumentNullException.ThrowIfNull(context);
+
+        // Browsers add Origin to every WebSocket handshake and every cross-site request, and scripts cannot remove it.
+        // SignalR WebSockets are not covered by CORS, so this is what keeps web pages out of the hub.
+        if (context.Request.Headers.Origin.Count > 0)
+        {
+            return AgentConnectionDecision.BrowserNotAllowed;
+        }
 
         var key = options.CurrentValue.Key;
         if (string.IsNullOrWhiteSpace(key))
@@ -53,6 +66,10 @@ public sealed partial class AgentConnectionGate(IOptionsMonitor<AgentOptions> op
             case AgentConnectionDecision.InvalidKey:
                 LogInvalidKey(logger, context.Connection.RemoteIpAddress);
                 context.Response.StatusCode = StatusCodes.Status401Unauthorized;
+                return false;
+            case AgentConnectionDecision.BrowserNotAllowed:
+                LogBrowserNotAllowed(logger, context.Connection.RemoteIpAddress, context.Request.Headers.Origin.ToString());
+                context.Response.StatusCode = StatusCodes.Status403Forbidden;
                 return false;
             default:
                 LogRemoteNotAllowed(logger, context.Connection.RemoteIpAddress);
@@ -104,6 +121,9 @@ public sealed partial class AgentConnectionGate(IOptionsMonitor<AgentOptions> op
 
     [LoggerMessage(Level = LogLevel.Warning, Message = "Rejected agent connection from {RemoteAddress}: missing or invalid agent key.")]
     private static partial void LogInvalidKey(ILogger logger, IPAddress? remoteAddress);
+
+    [LoggerMessage(Level = LogLevel.Warning, Message = "Rejected agent connection from {RemoteAddress}: it comes from a web page (origin {Origin}).")]
+    private static partial void LogBrowserNotAllowed(ILogger logger, IPAddress? remoteAddress, string origin);
 
     [LoggerMessage(Level = LogLevel.Warning, Message = "Rejected agent connection from {RemoteAddress}: no agent key is configured, so only local connections are accepted.")]
     private static partial void LogRemoteNotAllowed(ILogger logger, IPAddress? remoteAddress);
