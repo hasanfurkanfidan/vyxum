@@ -62,6 +62,13 @@ public static class PlatformServiceCollectionExtensions
                 () => licenses ??= provider.GetRequiredService<ILicenseState>());
         });
         services.AddSingleton<ICapabilityRegistry>(provider => provider.GetRequiredService<CapabilityRegistry>());
+        // Identity: a users module registers its own implementations in ConfigureServices above; without one,
+        // nobody signs in and everything is allowed (decision V-03). The permission catalog is always the platform's.
+        services.RemoveAll<IPermissionCatalog>();
+        services.AddSingleton<IPermissionCatalog, PermissionCatalog>();
+        services.TryAddScoped<ICurrentActor, NoUsersCurrentActor>();
+        services.TryAddScoped<IAuthorization, NoUsersAuthorization>();
+        services.TryAddScoped<ISupervisorApproval, NoUsersSupervisorApproval>();
         services.AddSingleton(databaseSettings);
         services.AddDbContext<PlatformDbContext>((provider, options) =>
             provider.GetRequiredService<DatabaseSettings>().Configure(options));

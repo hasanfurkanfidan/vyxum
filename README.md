@@ -138,6 +138,7 @@ Weighing endpoints (`/api/weighing`):
 - `GET /records/export` downloads the filtered records as an Excel (.xlsx) file.
 - `POST /records` records a weighing. Every request carries a `requestId`, so a retry with the same id does not record a second time.
 - `POST /records/{id}/cancel` cancels a record. A reason is required while `RequireCancelReason` is true.
+- With a users module, saving needs `weighing.record`, cancelling needs `weighing.cancel` (or `weighing.cancel.own` for one's own record within `CancelOwnWindow`), exporting needs `weighing.records.export`, and product changes need `products.edit`. A refused request gets 403 with `{ code }`. Records keep the operator's name and id. Without a users module nothing changes: nobody signs in and everything is allowed.
 
 Integration events (version 1):
 
@@ -154,6 +155,7 @@ Weighing rules are read from the `Vyxum:Weighing` section of the configuration:
 | `Vyxum:Weighing:MaxReadingAge` | `00:00:03` | Oldest scale reading that can be recorded. An older reading means the agent or its network stopped; the save is rejected. `00:00:00` turns the check off. |
 | `Vyxum:Weighing:MaxSaveDelay` | `00:00:10` | Longest time between the weight the operator saw and the save reaching the server. A later save (for example one retried after a network error) is rejected, so it cannot record the next load. `00:00:00` turns the check off. |
 | `Vyxum:Weighing:RequireCancelReason` | `true` | A cancel needs a reason |
+| `Vyxum:Weighing:CancelOwnWindow` | `00:10:00` | With a users module: how long after saving a person with only `weighing.cancel.own` may cancel their own record |
 | `Vyxum:Weighing:Currency` | `TRY` | Currency of amounts, stored with every record |
 | `Vyxum:Weighing:AmountDecimals` | `2` | Decimals amounts are rounded to (0 to 4) |
 | `Vyxum:Weighing:AmountRounding` | `AwayFromZero` | Rounding mode, by its .NET `MidpointRounding` name |

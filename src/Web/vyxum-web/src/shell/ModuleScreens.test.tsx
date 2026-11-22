@@ -160,6 +160,43 @@ describe('module screens', () => {
     expect(within(screen.getByRole('navigation')).getByRole('link', { name: 'Ücretli örnek' })).toBeInTheDocument();
   });
 
+  it('shows a page on the whole window without the menu and a sidebar component in the menu (SDK 2)', async () => {
+    install([{ ...paid('licensed'), ui: { entry: '/modules/samples.paid/index.js', sdkVersion: 2 } }]);
+    const importer: ModuleImporter = async () => ({
+      register: () => ({
+        routes: [{ path: '', element: <p>Inside the shell</p> }],
+        pages: [{ path: 'sign-in', element: <h1>Who is weighing?</h1> }],
+        sidebar: () => <p>Signed in: Ayşe Demir</p>,
+      }),
+    });
+    const { unmount } = renderApp('/m/samples.paid/sign-in', importer);
+
+    expect(await screen.findByRole('heading', { name: 'Who is weighing?' })).toBeInTheDocument();
+    expect(screen.queryByRole('navigation')).not.toBeInTheDocument();
+    unmount();
+
+    renderApp('/m/samples.paid', importer);
+    expect(await screen.findByText('Inside the shell')).toBeInTheDocument();
+    expect(within(screen.getByRole('navigation')).getByText('Signed in: Ayşe Demir')).toBeInTheDocument();
+  });
+
+  it('sends the user to the sign-in page a module names when the server answers 401, and keeps where to return', async () => {
+    install([{ ...paid('licensed'), ui: { entry: '/modules/samples.paid/index.js', sdkVersion: 2 } }], {
+      'GET /api/samples-paid/entries': () => jsonResponse({ code: 'users.SignInRequired', signInPath: '/m/samples.paid/sign-in' }, 401),
+    });
+    function SignIn() {
+      const location = ReactRouterDom.useLocation();
+      return <h1>{`Sign in, then ${new URLSearchParams(location.search).get('returnTo') ?? ''}`}</h1>;
+    }
+    const importer: ModuleImporter = async (url) => {
+      const sample = (await sampleImporter(url)) as { register: (host: unknown) => { routes: unknown[]; nav: unknown[] } };
+      return { register: (host: unknown) => ({ ...sample.register(host), pages: [{ path: 'sign-in', component: SignIn }] }) };
+    };
+    renderApp('/m/samples.paid', importer);
+
+    expect(await screen.findByRole('heading', { name: 'Sign in, then /m/samples.paid' })).toBeInTheDocument();
+  });
+
   it('uses the same router instance for module links', () => {
     installShared();
     const shared = (globalThis as unknown as Record<string, Record<string, unknown> | undefined>).__vyxumShared;

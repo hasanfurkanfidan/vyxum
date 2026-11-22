@@ -173,11 +173,32 @@ async function send(method: HttpMethod, path: string, body: unknown, options: Re
   }
 
   if (!response.ok) {
-    const error = toError(response.status, await readBody(response));
+    const body = await readBody(response);
+    const error = toError(response.status, body);
     if (error instanceof LicenseError) for (const listener of licenseDeniedListeners) listener(error);
+    const signInPath = signInPathOf(response.status, body);
+    if (signInPath) for (const listener of signInListeners) listener(signInPath);
     throw error;
   }
   return response;
+}
+
+type SignInListener = (signInPath: string) => void;
+const signInListeners = new Set<SignInListener>();
+
+/**
+ * Calls `listener` for every 401 answer that names a screen to sign in on (`{ signInPath: "/m/..." }`, sent by a users
+ * module while sign-in is required); returns the way to stop. Only addresses of this application are accepted.
+ */
+export function onSignInRequired(listener: SignInListener): () => void {
+  signInListeners.add(listener);
+  return () => signInListeners.delete(listener);
+}
+
+function signInPathOf(status: number, body: unknown): string | undefined {
+  if (status !== 401 || typeof body !== 'object' || body === null) return undefined;
+  const path = (body as { signInPath?: unknown }).signInPath;
+  return typeof path === 'string' && /^\/m\/[a-z0-9.-]+\/[\w\-/]*$/.test(path) ? path : undefined;
 }
 
 /** Sends a request and returns the parsed JSON body (undefined for 204 or an empty body). */

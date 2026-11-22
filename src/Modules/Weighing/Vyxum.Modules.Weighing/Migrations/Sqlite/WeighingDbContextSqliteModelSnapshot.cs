@@ -137,6 +137,10 @@ namespace Vyxum.Modules.Weighing.Migrations.Sqlite
                         .HasMaxLength(100)
                         .HasColumnType("TEXT");
 
+                    b.Property<string>("OperatorId")
+                        .HasMaxLength(64)
+                        .HasColumnType("TEXT");
+
                     b.Property<string>("ProductCode")
                         .HasMaxLength(32)
                         .HasColumnType("TEXT");

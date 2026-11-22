@@ -16,7 +16,9 @@ public sealed class WeighingService(
     WeighingDbContext db,
     ILiveWeightSource weights,
     IOptions<WeighingOptions> options,
-    TimeProvider time)
+    TimeProvider time,
+    ICurrentActor actor,
+    IAuthorization authorization)
 {
     private readonly WeighingOptions _options = options.Value;
 
@@ -24,6 +26,11 @@ public sealed class WeighingService(
     public async Task<WeighingResult> CreateAsync(CreateRecordRequest request, CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(request);
+
+        if (!authorization.IsAllowed(WeighingPermissions.Record))
+        {
+            return WeighingResult.Forbidden();
+        }
 
         var errors = new Dictionary<string, string[]>();
         var input = Validate(request, errors);
@@ -80,6 +87,11 @@ public sealed class WeighingService(
             return WeighingResult.Missing();
         }
 
+        if (!MayCancel(record))
+        {
+            return WeighingResult.Forbidden();
+        }
+
         var reason = string.IsNullOrWhiteSpace(request?.Reason) ? null : request.Reason.Trim();
         if (reason is null && _options.RequireCancelReason)
         {
@@ -113,6 +125,23 @@ public sealed class WeighingService(
 
         return WeighingResult.Ok(WeighingMapper.ToDto(record), created: false);
     }
+
+    /// <summary>Anyone with <c>weighing.cancel</c>; the operator who saved it within the window with <c>weighing.cancel.own</c>.</summary>
+    private bool MayCancel(WeighingRecord record)
+    {
+        if (authorization.IsAllowed(WeighingPermissions.Cancel))
+        {
+            return true;
+        }
+
+        return authorization.IsAllowed(WeighingPermissions.CancelOwn)
+               && actor.Person is { } person
+               && record.OperatorId is not null
+               && string.Equals(record.OperatorId, person.Id, StringComparison.Ordinal)
+               && time.GetUtcNow().UtcDateTime - record.CreatedAtUtc <= _options.CancelOwnWindow;
+    }
+
+    private static string? Truncate(string? value, int max) => value is null || value.Length <= max ? value : value[..max];
 
     private Task<WeighingRecord?> FindByRequestIdAsync(Guid requestId, CancellationToken cancellationToken) =>
         db.Records.AsNoTracking().SingleOrDefaultAsync(r => r.RequestId == requestId, cancellationToken);
@@ -288,6 +317,8 @@ public sealed class WeighingService(
             AmountScale = _options.AmountDecimals,
             Currency = _options.Currency.Trim(),
             Status = WeighingStatus.Saved,
+            Operator = Truncate(actor.Person?.DisplayName, WeighingLimits.OperatorMaxLength),
+            OperatorId = actor.Person?.Id,
         };
         return (record, null);
     }

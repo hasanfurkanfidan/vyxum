@@ -4,6 +4,22 @@ using Vyxum.Platform.Abstractions;
 
 namespace Vyxum.Modules.Weighing;
 
+/// <summary>Permissions of the Weighing module, checked with <see cref="IAuthorization"/>.</summary>
+public static class WeighingPermissions
+{
+    /// <summary>Save a weighing record.</summary>
+    public const string Record = "weighing.record";
+
+    /// <summary>Cancel one's own record within <see cref="WeighingOptions.CancelOwnWindow"/>.</summary>
+    public const string CancelOwn = "weighing.cancel.own";
+
+    /// <summary>Cancel any record.</summary>
+    public const string Cancel = "weighing.cancel";
+
+    /// <summary>Export records to Excel.</summary>
+    public const string Export = "weighing.records.export";
+}
+
 /// <summary>Weighing records: live weight from a scale, tare and net, amount, cancel, list and totals.</summary>
 public sealed class WeighingModule : IModule
 {
@@ -28,6 +44,13 @@ public sealed class WeighingModule : IModule
         Provides = [RecordsCapability],
         Optional = [ProductsCapability, LabelsCapability, UsersCapability],
         Publishes = [typeof(WeighingRecorded), typeof(WeighingCancelled)],
+        Permissions =
+        [
+            new() { Id = WeighingPermissions.Record, NameKey = WeighingStrings.KeyPrefix + ".PermissionRecord", DefaultRoles = [BuiltInRoles.Operator, BuiltInRoles.ShiftSupervisor] },
+            new() { Id = WeighingPermissions.CancelOwn, NameKey = WeighingStrings.KeyPrefix + ".PermissionCancelOwn", DefaultRoles = [BuiltInRoles.Operator, BuiltInRoles.ShiftSupervisor] },
+            new() { Id = WeighingPermissions.Cancel, NameKey = WeighingStrings.KeyPrefix + ".PermissionCancel", DefaultRoles = [BuiltInRoles.ShiftSupervisor, BuiltInRoles.Quality] },
+            new() { Id = WeighingPermissions.Export, NameKey = WeighingStrings.KeyPrefix + ".PermissionExport", DefaultRoles = [BuiltInRoles.ShiftSupervisor, BuiltInRoles.Quality, BuiltInRoles.Planning] },
+        ],
     };
 
     /// <inheritdoc />
@@ -45,6 +68,7 @@ public sealed class WeighingModule : IModule
             .Validate(o => o.AmountDecimals is >= 0 and <= WeighingLimits.AmountMaxDecimals,
                 $"Vyxum:Weighing:AmountDecimals must be between 0 and {WeighingLimits.AmountMaxDecimals}.")
             .Validate(o => Enum.IsDefined(o.AmountRounding), "Vyxum:Weighing:AmountRounding is not a known rounding mode.")
+            .Validate(o => o.CancelOwnWindow >= TimeSpan.Zero, "Vyxum:Weighing:CancelOwnWindow cannot be negative.")
             .ValidateOnStart();
         services.AddScoped<WeighingService>();
         services.AddScoped<WeighingQueries>();

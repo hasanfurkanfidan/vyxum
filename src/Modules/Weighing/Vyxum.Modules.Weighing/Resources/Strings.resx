@@ -100,4 +100,9 @@
   <data name="TargetUnder" xml:space="preserve"><value>below tolerance</value></data>
   <data name="TargetWithin" xml:space="preserve"><value>within tolerance</value></data>
   <data name="TargetOver" xml:space="preserve"><value>above tolerance</value></data>
+  <data name="PermissionRecord" xml:space="preserve"><value>Save weighing records</value></data>
+  <data name="PermissionCancelOwn" xml:space="preserve"><value>Cancel their own last record (shortly after saving)</value></data>
+  <data name="PermissionCancel" xml:space="preserve"><value>Cancel any weighing record</value></data>
+  <data name="PermissionExport" xml:space="preserve"><value>Export records to Excel</value></data>
+  <data name="NotAllowed" xml:space="preserve"><value>You do not have permission for this.</value></data>
 </root>

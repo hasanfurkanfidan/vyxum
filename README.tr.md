@@ -140,6 +140,7 @@ Weighing uç noktaları (`/api/weighing`):
 - `GET /records/export` süzülmüş kayıtları Excel (.xlsx) dosyası olarak indirir.
 - `POST /records` bir tartım kaydeder. Her istek bir `requestId` taşır; aynı kimlikle yapılan yeniden deneme ikinci kez kayıt oluşturmaz.
 - `POST /records/{id}/cancel` bir kaydı iptal eder. `RequireCancelReason` true iken neden zorunludur.
+- Kullanıcılar modülü varsa kaydetmek `weighing.record`, iptal `weighing.cancel` (ya da `CancelOwnWindow` içinde kendi kaydı için `weighing.cancel.own`), dışa aktarma `weighing.records.export`, ürün değişikliği `products.edit` yetkisi ister. Reddedilen istek `{ code }` ile 403 alır. Kayıtta tartanın adı ve kimliği saklanır. Kullanıcılar modülü yoksa hiçbir şey değişmez: kimse giriş yapmaz, her şeye izin verilir.
 
 Olaylar (sürüm 1):
 
@@ -156,6 +157,7 @@ Tartım kuralları yapılandırmanın `Vyxum:Weighing` bölümünden okunur:
 | `Vyxum:Weighing:MaxReadingAge` | `00:00:03` | Kaydedilebilecek en eski terazi okuması. Daha eski bir okuma agent'ın ya da ağının durduğunu gösterir; kayıt reddedilir. `00:00:00` kontrolü kapatır. |
 | `Vyxum:Weighing:MaxSaveDelay` | `00:00:10` | Operatörün gördüğü ağırlık ile kaydın sunucuya ulaşması arasındaki en uzun süre. Daha geç gelen kayıt (ör. ağ hatasından sonra yeniden denenen) reddedilir; böylece bir sonraki yük kaydedilemez. `00:00:00` kontrolü kapatır. |
 | `Vyxum:Weighing:RequireCancelReason` | `true` | İptal için neden gerekir |
+| `Vyxum:Weighing:CancelOwnWindow` | `00:10:00` | Kullanıcılar modülüyle: yalnız `weighing.cancel.own` yetkisi olan kişinin kendi kaydını kayıttan sonra ne kadar süre iptal edebileceği |
 | `Vyxum:Weighing:Currency` | `TRY` | Tutarların para birimi; her kayıtta saklanır |
 | `Vyxum:Weighing:AmountDecimals` | `2` | Tutarların yuvarlanacağı ondalık basamak sayısı (0 ile 4 arası) |
 | `Vyxum:Weighing:AmountRounding` | `AwayFromZero` | Yuvarlama yöntemi; .NET `MidpointRounding` adıyla |

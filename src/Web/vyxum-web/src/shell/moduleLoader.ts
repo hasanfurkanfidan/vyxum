@@ -44,6 +44,13 @@ export interface ModuleNavDefinition {
 export interface ModuleRegistration {
   routes?: ModuleRouteDefinition[];
   nav?: ModuleNavDefinition[];
+  /**
+   * SDK 2: screens shown on the whole window, without the menu (for example a sign-in screen), at the same
+   * `/m/{moduleId}/{path}` addresses as `routes`. A page wins over a route with the same path.
+   */
+  pages?: ModuleRouteDefinition[];
+  /** SDK 2: a small component the menu shows under its entries (for example who is signed in). */
+  sidebar?: ComponentType;
 }
 
 export interface ModuleEntry {
@@ -51,7 +58,14 @@ export interface ModuleEntry {
 }
 
 export type LoadedModuleUi =
-  | { id: string; status: 'loaded'; routes: ModuleRouteDefinition[]; nav: ModuleNavItem[] }
+  | {
+      id: string;
+      status: 'loaded';
+      routes: ModuleRouteDefinition[];
+      nav: ModuleNavItem[];
+      pages: ModuleRouteDefinition[];
+      sidebar?: ComponentType;
+    }
   | { id: string; status: 'failed' | 'incompatible'; error: string };
 
 /** Imports a module entry by URL. Tests replace it. */
@@ -82,22 +96,31 @@ function normalizePath(path: unknown): string {
   return relative;
 }
 
-function validate(id: string, registration: unknown): { routes: ModuleRouteDefinition[]; nav: ModuleNavItem[] } {
-  if (typeof registration !== 'object' || registration === null) throw new Error('register(host) must return an object.');
-  const { routes = [], nav = [] } = registration as ModuleRegistration;
-  if (!Array.isArray(routes) || !Array.isArray(nav)) throw new Error('routes and nav must be arrays.');
-
-  const checkedRoutes = routes.map((route) => {
+function checkRoutes(routes: ModuleRouteDefinition[]): ModuleRouteDefinition[] {
+  return routes.map((route) => {
     if (route.component === undefined && route.element === undefined) throw new Error('A route needs a component or an element.');
     return { ...route, path: normalizePath(route.path) };
   });
+}
+
+function validate(
+  id: string,
+  registration: unknown,
+): { routes: ModuleRouteDefinition[]; nav: ModuleNavItem[]; pages: ModuleRouteDefinition[]; sidebar?: ComponentType } {
+  if (typeof registration !== 'object' || registration === null) throw new Error('register(host) must return an object.');
+  const { routes = [], nav = [], pages = [], sidebar } = registration as ModuleRegistration;
+  if (!Array.isArray(routes) || !Array.isArray(nav) || !Array.isArray(pages)) throw new Error('routes, nav and pages must be arrays.');
+  if (sidebar !== undefined && typeof sidebar !== 'function' && typeof sidebar !== 'object') throw new Error('sidebar must be a component.');
+
+  const checkedRoutes = checkRoutes(routes);
   const checkedNav = nav.map((item): ModuleNavItem => {
     if (typeof item.labelKey !== 'string' || item.labelKey.length === 0) throw new Error('A menu entry needs a labelKey.');
     const group = item.group ?? 'modules';
     if (group !== 'modules' && group !== 'system' && group !== 'settings') throw new Error(`Unknown menu group '${String(group)}'.`);
     return { labelKey: item.labelKey, path: modulePath(id, normalizePath(item.path)), module: id, group };
   });
-  return { routes: checkedRoutes, nav: checkedNav };
+  const checked = { routes: checkedRoutes, nav: checkedNav, pages: checkRoutes(pages) };
+  return sidebar === undefined ? checked : { ...checked, sidebar };
 }
 
 /** Imports one module's entry and registers it. Never throws: a failure comes back as a `failed` result. */

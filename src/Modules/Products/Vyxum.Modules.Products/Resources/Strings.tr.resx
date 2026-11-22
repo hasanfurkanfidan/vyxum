@@ -42,4 +42,6 @@
   <data name="Empty" xml:space="preserve"><value>Henüz ürün yok</value></data>
   <data name="SearchPlaceholder" xml:space="preserve"><value>PLU ya da ad</value></data>
   <data name="ModuleName" xml:space="preserve"><value>Ürünler</value></data>
+  <data name="PermissionEdit" xml:space="preserve"><value>Ürün kartlarını ekler ve değiştirir</value></data>
+  <data name="NotAllowed" xml:space="preserve"><value>Bunun için yetkiniz yok.</value></data>
 </root>
