@@ -5,6 +5,7 @@
   <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
   <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
   <data name="NoReading" xml:space="preserve"><value>Teraziden henüz okuma gelmedi.</value></data>
+  <data name="ReadingChanged" xml:space="preserve"><value>Kayıt sunucuya ulaşmadan terazideki ağırlık değişti. Hiçbir şey kaydedilmedi. Ağırlığı kontrol edip yeniden kaydedin.</value></data>
   <data name="DeviceNotConnected" xml:space="preserve"><value>Terazi bağlı değil.</value></data>
   <data name="NotStable" xml:space="preserve"><value>Ağırlık sabit değil. Terazi durulunca yeniden deneyin.</value></data>
   <data name="Overload" xml:space="preserve"><value>Aşırı yük: yük terazinin kapasitesini aşıyor.</value></data>
@@ -54,6 +55,7 @@
   <data name="Saving" xml:space="preserve"><value>Kaydediliyor…</value></data>
   <data name="SaveFailed" xml:space="preserve"><value>Tartım kaydedilemedi.</value></data>
   <data name="Retrying" xml:space="preserve"><value>Bağlantı koptu, yeniden deneniyor…</value></data>
+  <data name="SaveNotConfirmed" xml:space="preserve"><value>Sunucuya ulaşılamadı, tartım kaydedilmemiş olabilir. Yeniden kaydetmeden önce son tartımları kontrol edin.</value></data>
   <data name="ZeroDone" xml:space="preserve"><value>Terazi sıfırlandı.</value></data>
   <data name="ZeroNotSupported" xml:space="preserve"><value>Bu terazi buradan sıfırlanamıyor.</value></data>
   <data name="ZeroRejected" xml:space="preserve"><value>Terazi sıfırlamayı reddetti. Kefeyi boşaltıp ağırlık sabitlenince deneyin.</value></data>

@@ -95,6 +95,20 @@ export interface CreateRecordInput {
   lot: string | null;
   /** Station tare in the scale's unit, invariant decimal string. */
   tare: string | null;
+  /**
+   * The reading the screen showed when the operator pressed save. The server saves only if the scale still shows it,
+   * so a retried save never records the next load.
+   */
+  reading: ObservedReading | null;
+}
+
+/** A reading as the screen showed it, sent with a save. */
+export interface ObservedReading {
+  /** Invariant decimal string, as the device endpoints sent it. */
+  value: string;
+  unit: string | null;
+  /** When the server received the reading (the live weight's `receivedAt`). */
+  receivedAt: string;
 }
 
 // The device endpoints write weights as JSON numbers ("value": 1.260). JSON.parse would turn them

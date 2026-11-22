@@ -308,6 +308,10 @@ describe('weighing screen', () => {
     expect(ids.size).toBe(1);
     expect(String(bodies[0]?.requestId)).toMatch(/^[0-9a-f-]{36}$/);
     expect(bodies[0]).toMatchObject({ lot: 'L-261121-03' });
+    // Every attempt carries the reading the operator saw, not whatever the scale shows when it is sent.
+    for (const body of bodies) {
+      expect(body.reading).toEqual({ value: '1.260', unit: 'kg', receivedAt: '2026-11-21T10:00:00Z' });
+    }
 
     const recent = screen.getByRole('region', { name: 'Son tartımlar' });
     expect(within(recent).getByText('Antep Fıstığı, kavrulmuş')).toBeInTheDocument();
@@ -315,6 +319,34 @@ describe('weighing screen', () => {
     expect(within(recent).getByRole('link', { name: 'Tüm kayıtlar' })).toHaveAttribute('href', '/records');
     expect(screen.getByRole('button', { name: 'Tartımı kaydet' })).toBeEnabled();
     expect(window.localStorage.getItem('vyxum.weighing.lot')).toBe('L-261121-03');
+  });
+
+  it('gives up a save that cannot reach the server and tells the operator to check the recent weighings', async () => {
+    vi.useFakeTimers({ shouldAdvanceTime: true });
+    try {
+      const fetchMock = setup({
+        routes: {
+          'POST /api/weighing/records': () => {
+            throw new TypeError('Failed to fetch');
+          },
+        },
+      });
+      const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime });
+      renderWeighing();
+      await liveNet();
+
+      await user.click(screen.getByRole('button', { name: 'Tartımı kaydet' }));
+      expect(await screen.findByText('Bağlantı koptu, yeniden deneniyor…')).toBeInTheDocument();
+      await vi.advanceTimersByTimeAsync(8000);
+
+      expect(
+        await screen.findByText('Sunucuya ulaşılamadı, tartım kaydedilmemiş olabilir. Yeniden kaydetmeden önce son tartımları kontrol edin.'),
+      ).toBeInTheDocument();
+      expect(postBodies(fetchMock, '/api/weighing/records')).toHaveLength(5); // the first try and four retries
+      expect(screen.getByRole('button', { name: 'Tartımı kaydet' })).toBeEnabled();
+    } finally {
+      vi.useRealTimers();
+    }
   });
 
   it('uses a new request id for the next save', async () => {

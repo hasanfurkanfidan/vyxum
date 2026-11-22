@@ -5,6 +5,7 @@
   <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
   <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
   <data name="NoReading" xml:space="preserve"><value>No reading from the scale yet.</value></data>
+  <data name="ReadingChanged" xml:space="preserve"><value>The weight on the scale changed before the save reached the server. Nothing was saved. Check the weight and save again.</value></data>
   <data name="DeviceNotConnected" xml:space="preserve"><value>The scale is not connected.</value></data>
   <data name="NotStable" xml:space="preserve"><value>The weight is not stable. Try again when the scale settles.</value></data>
   <data name="Overload" xml:space="preserve"><value>Overload: the load is above the scale's capacity.</value></data>
@@ -54,6 +55,7 @@
   <data name="Saving" xml:space="preserve"><value>Saving…</value></data>
   <data name="SaveFailed" xml:space="preserve"><value>The weighing could not be saved.</value></data>
   <data name="Retrying" xml:space="preserve"><value>Connection lost, retrying…</value></data>
+  <data name="SaveNotConfirmed" xml:space="preserve"><value>The server could not be reached, so the weighing may not have been saved. Check the recent weighings before saving again.</value></data>
   <data name="ZeroDone" xml:space="preserve"><value>The scale was zeroed.</value></data>
   <data name="ZeroNotSupported" xml:space="preserve"><value>This scale cannot be zeroed from here.</value></data>
   <data name="ZeroRejected" xml:space="preserve"><value>The scale rejected zeroing. Empty the pan and wait until it is stable.</value></data>

@@ -53,7 +53,20 @@ public sealed record WeighingRecordDto(
 /// <param name="ProductId">Product from the Weighing module's product list, optional.</param>
 /// <param name="Lot">Lot, optional.</param>
 /// <param name="Tare">Station tare in the scale's unit as an invariant decimal string; overrides the product's package tare.</param>
-public sealed record CreateRecordRequest(Guid? RequestId, string? DeviceId, Guid? ProductId, string? Lot, string? Tare);
+/// <param name="Reading">
+/// The reading the operator saw when saving, optional. When sent, the record is saved only if the scale's latest
+/// reading still has this value and unit and the request arrives within <see cref="WeighingOptions.MaxSaveDelay"/> of
+/// it; otherwise it is rejected with <see cref="WeighingErrors.ReadingChanged"/>. A retried request then never records
+/// the next load on the scale.
+/// </param>
+public sealed record CreateRecordRequest(
+    Guid? RequestId, string? DeviceId, Guid? ProductId, string? Lot, string? Tare, ObservedReading? Reading = null);
+
+/// <summary>A reading as the weighing screen showed it, sent with <see cref="CreateRecordRequest"/>.</summary>
+/// <param name="Value">The value as an invariant decimal string, as the device endpoints sent it.</param>
+/// <param name="Unit">The unit, as the device endpoints sent it.</param>
+/// <param name="ReceivedAt">When the web application received the reading (<c>receivedAt</c> of the live weight).</param>
+public sealed record ObservedReading(string? Value, string? Unit, DateTimeOffset? ReceivedAt);
 
 /// <summary>Body of <c>POST /api/weighing/records/{id}/cancel</c>.</summary>
 /// <param name="Reason">Why the record is cancelled.</param>
@@ -183,6 +196,11 @@ public static class WeighingErrors
 
     /// <summary>A conversion is needed (package tare, price, minimum net) but the scale's unit is unknown.</summary>
     public const string UnknownUnit = "weighing.UnknownUnit";
+
+    /// <summary>
+    /// The scale's weight is no longer the one the operator saw, or the save arrived too late to be sure it is.
+    /// </summary>
+    public const string ReadingChanged = "weighing.ReadingChanged";
 
     /// <summary>The record is already cancelled.</summary>
     public const string AlreadyCancelled = "weighing.AlreadyCancelled";

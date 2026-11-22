@@ -50,8 +50,11 @@ const devicePollMs = 5000;
 const streamRetryMs = 3000;
 /** How long the "saved" message stays. */
 const savedNoticeMs = 4000;
-/** Waits between save attempts after a network error or a server error; the last one repeats. */
-export const saveRetryDelaysMs: readonly number[] = [500, 1000, 2000, 4000, 8000];
+/**
+ * Waits between save attempts after a network error or a server error. After the last one the save gives up: the
+ * server rejects a save that arrives too long after the reading the operator saw, so retrying longer only delays that.
+ */
+export const saveRetryDelaysMs: readonly number[] = [500, 1000, 2000, 4000];
 
 const deviceStorageKey = 'vyxum.weighing.device';
 const lotStorageKey = 'vyxum.weighing.lot';
@@ -402,10 +405,11 @@ export function WeighingPage() {
       productId: product?.id ?? null,
       lot: lot.trim() === '' ? null : lot.trim(),
       tare: stationTare && stationTare.unit === weight?.unit ? stationTare.value : null,
+      reading: weight && weight.value !== null ? { value: weight.value, unit: weight.unit, receivedAt: weight.receivedAt } : null,
     };
     showNotice({ tone: 'info', key: 'weighing.Saving' });
 
-    // Retried with the same request id until the server answers, so a lost answer never saves twice.
+    // Retried with the same request id, so a lost answer never saves twice.
     for (let attempt = 0; mounted.current; attempt++) {
       try {
         const record = await createRecord(input);
@@ -417,8 +421,13 @@ export function WeighingPage() {
       } catch (error) {
         if (!mounted.current) break;
         if (isRetryable(error)) {
+          const wait = saveRetryDelaysMs[attempt];
+          if (wait === undefined) {
+            console.error('Saving the weighing failed; giving up after retries.', error);
+            showNotice({ tone: 'warning', key: 'weighing.SaveNotConfirmed' });
+            break;
+          }
           showNotice({ tone: 'warning', key: 'weighing.Retrying' });
-          const wait = saveRetryDelaysMs[Math.min(attempt, saveRetryDelaysMs.length - 1)] ?? 1000;
           await delay(wait);
           continue;
         }

@@ -148,6 +148,7 @@ Weighing rules are read from the `Vyxum:Weighing` section of the configuration:
 | `Vyxum:Weighing:RequireStable` | `true` | Only a stable weight can be recorded |
 | `Vyxum:Weighing:MinimumNet` | `0` | Smallest net weight in kg that can be recorded. The net must always be greater than 0; a positive value also sets a lower limit. |
 | `Vyxum:Weighing:MaxReadingAge` | `00:00:03` | Oldest scale reading that can be recorded. An older reading means the agent or its network stopped; the save is rejected. `00:00:00` turns the check off. |
+| `Vyxum:Weighing:MaxSaveDelay` | `00:00:10` | Longest time between the weight the operator saw and the save reaching the server. A later save (for example one retried after a network error) is rejected, so it cannot record the next load. `00:00:00` turns the check off. |
 | `Vyxum:Weighing:RequireCancelReason` | `true` | A cancel needs a reason |
 | `Vyxum:Weighing:Currency` | `TRY` | Currency of amounts, stored with every record |
 | `Vyxum:Weighing:AmountDecimals` | `2` | Decimals amounts are rounded to (0 to 4) |
