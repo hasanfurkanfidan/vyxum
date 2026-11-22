@@ -4,7 +4,7 @@
 // `register(host)`, which returns the module's routes (under /m/{id}/) and menu entries.
 import type { ComponentType, ReactNode } from 'react';
 import type { UiModule } from '../lib/api';
-import { MIN_SDK_VERSION, SDK_VERSION } from '../sdk/contract';
+import { MIN_SDK_VERSION, MODULE_SLOTS, SDK_VERSION } from '../sdk/contract';
 import { licenseInfo, type ModuleLicenseInfo } from '../sdk/license';
 import { modulePath, type ModuleNavItem, type NavGroupId } from './navigation';
 
@@ -40,6 +40,19 @@ export interface ModuleNavDefinition {
   group?: Extract<NavGroupId, 'modules' | 'system' | 'settings'>;
 }
 
+/** A named place of the application's screens (SDK 3). */
+export type ModuleSlotName = (typeof MODULE_SLOTS)[number];
+
+/** SDK 3: a component the application shows in one of its slots. */
+export interface ModuleSlotDefinition {
+  /** The place, one of `MODULE_SLOTS`. */
+  slot: string;
+  /** The component; it gets the slot's props. */
+  component: ComponentType<any>;
+  /** Capability that must be available for the component to be shown. */
+  capability?: string;
+}
+
 /** What `register(host)` returns. */
 export interface ModuleRegistration {
   routes?: ModuleRouteDefinition[];
@@ -51,6 +64,8 @@ export interface ModuleRegistration {
   pages?: ModuleRouteDefinition[];
   /** SDK 2: a small component the menu shows under its entries (for example who is signed in). */
   sidebar?: ComponentType;
+  /** SDK 3: components for named places of the application's screens. */
+  slots?: ModuleSlotDefinition[];
 }
 
 export interface ModuleEntry {
@@ -65,6 +80,7 @@ export type LoadedModuleUi =
       nav: ModuleNavItem[];
       pages: ModuleRouteDefinition[];
       sidebar?: ComponentType;
+      slots: ModuleSlotDefinition[];
     }
   | { id: string; status: 'failed' | 'incompatible'; error: string };
 
@@ -103,13 +119,30 @@ function checkRoutes(routes: ModuleRouteDefinition[]): ModuleRouteDefinition[] {
   });
 }
 
+const knownSlots: ReadonlySet<string> = new Set(MODULE_SLOTS);
+
+function checkSlots(id: string, slots: ModuleSlotDefinition[]): ModuleSlotDefinition[] {
+  return slots.flatMap((item) => {
+    if (typeof item !== 'object' || item === null || typeof item.slot !== 'string') throw new Error('A slot entry needs a slot name.');
+    if (typeof item.component !== 'function' && typeof item.component !== 'object') throw new Error('A slot entry needs a component.');
+    // A slot this application does not have is left out, so the rest of the module still works.
+    if (!knownSlots.has(item.slot)) {
+      console.warn(`Module '${id}' fills the unknown slot '${item.slot}'; it is not shown.`);
+      return [];
+    }
+    return [item.capability === undefined ? { slot: item.slot, component: item.component } : { slot: item.slot, component: item.component, capability: item.capability }];
+  });
+}
+
 function validate(
   id: string,
   registration: unknown,
-): { routes: ModuleRouteDefinition[]; nav: ModuleNavItem[]; pages: ModuleRouteDefinition[]; sidebar?: ComponentType } {
+): { routes: ModuleRouteDefinition[]; nav: ModuleNavItem[]; pages: ModuleRouteDefinition[]; sidebar?: ComponentType; slots: ModuleSlotDefinition[] } {
   if (typeof registration !== 'object' || registration === null) throw new Error('register(host) must return an object.');
-  const { routes = [], nav = [], pages = [], sidebar } = registration as ModuleRegistration;
-  if (!Array.isArray(routes) || !Array.isArray(nav) || !Array.isArray(pages)) throw new Error('routes, nav and pages must be arrays.');
+  const { routes = [], nav = [], pages = [], sidebar, slots = [] } = registration as ModuleRegistration;
+  if (!Array.isArray(routes) || !Array.isArray(nav) || !Array.isArray(pages) || !Array.isArray(slots)) {
+    throw new Error('routes, nav, pages and slots must be arrays.');
+  }
   if (sidebar !== undefined && typeof sidebar !== 'function' && typeof sidebar !== 'object') throw new Error('sidebar must be a component.');
 
   const checkedRoutes = checkRoutes(routes);
@@ -119,7 +152,7 @@ function validate(
     if (group !== 'modules' && group !== 'system' && group !== 'settings') throw new Error(`Unknown menu group '${String(group)}'.`);
     return { labelKey: item.labelKey, path: modulePath(id, normalizePath(item.path)), module: id, group };
   });
-  const checked = { routes: checkedRoutes, nav: checkedNav, pages: checkRoutes(pages) };
+  const checked = { routes: checkedRoutes, nav: checkedNav, pages: checkRoutes(pages), slots: checkSlots(id, slots) };
   return sidebar === undefined ? checked : { ...checked, sidebar };
 }
 

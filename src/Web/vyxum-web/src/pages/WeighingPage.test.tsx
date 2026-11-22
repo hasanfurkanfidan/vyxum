@@ -5,6 +5,9 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { App, AppProviders } from '../App';
 import type { WeighingProduct, WeighingRecord, WeighingSettings } from '../lib/weighing';
 import { callsTo, installFakeApi, jsonResponse, type FakeHandler } from '../test/fakeApi';
+import type { UiModule } from '../lib/api';
+import type { WeighingPanelProps } from '../sdk/slots';
+import type { ModuleImporter } from '../shell/moduleLoader';
 
 /** Minimal EventSource double: the test pushes events with `emit`. */
 class FakeEventSource {
@@ -150,11 +153,13 @@ interface Setup {
   products?: WeighingProduct[];
   recent?: WeighingRecord[];
   routes?: Record<string, FakeHandler>;
+  moduleList?: UiModule[];
 }
 
 function setup(options: Setup = {}) {
   const devices = options.devices ?? `[${deviceJson({ value: '1.260' })}]`;
   return installFakeApi({
+    ...(options.moduleList ? { moduleList: options.moduleList } : {}),
     routes: {
       'GET /api/devices': () => rawJson(devices),
       'GET /api/weighing/settings': () => jsonResponse({ ...settings, ...options.settings }),
@@ -165,9 +170,9 @@ function setup(options: Setup = {}) {
   });
 }
 
-function renderWeighing() {
+function renderWeighing(moduleImporter?: ModuleImporter) {
   return render(
-    <AppProviders>
+    <AppProviders {...(moduleImporter ? { moduleImporter } : {})}>
       <MemoryRouter initialEntries={['/']}>
         <App />
       </MemoryRouter>
@@ -273,6 +278,49 @@ describe('weighing screen', () => {
     expect(postBodies(fetchMock, '/api/weighing/records')[0]).toMatchObject({ deviceId: 'scale-1', productId: null, tare: '0.250' });
     // The station tare is reset after the save.
     expect(screen.getByRole('button', { name: 'Dara al' })).toBeInTheDocument();
+  });
+
+  it('saves with a label request when a labels module is loaded, and a plain save asks for none', async () => {
+    const fetchMock = setup({
+      settings: { canPrintLabel: true },
+      routes: { 'POST /api/weighing/records': () => jsonResponse(record(), 201) },
+    });
+    const user = userEvent.setup();
+    renderWeighing();
+    await liveNet();
+
+    await user.click(screen.getByRole('button', { name: 'Kaydet ve etiket bas' }));
+    await screen.findByText('000142 kaydedildi');
+    await user.click(screen.getByRole('button', { name: 'Tartımı kaydet' }));
+    await waitFor(() => expect(postBodies(fetchMock, '/api/weighing/records')).toHaveLength(2));
+    const [printed, plain] = postBodies(fetchMock, '/api/weighing/records');
+    expect(printed).toMatchObject({ deviceId: 'scale-1', printLabel: true });
+    expect(plain).not.toHaveProperty('printLabel');
+  });
+
+  it('shows module components in the weighing panel with the last record; a failing one leaves the screen working', async () => {
+    vi.spyOn(console, 'error').mockImplementation(() => {});
+    const labels: UiModule = { id: 'labels', version: '1.0.0', requiresLicense: true, license: 'licensed', ui: { entry: '/modules/labels/index.js', sdkVersion: 3 } };
+    setup({
+      settings: { canPrintLabel: true },
+      moduleList: [labels, { ...labels, id: 'broken', ui: { entry: '/modules/broken/index.js', sdkVersion: 3 } }],
+      routes: { 'POST /api/weighing/records': () => jsonResponse(record(), 201) },
+    });
+    const Panel = ({ deviceId, lastRecord }: WeighingPanelProps) => (
+      <p>{`Panel ${deviceId ?? '-'} ${lastRecord ? `${lastRecord.number} ${lastRecord.printLabel ? 'print' : 'plain'}` : 'none'}`}</p>
+    );
+    const Broken = () => {
+      throw new Error('boom');
+    };
+    const user = userEvent.setup();
+    renderWeighing(async (url) => ({
+      register: () => ({ slots: [{ slot: 'weighing.panel', component: url.includes('broken') ? Broken : Panel }] }),
+    }));
+    await liveNet();
+
+    expect(await screen.findByText('Panel scale-1 none')).toBeInTheDocument();
+    await user.click(screen.getByRole('button', { name: 'Kaydet ve etiket bas' }));
+    expect(await screen.findByText('Panel scale-1 000142 print')).toBeInTheDocument();
   });
 
   it('does not take the tare while the weight is in motion', async () => {

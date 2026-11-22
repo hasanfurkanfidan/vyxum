@@ -6,8 +6,18 @@
  * never remove or change what an earlier version offered, so modules built for an older version keep working.
  * Version 2: `register` may return `pages` (screens on the whole window) and `sidebar` (a component in the menu),
  * and a 401 answer with `signInPath` sends the user to that screen.
+ * Version 3: `register` may return `slots`: components the application places in named places of its own screens
+ * (see MODULE_SLOTS). The application knows the places, never the modules that fill them.
  */
-export const SDK_VERSION = 2;
+export const SDK_VERSION = 3;
+
+/**
+ * The named places of the application's screens that modules may fill (SDK 3). Each slot documents the props its
+ * components get; a module's component must render nothing when it has nothing to say.
+ *
+ * - `weighing.panel`: on the weighing screen, above the live weight, column wide. Props: `WeighingPanelProps`.
+ */
+export const MODULE_SLOTS = ['weighing.panel'] as const;
 
 /** Oldest SDK version this application still serves. */
 export const MIN_SDK_VERSION = 1;
