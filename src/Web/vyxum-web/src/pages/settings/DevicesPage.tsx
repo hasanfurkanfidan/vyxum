@@ -1,6 +1,6 @@
 import { Fragment, useCallback, useEffect, useState, type FormEvent } from 'react';
 import { useCulture, useT } from '../../i18n/I18nProvider';
-import { NetworkError, RuleError, ValidationError } from '../../lib/api';
+import { NetworkError, RuleError, ruleErrorKey, ValidationError } from '../../lib/api';
 import { deleteDeviceConfig, listDeviceConfigs, toInput, updateDeviceConfig, type DeviceConfig } from '../../lib/devices';
 import { formatDecimal, formatWeight } from '../../lib/format';
 import { getDevices, type LiveDevice } from '../../lib/weighing';
@@ -24,7 +24,7 @@ import '../../styles/devices.css';
 export const devicesPageTiming = { liveMs: 2000 };
 
 function errorKeyOf(error: unknown): string {
-  if (error instanceof RuleError) return error.code;
+  if (error instanceof RuleError) return ruleErrorKey(error);
   if (!(error instanceof NetworkError)) console.error('A device request failed.', error);
   return 'shell.Error';
 }

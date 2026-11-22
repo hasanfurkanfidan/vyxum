@@ -14,9 +14,9 @@ public sealed class TestDatabase : IAsyncDisposable
     /// <summary>Environment variable with a SQL Server connection string without a database name.</summary>
     public const string SqlServerEnvironmentVariable = "VYXUM_TEST_SQLSERVER";
 
-    private readonly string? _directory;
+    private readonly string _directory;
 
-    private TestDatabase(DatabaseProvider provider, string connectionString, string? directory)
+    private TestDatabase(DatabaseProvider provider, string connectionString, string directory)
     {
         Provider = provider;
         ConnectionString = connectionString;
@@ -40,18 +40,16 @@ public sealed class TestDatabase : IAsyncDisposable
                 [DatabaseSettings.ConnectionStringKey] = ConnectionString,
             };
 
-            // Keeps files the platform writes next to the database (e.g. backups) inside the test's directory.
-            if (DataDirectory is not null)
-            {
-                settings[DatabaseSettings.DataDirectoryKey] = DataDirectory;
-            }
+            // Keeps files the platform writes next to the database (e.g. backups) inside the test's directory,
+            // for every provider. Without it the platform would fall back to the real product data folder.
+            settings[DatabaseSettings.DataDirectoryKey] = DataDirectory;
 
             return settings;
         }
     }
 
-    /// <summary>The test's own data directory (SQLite only; null for SQL Server).</summary>
-    public string? DataDirectory => _directory;
+    /// <summary>The test's own temporary data directory (every provider); never the real product data folder.</summary>
+    public string DataDirectory => _directory;
 
     /// <summary>Why <paramref name="provider"/> cannot be used in this environment, or null when it can.</summary>
     public static string? GetUnavailableReason(DatabaseProvider provider) =>
@@ -71,11 +69,11 @@ public sealed class TestDatabase : IAsyncDisposable
         }
 
         var name = $"vyxum_test_{DateTime.UtcNow:yyyyMMddHHmmss}_{Guid.NewGuid():N}"[..48];
+        var directory = Path.Combine(Path.GetTempPath(), "vyxum-tests", name);
+        Directory.CreateDirectory(directory);
         switch (provider)
         {
             case DatabaseProvider.Sqlite:
-                var directory = Path.Combine(Path.GetTempPath(), "vyxum-tests", name);
-                Directory.CreateDirectory(directory);
                 var sqlite = new SqliteConnectionStringBuilder { DataSource = Path.Combine(directory, "vyxum.db") };
                 return new TestDatabase(provider, sqlite.ToString(), directory);
 
@@ -84,14 +82,14 @@ public sealed class TestDatabase : IAsyncDisposable
                 {
                     InitialCatalog = name,
                 };
-                return new TestDatabase(provider, sqlServer.ToString(), null);
+                return new TestDatabase(provider, sqlServer.ToString(), directory);
 
             default:
                 throw new ArgumentOutOfRangeException(nameof(provider), provider, null);
         }
     }
 
-    /// <summary>Drops the database (SQL Server) or deletes its directory (SQLite).</summary>
+    /// <summary>Drops the database (SQL Server) and deletes the test's directory.</summary>
     public async ValueTask DisposeAsync()
     {
         if (Provider == DatabaseProvider.SqlServer)
@@ -100,13 +98,15 @@ public sealed class TestDatabase : IAsyncDisposable
             new DatabaseSettings(Provider, ConnectionString).Configure(options);
             await using var context = new DbContext(options.Options);
             await context.Database.EnsureDeletedAsync();
-            return;
+        }
+        else
+        {
+            SqliteConnection.ClearAllPools();
         }
 
-        SqliteConnection.ClearAllPools();
         try
         {
-            Directory.Delete(_directory!, recursive: true);
+            Directory.Delete(_directory, recursive: true);
         }
         catch (IOException)
         {

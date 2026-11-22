@@ -92,6 +92,7 @@
   <data name="LiveWeight" xml:space="preserve"><value>Live weight</value></data>
   <data name="ProductSelection" xml:space="preserve"><value>Product selection</value></data>
   <data name="NoRecent" xml:space="preserve"><value>No weighings yet.</value></data>
+  <data name="ModuleName" xml:space="preserve"><value>Weighing</value></data>
   <data name="Target" xml:space="preserve"><value>Target</value></data>
   <data name="TargetTolerance" xml:space="preserve"><value>Tolerance range</value></data>
   <data name="TargetRemaining" xml:space="preserve"><value>Remaining</value></data>

@@ -1,3 +1,5 @@
+import type { UiModule } from '../lib/api';
+
 // Menu entries of the shell. An entry is shown only when its module is loaded in the host.
 // Groups without visible entries are hidden.
 
@@ -29,7 +31,17 @@ export const routes = {
   /** Settings screens of the platform. */
   settingsDevices: '/settings/devices',
   settingsAbout: '/settings/about',
+  /** Modules and license settings. */
+  settingsLicense: '/settings/license',
+  /** Screens of separately built modules: `/m/{moduleId}/...`. */
+  module: '/m/:moduleId/*',
 } as const;
+
+/** Address of a module screen: `/m/{moduleId}` plus the module's own relative path. */
+export function modulePath(moduleId: string, path = ''): string {
+  const relative = path.replace(/^\/+/, '');
+  return relative ? `/m/${moduleId}/${relative}` : `/m/${moduleId}`;
+}
 
 export const navGroups: readonly NavGroup[] = [
   {
@@ -41,7 +53,7 @@ export const navGroups: readonly NavGroup[] = [
       { labelKey: 'shell.Products', path: routes.products, module: 'products' },
     ],
   },
-  // Screens of separately developed modules are added in a later phase.
+  // Screens of separately built modules register their entries at run time (see withModuleNav).
   { id: 'modules', labelKey: 'shell.Modules', items: [] },
   { id: 'system', labelKey: 'shell.System', items: [] },
   {
@@ -49,6 +61,7 @@ export const navGroups: readonly NavGroup[] = [
     labelKey: 'setup.Settings',
     items: [
       { labelKey: 'devices.Title', path: routes.settingsDevices },
+      { labelKey: 'license.Title', path: routes.settingsLicense },
       { labelKey: 'setup.AboutTitle', path: routes.settingsAbout },
     ],
   },
@@ -59,4 +72,22 @@ export function visibleNavGroups(hasModule: (id: string) => boolean, groups: rea
   return groups
     .map((group) => ({ ...group, items: group.items.filter((item) => item.module === undefined || hasModule(item.module)) }))
     .filter((group) => group.items.length > 0);
+}
+
+/** Locked paid modules that declare a preview: the "Vyxum Pro" group at the bottom of the menu lists them. */
+export function previewModules(modules: readonly UiModule[]): UiModule[] {
+  return modules.filter((m) => m.license === 'locked' && m.preview);
+}
+
+/** A menu entry a module registered, with the group it goes in. */
+export interface ModuleNavItem extends NavItem {
+  group: NavGroupId;
+}
+
+/** The groups with the entries modules registered appended to their group. */
+export function withModuleNav(groups: readonly NavGroup[], items: readonly ModuleNavItem[]): NavGroup[] {
+  return groups.map((group) => {
+    const added = items.filter((item) => item.group === group.id).map(({ group: _group, ...item }) => item);
+    return added.length > 0 ? { ...group, items: [...group.items, ...added] } : group;
+  });
 }

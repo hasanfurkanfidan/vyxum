@@ -10,6 +10,19 @@ public static class PlatformSettingKeys
 
     /// <summary>The company name entered in the setup wizard.</summary>
     public const string CompanyName = "company.name";
+
+    /// <summary>The installed license file (<c>.vxlic</c>) exactly as uploaded. Missing in the free version.</summary>
+    public const string LicenseFile = "license.file";
+
+    /// <summary>The device ids chosen as licensed stations, a JSON array of strings (decision V-49).</summary>
+    public const string LicenseStations = "license.stations";
+
+    /// <summary>
+    /// Prefix of the latest time seen for one license (ISO 8601, round-trip), followed by the lowercase hex SHA-256 of
+    /// the license id. Kept per license, and kept when the license is removed, so that turning the clock back never
+    /// extends a license; a newly issued license (new id) starts fresh.
+    /// </summary>
+    public const string LicenseLastSeenPrefix = "license.lastSeen.";
 }
 
 /// <summary>Platform-wide text settings stored in the database (<c>plt_Settings</c>). Scoped.</summary>

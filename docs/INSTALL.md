@@ -27,7 +27,7 @@ If the installer asks for a language, choose Türkçe or English.
 
 ## 3. First start: the setup wizard
 
-The first time Vyxum opens, a setup wizard appears. It has four steps: **Database**, **Scale**, **Company** and **Products**. Use **Next** to go on and **Back** to return.
+The first time Vyxum opens, a setup wizard appears. It has five steps: **Database**, **Scale**, **Company**, **License** and **Products**. Use **Next** to go on and **Back** to return.
 
 The wizard can only be run on the computer where Vyxum is installed.
 
@@ -44,7 +44,9 @@ Only if your company has a SQL Server, open **Advanced: SQL Server**, enter the 
 
 **Step 3: Company.** Type the company name and click **Next**. The name appears on the screens and in the reports.
 
-**Step 4: Products.** Add the first products you will weigh, or click **Skip**. You can add products later on the Products screen.
+**Step 4: License.** If you have a license file, select **Load a license file**, then use **Choose file** to select the `.vxlic` file. If you do not have one, keep **Continue free** selected. Weighing, Products and Records work without a license. For details, see the [licensing guide](LICENSING.md).
+
+**Step 5: Products.** Add the first products you will weigh, or click **Skip**. You can add products later on the Products screen.
 
 At the end you see **Setup complete**. Click **Go to weighing** to start weighing. The wizard does not open again. Later changes are made on the Settings screen.
 

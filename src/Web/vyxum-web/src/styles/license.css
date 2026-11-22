@@ -1,0 +1,535 @@
+/* Modules and license screen, the license step of the setup wizard, the license strip and the module placeholder
+   (design sources: BModuller, BKurulum). Values come from tokens.css; no shadows, no gradients. */
+
+.license-page {
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+}
+
+.license-page__intro {
+  max-width: 62ch;
+  font-size: var(--text-body);
+  line-height: 1.5;
+  color: var(--color-ink-muted);
+}
+
+.license-page__columns {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--gap-columns);
+  align-items: flex-start;
+}
+
+.license-block {
+  flex: 1 1 320px;
+  min-width: 0;
+  border-top: var(--rule-section);
+  padding-top: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.license-block__head {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 4px 12px;
+  padding-bottom: 8px;
+}
+
+.license-block__title {
+  font-size: 18px;
+  font-weight: 500;
+}
+
+.license-block__status {
+  font-family: var(--font-mono);
+  font-size: var(--text-eyebrow);
+}
+
+.license-block__text {
+  max-width: 62ch;
+  font-size: var(--text-small);
+  line-height: 1.5;
+  color: var(--color-ink-muted);
+}
+
+.license-block__notice {
+  padding-top: 8px;
+  max-width: 62ch;
+  font-size: var(--text-small);
+  line-height: 1.5;
+  color: var(--color-warning-text);
+}
+
+.license-block__ok {
+  padding-top: 8px;
+  font-size: var(--text-small);
+  color: var(--color-positive);
+}
+
+.kv {
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.kv__row {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 9px 0;
+  border-top: var(--rule-row);
+  font-size: var(--text-small);
+}
+
+.kv__label {
+  color: var(--color-ink-muted);
+}
+
+.kv__value {
+  margin: 0;
+  min-width: 0;
+  text-align: right;
+  font-family: var(--font-mono);
+  overflow-wrap: anywhere;
+}
+
+.license-block__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: flex-start;
+  padding-top: 12px;
+}
+
+.license-upload {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
+}
+
+.license-upload__input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+.license-upload__button {
+  min-height: 46px;
+}
+
+.license-dialog {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  max-width: 560px;
+  padding-top: 12px;
+}
+
+.license-dialog__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+/* Module table */
+.license-modules {
+  overflow-x: auto;
+  border-top: var(--rule-section);
+}
+
+.license-modules .table {
+  min-width: 820px;
+}
+
+.license-modules .table td:first-child,
+.license-modules .table th:first-child {
+  padding-left: 0;
+}
+
+.license-modules .table th:last-child,
+.license-modules .table td:last-child {
+  padding-right: 0;
+  text-align: right;
+}
+
+.license-modules__name {
+  font-weight: 500;
+}
+
+.license-modules__kind {
+  font-family: var(--font-mono);
+  font-size: var(--text-eyebrow);
+  color: var(--color-ink-muted);
+}
+
+/* Status chip: a word with a border, never color alone. */
+.chip {
+  display: inline-block;
+  min-width: 96px;
+  padding: 6px 12px;
+  border: 1px solid var(--color-ink-muted);
+  border-radius: var(--radius-small);
+  background: var(--color-surface);
+  color: var(--color-ink-muted);
+  font-size: var(--text-label);
+  text-align: center;
+}
+
+.chip--on {
+  border-color: var(--color-accent);
+  background: var(--color-accent);
+  color: var(--color-on-accent);
+}
+
+.chip--warning {
+  border-color: var(--color-warning);
+  color: var(--color-warning-text);
+}
+
+/* Stations */
+.stations__list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+}
+
+.stations__item {
+  border-top: var(--rule-row);
+}
+
+.stations__check {
+  min-height: var(--control-height);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+}
+
+.stations__check input {
+  width: 18px;
+  height: 18px;
+  margin: 0;
+  accent-color: var(--color-accent);
+}
+
+.stations__count {
+  font-family: var(--font-mono);
+}
+
+.stations__count--over {
+  color: var(--color-warning-text);
+}
+
+/* Wizard license step */
+.license-options {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.license-option {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 14px 0;
+  border-top: var(--rule-row);
+}
+
+.license-option:first-of-type {
+  border-top: 0;
+}
+
+.license-option__label {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  cursor: pointer;
+}
+
+.license-option__label input {
+  width: 18px;
+  height: 18px;
+  margin: 2px 0 0;
+  accent-color: var(--color-accent);
+}
+
+.license-option__text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.license-option__title {
+  font-weight: 500;
+}
+
+.license-option__hint {
+  font-size: var(--text-small);
+  color: var(--color-ink-muted);
+}
+
+.license-option__body {
+  padding-left: 30px;
+}
+
+/* Thin strip above the screen when the license has expired */
+.license-banner {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 4px 16px;
+  padding: 10px 0;
+  border-top: 1px solid var(--color-warning);
+  border-bottom: var(--rule-row);
+  font-size: var(--text-small);
+  color: var(--color-warning-text);
+}
+
+.license-banner__link {
+  color: var(--color-warning-text);
+  font-weight: 500;
+}
+
+/* License holder at the bottom of the menu */
+.sidebar__licensee {
+  margin-top: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+  padding: 0 12px;
+}
+
+.sidebar__licensee + .language {
+  margin-top: 0;
+}
+
+.sidebar__licensee-label {
+  font-family: var(--font-mono);
+  font-size: var(--text-caption);
+  letter-spacing: var(--tracking-group);
+  text-transform: uppercase;
+  color: var(--color-ink-muted);
+}
+
+.sidebar__licensee-name {
+  font-size: var(--text-label);
+  overflow-wrap: anywhere;
+}
+
+@media (max-width: 760px) {
+  .sidebar__licensee {
+    margin-top: 0;
+  }
+}
+
+/* Placeholder of a module screen without a license: plain text under a rule, no box. */
+.license-placeholder {
+  max-width: 62ch;
+  border-top: var(--rule-section);
+  padding-top: 16px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.license-placeholder__title {
+  font-size: 22px;
+  font-weight: 500;
+  letter-spacing: var(--tracking-title);
+  line-height: 1.2;
+}
+
+.license-placeholder__text {
+  line-height: 1.5;
+  color: var(--color-ink-muted);
+}
+
+.license-placeholder__link {
+  display: inline-flex;
+  align-items: center;
+  text-decoration: none;
+}
+
+.license-placeholder__link:hover {
+  color: var(--color-on-accent);
+}
+
+.license-options__legend {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+.license-modules__caps {
+  font-family: var(--font-mono);
+  font-size: var(--text-eyebrow);
+  overflow-wrap: anywhere;
+}
+
+.license-modules__caps--muted {
+  color: var(--color-ink-muted);
+}
+
+/* Locked paid module with a preview: the sample image blurred beside the description, no box. */
+.preview {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--gap-columns);
+  align-items: flex-start;
+  border-top: var(--rule-section);
+  padding-top: 16px;
+}
+
+.preview__frame {
+  flex: 1 1 360px;
+  min-width: 0;
+  max-width: 640px;
+  overflow: hidden;
+  border: var(--rule-row);
+  pointer-events: none;
+  user-select: none;
+}
+
+.preview__image {
+  display: block;
+  width: 100%;
+  height: auto;
+  filter: blur(6px);
+}
+
+.preview__info {
+  flex: 1 1 280px;
+  max-width: 62ch;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.preview__title {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 22px;
+  font-weight: 500;
+  letter-spacing: var(--tracking-title);
+  line-height: 1.2;
+}
+
+.preview__lock {
+  flex: none;
+  color: var(--color-ink-muted);
+}
+
+.preview__text {
+  line-height: 1.5;
+}
+
+.preview__note {
+  font-size: var(--text-small);
+  color: var(--color-ink-muted);
+}
+
+.preview__actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 16px;
+}
+
+.preview__link {
+  font-size: var(--text-small);
+  color: var(--color-accent);
+}
+
+/* Trial request dialog: a plain panel over a flat tint, no shadow. */
+.trial__backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 10;
+  display: flex;
+  align-items: flex-start;
+  justify-content: flex-start;
+  padding: 64px 36px;
+  background: rgba(16, 24, 32, 0.4);
+}
+
+.trial {
+  width: min(560px, 100%);
+  max-height: 100%;
+  overflow: auto;
+  padding: 20px 24px 24px;
+  background: var(--color-surface);
+  border: var(--rule-section);
+  border-radius: var(--radius);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.trial__title {
+  font-size: 20px;
+  font-weight: 500;
+  letter-spacing: var(--tracking-title);
+}
+
+.trial__text {
+  font-size: var(--text-small);
+  line-height: 1.5;
+  color: var(--color-ink-muted);
+  overflow-wrap: anywhere;
+}
+
+.trial__text a {
+  color: var(--color-accent);
+}
+
+.trial__label {
+  font-family: var(--font-mono);
+  font-size: var(--text-caption);
+  letter-spacing: var(--tracking-caption);
+  text-transform: uppercase;
+  color: var(--color-ink-muted);
+}
+
+.trial__request {
+  width: 100%;
+  padding: 10px 12px;
+  border: var(--rule-row);
+  border-radius: var(--radius-small);
+  background: var(--color-bg);
+  font-family: var(--font-mono);
+  font-size: var(--text-label);
+  line-height: 1.5;
+  color: var(--color-ink);
+  resize: none;
+}
+
+.trial__actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+}
+
+.trial__copied {
+  font-size: var(--text-small);
+  color: var(--color-positive);
+}

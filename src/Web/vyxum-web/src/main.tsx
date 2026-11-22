@@ -1,3 +1,5 @@
+// First: share React, React Router and the module SDK with module screens before anything else runs.
+import { installShared } from './sdk/shared';
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import { BrowserRouter } from 'react-router-dom';
@@ -15,6 +17,8 @@ import './styles/base.css';
 import './styles/shell.css';
 
 import { App, AppProviders } from './App';
+
+installShared();
 
 const container = document.getElementById('root');
 if (!container) throw new Error('The root element is missing from index.html.');

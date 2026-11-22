@@ -43,7 +43,8 @@ internal sealed class WeighingTestApp : IAsyncDisposable
         DatabaseProvider provider,
         bool withProducts = false,
         bool withWeighing = true,
-        IReadOnlyDictionary<string, string?>? settings = null)
+        IReadOnlyDictionary<string, string?>? settings = null,
+        IReadOnlyList<IModule>? otherModules = null)
     {
         var reason = TestDatabase.GetUnavailableReason(provider);
         if (reason is not null)
@@ -73,6 +74,7 @@ internal sealed class WeighingTestApp : IAsyncDisposable
             modules.Add(new ProductsModule());
         }
 
+        modules.AddRange(otherModules ?? []);
         var clock = new TestClock();
         builder.Services.AddSingleton<TimeProvider>(clock);
         builder.Services.AddVyxumPlatform(builder.Configuration, modules);

@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 360" width="640" height="360" role="img">
+  <rect width="640" height="360" fill="#fbfcfc"/>
+  <text x="32" y="34" font-family="Consolas, monospace" font-size="11" letter-spacing="0.7" fill="#4a5560">SAMPLE MODULE</text>
+  <text x="32" y="72" font-family="'Segoe UI', Arial, sans-serif" font-size="30" font-weight="500" fill="#101820">Paid sample</text>
+  <rect x="32" y="92" width="576" height="1" fill="#101820"/>
+  <text x="32" y="116" font-family="Consolas, monospace" font-size="11" letter-spacing="0.7" fill="#4a5560">NO</text>
+  <text x="96" y="116" font-family="Consolas, monospace" font-size="11" letter-spacing="0.7" fill="#4a5560">ENTRY</text>
+  <text x="420" y="116" font-family="Consolas, monospace" font-size="11" letter-spacing="0.7" fill="#4a5560">QTY</text>
+  <text x="520" y="116" font-family="Consolas, monospace" font-size="11" letter-spacing="0.7" fill="#4a5560">TIME</text>
+  <rect x="32" y="126" width="576" height="1" fill="#d5dadf"/>
+  <rect x="32" y="127" width="576" height="38" fill="#eef3f6"/>
+  <g font-family="'Segoe UI', Arial, sans-serif" font-size="15" fill="#101820">
+    <text x="32" y="152" font-family="Consolas, monospace">001</text><text x="96" y="152">Order: 2 x Flour</text><text x="420" y="152" font-family="Consolas, monospace">2</text><text x="520" y="152" font-family="Consolas, monospace">08:12</text>
+    <text x="32" y="192" font-family="Consolas, monospace">002</text><text x="96" y="192">Order: 5 x Sugar</text><text x="420" y="192" font-family="Consolas, monospace">5</text><text x="520" y="192" font-family="Consolas, monospace">08:40</text>
+    <text x="32" y="232" font-family="Consolas, monospace">003</text><text x="96" y="232">Order: 1 x Yeast</text><text x="420" y="232" font-family="Consolas, monospace">1</text><text x="520" y="232" font-family="Consolas, monospace">09:05</text>
+    <text x="32" y="272" font-family="Consolas, monospace">004</text><text x="96" y="272">Order: 8 x Butter</text><text x="420" y="272" font-family="Consolas, monospace">8</text><text x="520" y="272" font-family="Consolas, monospace">09:31</text>
+  </g>
+  <rect x="32" y="165" width="576" height="1" fill="#d5dadf"/>
+  <rect x="32" y="205" width="576" height="1" fill="#d5dadf"/>
+  <rect x="32" y="245" width="576" height="1" fill="#d5dadf"/>
+  <rect x="32" y="285" width="576" height="1" fill="#d5dadf"/>
+  <rect x="32" y="308" width="140" height="44" rx="3" fill="#0b4f6c"/>
+  <text x="102" y="335" text-anchor="middle" font-family="'Segoe UI', Arial, sans-serif" font-size="15" fill="#ffffff">Add entry</text>
+</svg>

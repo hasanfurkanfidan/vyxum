@@ -1,6 +1,6 @@
 import { createContext, useCallback, useContext, type ReactNode } from 'react';
 import { useT } from '../../i18n/I18nProvider';
-import { NetworkError, RuleError } from '../../lib/api';
+import { NetworkError, RuleError, ruleErrorKey } from '../../lib/api';
 import { localOnlyCode } from '../../lib/setup';
 
 /** What the wizard frame gives to the step that is shown. */
@@ -36,7 +36,7 @@ export function useSetupErrorKey(): (error: unknown) => string | null {
           onLocalOnly();
           return null;
         }
-        return error.code;
+        return ruleErrorKey(error);
       }
       if (!(error instanceof NetworkError)) console.error('A setup request failed.', error);
       return 'shell.Error';

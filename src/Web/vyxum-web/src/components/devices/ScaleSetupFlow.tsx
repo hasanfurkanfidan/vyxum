@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useCulture, useT } from '../../i18n/I18nProvider';
-import { NetworkError, RuleError, ValidationError } from '../../lib/api';
+import { NetworkError, RuleError, ruleErrorKey, ValidationError } from '../../lib/api';
 import {
   createDeviceConfig,
   deleteDeviceConfig,
@@ -44,7 +44,7 @@ export interface ScaleSetupFlowProps {
 }
 
 function errorKeyOf(error: unknown): string {
-  if (error instanceof RuleError) return error.code;
+  if (error instanceof RuleError) return ruleErrorKey(error);
   if (!(error instanceof NetworkError)) console.error('A device request failed.', error);
   return 'shell.Error';
 }

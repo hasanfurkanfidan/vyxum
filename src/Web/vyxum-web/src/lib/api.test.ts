@@ -1,12 +1,12 @@
 import { describe, expect, it, vi } from 'vitest';
 import { installFakeApi, jsonResponse } from '../test/fakeApi';
-import { ApiError, NetworkError, RuleError, ValidationError, apiGet, apiPost, getUiModules, withQuery } from './api';
+import { ApiError, LicenseError, NetworkError, RuleError, ValidationError, apiDelete, apiGet, apiPost, apiPostText, apiPut, getUiModules, onLicenseDenied, withQuery } from './api';
 
 describe('api client', () => {
   it('returns the parsed JSON body', async () => {
     installFakeApi({ modules: ['weighing'], capabilities: ['weighing.records'] });
     await expect(getUiModules()).resolves.toEqual({
-      modules: [{ id: 'weighing', version: '1.0.0' }],
+      modules: [{ id: 'weighing', version: '1.0.0', name: 'Tartım' }],
       capabilities: ['weighing.records'],
     });
   });
@@ -80,5 +80,40 @@ describe('api client', () => {
       '/api/products?search=kaju&includeInactive=false&skip=0',
     );
     expect(withQuery('/api/products', {})).toBe('/api/products');
+  });
+});
+
+describe('state-changing requests', () => {
+  it.each([
+    ['POST', (path: string) => apiPost(path, {})],
+    ['PUT', (path: string) => apiPut(path, {})],
+    ['DELETE', (path: string) => apiDelete(path)],
+    ['POST text', (path: string) => apiPostText(path, 'text')],
+  ])('send the custom header on %s', async (_name, call) => {
+    const fetchMock = installFakeApi({ routes: { 'POST /api/x': () => jsonResponse({}), 'PUT /api/x': () => jsonResponse({}), 'DELETE /api/x': () => jsonResponse({}) } });
+    await call('/api/x');
+    expect(fetchMock.mock.calls[0]?.[1]?.headers).toMatchObject({ 'X-Vyxum-Request': '1' });
+  });
+
+  it('does not send it on GET', async () => {
+    const fetchMock = installFakeApi({ routes: { 'GET /api/x': () => jsonResponse({}) } });
+    await apiGet('/api/x');
+    expect(fetchMock.mock.calls[0]?.[1]?.headers).not.toHaveProperty('X-Vyxum-Request');
+  });
+
+  it('turns a 403 license code into a LicenseError and tells the listeners', async () => {
+    installFakeApi({ routes: { 'POST /api/x': () => jsonResponse({ code: 'license_required' }, 403) } });
+    const listener = vi.fn();
+    const stop = onLicenseDenied(listener);
+    await expect(apiPost('/api/x')).rejects.toBeInstanceOf(LicenseError);
+    expect(listener).toHaveBeenCalledOnce();
+    stop();
+  });
+
+  it('keeps another 403 code a plain RuleError', async () => {
+    installFakeApi({ routes: { 'POST /api/x': () => jsonResponse({ code: 'other' }, 403) } });
+    const error = await apiPost('/api/x').catch((e: unknown) => e);
+    expect(error).toBeInstanceOf(RuleError);
+    expect(error).not.toBeInstanceOf(LicenseError);
   });
 });

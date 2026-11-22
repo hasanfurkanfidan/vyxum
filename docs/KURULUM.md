@@ -27,7 +27,7 @@ Kurulum sihirbazı dil sorarsa Türkçe ya da English seçin.
 
 ## 3. İlk açılış: kurulum sihirbazı
 
-Vyxum ilk kez açıldığında bir kurulum sihirbazı çıkar. Dört adımı vardır: **Veritabanı**, **Terazi**, **Firma** ve **Ürünler**. İleri gitmek için **İleri**, geri dönmek için **Geri** düğmesini kullanın.
+Vyxum ilk kez açıldığında bir kurulum sihirbazı çıkar. Beş adımı vardır: **Veritabanı**, **Terazi**, **Firma**, **Lisans** ve **Ürünler**. İleri gitmek için **İleri**, geri dönmek için **Geri** düğmesini kullanın.
 
 Kurulum sihirbazı yalnızca Vyxum'un kurulu olduğu bilgisayardan yapılabilir.
 
@@ -44,7 +44,9 @@ Yalnızca kurumunuzda SQL Server varsa **Gelişmiş: SQL Server** bölümünü a
 
 **3. adım: Firma.** Firma adını yazın ve **İleri**'ye tıklayın. Firma adı ekranlarda ve raporlarda görünür.
 
-**4. adım: Ürünler.** Tartacağınız ilk ürünleri ekleyin ya da **Atla** deyin. Ürünleri daha sonra Ürünler ekranından da ekleyebilirsiniz.
+**4. adım: Lisans.** Lisans dosyanız varsa **Lisans dosyası yükle** seçeneğini işaretleyin, **Dosya seç** ile `.vxlic` dosyasını seçin. Yoksa **Ücretsiz devam et** seçili kalsın. Tartım, Ürünler ve Kayıtlar lisanssız çalışır. Ayrıntılar için [Lisans kılavuzu](LISANS.md).
+
+**5. adım: Ürünler.** Tartacağınız ilk ürünleri ekleyin ya da **Atla** deyin. Ürünleri daha sonra Ürünler ekranından da ekleyebilirsiniz.
 
 Sonunda **Kurulum tamamlandı** yazısı görünür. Tartıma başlamak için **Tartıma geç** düğmesine tıklayın. Sihirbaz bir daha açılmaz. Sonraki değişiklikler Ayarlar ekranından yapılır.
 

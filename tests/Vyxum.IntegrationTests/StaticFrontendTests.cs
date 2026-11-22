@@ -90,6 +90,9 @@ public sealed class StaticFrontendTests : IDisposable
     [InlineData("/api")]
     [InlineData("/hubs/unknown")]
     [InlineData("/health/unknown")]
+    [InlineData("/modules")]
+    [InlineData("/modules/unknown-module/index.js")]
+    [InlineData("/modules/products/index.js")]
     public async Task Unknown_backend_paths_return_404_and_not_the_frontend(string path)
     {
         var ct = TestContext.Current.CancellationToken;

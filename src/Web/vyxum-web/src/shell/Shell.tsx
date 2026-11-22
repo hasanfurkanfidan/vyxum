@@ -1,6 +1,7 @@
 import { useEffect, type ReactNode } from 'react';
 import { useI18n } from '../i18n/I18nProvider';
 import { useModules } from './ModulesProvider';
+import { LicenseBanner } from './LicenseBanner';
 import { Sidebar } from './Sidebar';
 
 /** Page frame: sidebar on the left, the routed screen on the right. */
@@ -40,7 +41,12 @@ export function Shell({ children }: { children: ReactNode }) {
       </div>
     );
   } else {
-    content = children;
+    content = (
+      <>
+        <LicenseBanner />
+        {children}
+      </>
+    );
   }
 
   return (

@@ -59,6 +59,38 @@ export class RuleError extends ApiError {
   }
 }
 
+/** Codes of a 403 that means the license does not allow the request (not yet valid, locked, or read-only). */
+export const licenseDeniedCodes = ['license_required', 'license_read_only'] as const;
+
+/**
+ * 403 `license_required` or `license_read_only`: the license state changed under the screen (the grace period ended,
+ * or another station changed the license). The client reloads the module list quietly; the screen shows `messageKey`.
+ */
+export class LicenseError extends RuleError {
+  /** Resource key of the translated message. */
+  readonly messageKey: string;
+
+  constructor(status: number, body: CodedError) {
+    super(status, body);
+    this.name = 'LicenseError';
+    this.messageKey = `license.Error.${body.code}`;
+  }
+}
+
+/** Resource key to show for a rejected request: the license message for a LicenseError, otherwise the error code. */
+export function ruleErrorKey(error: RuleError): string {
+  return error instanceof LicenseError ? error.messageKey : error.code;
+}
+
+type LicenseDeniedListener = (error: LicenseError) => void;
+const licenseDeniedListeners = new Set<LicenseDeniedListener>();
+
+/** Calls `listener` for every response that says the license denies the request; returns the way to stop. */
+export function onLicenseDenied(listener: LicenseDeniedListener): () => void {
+  licenseDeniedListeners.add(listener);
+  return () => licenseDeniedListeners.delete(listener);
+}
+
 export interface ValidationProblem {
   type?: string;
   title?: string;
@@ -81,11 +113,16 @@ export function isCodedError(body: unknown): body is CodedError {
   return typeof body === 'object' && body !== null && typeof (body as { code?: unknown }).code === 'string';
 }
 
-export type HttpMethod = 'GET' | 'POST' | 'PUT' | 'DELETE';
+export type HttpMethod = 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH';
+
+/** Header every state-changing request carries; the server rejects such requests without it (CSRF protection). */
+export const REQUEST_HEADER = 'X-Vyxum-Request';
 
 export interface RequestOptions {
   signal?: AbortSignal;
   headers?: Record<string, string>;
+  /** Sends this text as the body as it is (UTF-8 text), instead of a JSON-encoded body. */
+  rawBody?: string;
 }
 
 async function readBody(response: Response): Promise<unknown> {
@@ -103,7 +140,12 @@ async function readBody(response: Response): Promise<unknown> {
   return text;
 }
 
+function isLicenseDenied(status: number, body: unknown): body is CodedError {
+  return status === 403 && isCodedError(body) && (licenseDeniedCodes as readonly string[]).includes(body.code);
+}
+
 function toError(status: number, body: unknown): ApiError {
+  if (isLicenseDenied(status, body)) return new LicenseError(status, body);
   if (isValidationProblem(body)) return new ValidationError(status, body);
   if (isCodedError(body)) return new RuleError(status, body);
   return new ApiError(`Request failed with status ${status}.`, status, body);
@@ -111,9 +153,13 @@ function toError(status: number, body: unknown): ApiError {
 
 async function send(method: HttpMethod, path: string, body: unknown, options: RequestOptions): Promise<Response> {
   const headers: Record<string, string> = { Accept: 'application/json', ...options.headers };
+  if (method !== 'GET') headers[REQUEST_HEADER] = '1';
   const init: RequestInit = { method, headers, credentials: 'same-origin' };
   if (options.signal) init.signal = options.signal;
-  if (body !== undefined) {
+  if (options.rawBody !== undefined) {
+    headers['Content-Type'] = 'text/plain; charset=utf-8';
+    init.body = options.rawBody;
+  } else if (body !== undefined) {
     headers['Content-Type'] = 'application/json';
     init.body = JSON.stringify(body);
   }
@@ -127,7 +173,9 @@ async function send(method: HttpMethod, path: string, body: unknown, options: Re
   }
 
   if (!response.ok) {
-    throw toError(response.status, await readBody(response));
+    const error = toError(response.status, await readBody(response));
+    if (error instanceof LicenseError) for (const listener of licenseDeniedListeners) listener(error);
+    throw error;
   }
   return response;
 }
@@ -144,6 +192,11 @@ export function apiGet<T>(path: string, options?: RequestOptions): Promise<T> {
 
 export function apiPost<T>(path: string, body?: unknown, options?: RequestOptions): Promise<T> {
   return request<T>('POST', path, body, options);
+}
+
+/** POST with a text body that is sent unchanged, for example the text of an uploaded file. */
+export function apiPostText<T>(path: string, text: string, options: RequestOptions = {}): Promise<T> {
+  return request<T>('POST', path, undefined, { ...options, rawBody: text });
 }
 
 export function apiPut<T>(path: string, body?: unknown, options?: RequestOptions): Promise<T> {
@@ -214,13 +267,61 @@ export interface UiStrings {
 export interface UiModule {
   id: string;
   version: string;
+  /** Whether the module works only with a license. Older hosts leave it out. */
+  requiresLicense?: boolean;
+  /** Display name in the current language; null or absent when the module declares none (show the id). */
+  name?: string | null;
+  /** Capability ids the module provides, needs, and uses when available. Older hosts leave them out. */
+  provides?: string[];
+  requires?: string[];
+  optional?: string[];
+  /** `free`, `licensed`, `grace`, `readOnly` or `locked`. Older hosts leave it out (free). */
+  license?: 'free' | 'licensed' | 'grace' | 'readOnly' | 'locked';
+  /** The module's screens, when it has some and may load them (not locked); otherwise null or absent. */
+  ui?: UiModuleScreens | null;
+  /** Static sample of a paid module's screen, offered locked or not; absent when the module declares none. */
+  preview?: UiModulePreview | null;
+}
+
+export interface UiModulePreview {
+  /** Two short lines (separated by a line break) saying what the module does, in the current language. */
+  description: string;
+  /** URL of the sample image, served without a license. */
+  imageUrl: string;
+}
+
+/** Where to send a trial license request; both parts are null when the installation has no contact configured. */
+export interface UiContact {
+  email: string | null;
+  url: string | null;
+}
+
+export interface UiModuleScreens {
+  /** URL of the entry ES module, e.g. `/modules/samples.paid/index.js`. */
+  entry: string;
+  /** SDK version the screens were built against. */
+  sdkVersion: number;
+}
+
+/** Overall license state in the module list. */
+export interface UiLicense {
+  /** `none`, `invalid`, `notYetValid`, `valid`, `grace` or `readOnly`. */
+  status: 'none' | 'invalid' | 'notYetValid' | 'valid' | 'grace' | 'readOnly';
+  /** Name of the licensee of a license that verifies, or null. */
+  licensee: string | null;
+  /** In the grace period: days left, counting today. */
+  graceDaysLeft: number | null;
 }
 
 export interface UiModules {
   modules: UiModule[];
   capabilities: string[];
+  /** Older hosts leave it out (no license). */
+  license?: UiLicense;
   /** Company name entered in the setup wizard, or null. Older hosts leave it out. */
   companyName?: string | null;
+  /** Contact for license requests (configuration `Vyxum:Contact`). Older hosts leave it out. */
+  contact?: UiContact;
 }
 
 export function getUiStrings(options?: RequestOptions): Promise<UiStrings> {
