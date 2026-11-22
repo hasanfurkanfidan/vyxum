@@ -62,6 +62,7 @@ public sealed partial class AgentRawPrinterChannel(
             request.ReplyMaxBytes,
             replyTimeout,
             request.ReplyEndByte,
+            Math.Clamp(request.ReplyEndCount, 1, 16),
             agentTimeout);
 
         using var timeoutCts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);

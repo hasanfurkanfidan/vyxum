@@ -77,7 +77,8 @@ public static class AgentFeatures
 /// <param name="Data">The bytes to send.</param>
 /// <param name="ReplyMaxBytes">When above 0, the answer is read after sending, up to this many bytes.</param>
 /// <param name="ReplyTimeout">How long to wait for the answer.</param>
-/// <param name="ReplyEndByte">When set, reading stops after this byte.</param>
+/// <param name="ReplyEndByte">When set, reading stops after this byte has arrived <paramref name="ReplyEndCount"/> times.</param>
+/// <param name="ReplyEndCount">How many end bytes end the answer.</param>
 /// <param name="Timeout">How long the whole job may take on the agent.</param>
 public sealed record AgentPrintRequest(
     RawPrinterConnection Connection,
@@ -89,6 +90,7 @@ public sealed record AgentPrintRequest(
     int ReplyMaxBytes,
     TimeSpan ReplyTimeout,
     byte? ReplyEndByte,
+    int ReplyEndCount,
     TimeSpan Timeout);
 
 /// <summary>The answer of an agent to <see cref="AgentHubContract.PrintRaw"/>.</summary>

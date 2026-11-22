@@ -36,13 +36,15 @@ public sealed record RawPrinterTarget(
 /// <see cref="RawPrinterLimits.MaxReplyBytes"/>), for example the answer to a status query.
 /// </param>
 /// <param name="ReplyTimeout">How long the agent waits for the answer. Default: 2 seconds.</param>
-/// <param name="ReplyEndByte">When set, the agent stops reading after this byte.</param>
+/// <param name="ReplyEndByte">When set, the agent stops reading after this byte has arrived <paramref name="ReplyEndCount"/> times.</param>
+/// <param name="ReplyEndCount">How many end bytes end the answer, for answers made of several blocks. Default: 1.</param>
 public sealed record RawPrintRequest(
     RawPrinterTarget Target,
     ReadOnlyMemory<byte> Data,
     int ReplyMaxBytes = 0,
     TimeSpan? ReplyTimeout = null,
-    byte? ReplyEndByte = null);
+    byte? ReplyEndByte = null,
+    int ReplyEndCount = 1);
 
 /// <summary>The outcome of a print job.</summary>
 public enum RawPrintOutcome

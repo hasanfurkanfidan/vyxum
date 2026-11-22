@@ -346,7 +346,7 @@ public class AgentContractTests
     public void Print_request_written_by_the_platform_is_read_by_the_agent()
     {
         var sent = new PlatformSide.AgentPrintRequest(
-            RawPrinterConnection.Serial, null, null, "COM4", 9600, [0x02, 0x7E, 0xFF], 16, TimeSpan.FromSeconds(2), 0x03, TimeSpan.FromSeconds(28));
+            RawPrinterConnection.Serial, null, null, "COM4", 9600, [0x02, 0x7E, 0xFF], 16, TimeSpan.FromSeconds(2), 0x03, 3, TimeSpan.FromSeconds(28));
 
         var json = JsonSerializer.Serialize(sent, Json);
         var received = JsonSerializer.Deserialize<AgentSide.AgentPrintRequest>(json, Json);
@@ -360,6 +360,7 @@ public class AgentContractTests
         received.ReplyMaxBytes.ShouldBe(16);
         received.ReplyTimeout.ShouldBe(TimeSpan.FromSeconds(2));
         received.ReplyEndByte.ShouldBe((byte)0x03);
+        received.ReplyEndCount.ShouldBe(3);
         received.Timeout.ShouldBe(TimeSpan.FromSeconds(28));
     }
 

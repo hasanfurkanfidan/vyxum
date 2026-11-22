@@ -163,6 +163,7 @@ public sealed partial class RawPrinter : IDisposable
     {
         var buffer = new byte[Math.Min(request.ReplyMaxBytes, 4096)];
         var count = 0;
+        var endsLeft = Math.Max(1, request.ReplyEndCount);
         using var timeout = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
         timeout.CancelAfter(request.ReplyTimeout > TimeSpan.Zero ? request.ReplyTimeout : TimeSpan.FromSeconds(2));
         try
@@ -175,7 +176,19 @@ public sealed partial class RawPrinter : IDisposable
                     break;
                 }
 
-                var end = request.ReplyEndByte is { } endByte ? Array.IndexOf(buffer, endByte, count, read) : -1;
+                var end = -1;
+                if (request.ReplyEndByte is { } endByte)
+                {
+                    for (var i = count; i < count + read; i++)
+                    {
+                        if (buffer[i] == endByte && --endsLeft == 0)
+                        {
+                            end = i;
+                            break;
+                        }
+                    }
+                }
+
                 count += read;
                 if (end >= 0)
                 {

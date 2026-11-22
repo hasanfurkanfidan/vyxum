@@ -116,6 +116,35 @@ public sealed class RawPrintTests : IDisposable
     }
 
     [Fact]
+    public async Task Answer_of_several_blocks_is_read_up_to_the_last_end_byte()
+    {
+        var ct = TestContext.Current.CancellationToken;
+        using var listener = new TcpListener(IPAddress.Loopback, 0);
+        listener.Start();
+        var port = ((IPEndPoint)listener.LocalEndpoint).Port;
+        await using var factory = CreateFactory();
+        using var agent = BuildAgent(factory.Server, port);
+        await agent.StartAsync(ct);
+        var channel = factory.Services.GetRequiredService<IRawPrinterChannel>();
+        await WaitForPrintingAgentAsync(channel, ct);
+
+        const string answer = "\u0002a\u0003\r\n\u0002b\u0003\r\n\u0002c\u0003";
+        var printer = ServeOnceAsync(listener, 3, Encoding.ASCII.GetBytes(answer + "\r\nmore"), ct);
+
+        var started = DateTime.UtcNow;
+        var result = await channel.SendAsync(
+            new RawPrintRequest(Network(port), "~HS"u8.ToArray(), ReplyMaxBytes: 256, ReplyTimeout: TimeSpan.FromSeconds(5), ReplyEndByte: 0x03, ReplyEndCount: 3),
+            ct);
+
+        result.Outcome.ShouldBe(RawPrintOutcome.Sent, result.Detail);
+        Encoding.ASCII.GetString(result.Reply.ShouldNotBeNull()).ShouldBe(answer);
+        (DateTime.UtcNow - started).ShouldBeLessThan(TimeSpan.FromSeconds(4));
+        await printer;
+
+        await agent.StopAsync(ct);
+    }
+
+    [Fact]
     public async Task Job_without_reply_needs_no_answer()
     {
         var ct = TestContext.Current.CancellationToken;
