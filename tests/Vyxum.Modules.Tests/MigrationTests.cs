@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Migrations;
+using Microsoft.EntityFrameworkCore.Migrations.Operations;
 using Microsoft.EntityFrameworkCore.Storage;
 using Microsoft.Extensions.DependencyInjection;
 using Shouldly;
@@ -271,6 +272,21 @@ public class MigrationTests
                 await weighing.GetService<IRelationalDatabaseCreator>().CreateTablesAsync(cancellationToken);
                 weighing.Records.Add(Record(Guid.NewGuid()));
                 await weighing.SaveChangesAsync(cancellationToken);
+
+                // CreateTables builds today's model; take away what later migrations add, so the tables are the
+                // first migration's, as in a database made before migrations. Add a column here when a migration adds one.
+                var dropAddedLater = new MigrationOperation[]
+                {
+                    new DropColumnOperation { Table = "wgh_Records", Name = "OperatorId" },
+                };
+                // SQLite rebuilds the table for a dropped column; it takes the table from the first migration's model.
+                var migrations = weighing.GetService<IMigrationsAssembly>();
+                var first = migrations.CreateMigration(migrations.Migrations.First().Value, weighing.Database.ProviderName!);
+                var firstModel = weighing.GetService<IModelRuntimeInitializer>()
+                    .Initialize(first.TargetModel!, designTime: true, validationLogger: null);
+                var commands = weighing.GetService<IMigrationsSqlGenerator>().Generate(dropAddedLater, firstModel);
+                await weighing.GetService<IMigrationCommandExecutor>()
+                    .ExecuteNonQueryAsync(commands, weighing.GetService<IRelationalConnection>(), cancellationToken);
             }
 
             Microsoft.Data.Sqlite.SqliteConnection.ClearAllPools();

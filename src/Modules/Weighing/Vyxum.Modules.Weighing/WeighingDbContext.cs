@@ -56,6 +56,7 @@ public sealed class WeighingDbContext(DbContextOptions<WeighingDbContext> option
             entity.Property(r => r.Status).HasConversion<string>().HasMaxLength(16).IsConcurrencyToken();
             entity.Property(r => r.CancelReason).HasMaxLength(WeighingLimits.CancelReasonMaxLength);
             entity.Property(r => r.Operator).HasMaxLength(WeighingLimits.OperatorMaxLength);
+            entity.Property(r => r.OperatorId).HasMaxLength(WeighingLimits.OperatorIdMaxLength);
             entity.HasIndex(r => r.RequestId).IsUnique();
             entity.HasIndex(r => r.CreatedAtUtc);
             entity.HasIndex(r => new { r.DeviceId, r.Id });
@@ -94,6 +95,9 @@ public static class WeighingLimits
 
     /// <summary>Maximum length of an operator name.</summary>
     public const int OperatorMaxLength = 100;
+
+    /// <summary>Operator id.</summary>
+    public const int OperatorIdMaxLength = 64;
 
     /// <summary>Maximum decimals of a stored weight.</summary>
     public const int WeightMaxDecimals = 6;
@@ -239,6 +243,9 @@ public sealed class WeighingRecord
     /// <summary>Cancel reason.</summary>
     public string? CancelReason { get; set; }
 
-    /// <summary>Operator; empty until a users module exists.</summary>
+    /// <summary>Operator's name as it was when saved; empty without a users module.</summary>
     public string? Operator { get; init; }
+
+    /// <summary>Operator's person id (<see cref="Actor.Id"/>); empty without a users module.</summary>
+    public string? OperatorId { get; init; }
 }

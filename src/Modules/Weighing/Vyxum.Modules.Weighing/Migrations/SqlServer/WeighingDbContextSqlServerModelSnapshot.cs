@@ -144,6 +144,10 @@ namespace Vyxum.Modules.Weighing.Migrations.SqlServer
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
 
+                    b.Property<string>("OperatorId")
+                        .HasMaxLength(64)
+                        .HasColumnType("nvarchar(64)");
+
                     b.Property<string>("ProductCode")
                         .HasMaxLength(32)
                         .HasColumnType("nvarchar(32)");

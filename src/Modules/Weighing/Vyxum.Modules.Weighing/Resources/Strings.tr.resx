@@ -100,4 +100,9 @@
   <data name="TargetUnder" xml:space="preserve"><value>tolerans altında</value></data>
   <data name="TargetWithin" xml:space="preserve"><value>tolerans içinde</value></data>
   <data name="TargetOver" xml:space="preserve"><value>tolerans üstünde</value></data>
+  <data name="PermissionRecord" xml:space="preserve"><value>Tartım kaydeder</value></data>
+  <data name="PermissionCancelOwn" xml:space="preserve"><value>Kendi son tartımını iptal eder (kayıttan kısa süre sonra)</value></data>
+  <data name="PermissionCancel" xml:space="preserve"><value>Herhangi bir tartımı iptal eder</value></data>
+  <data name="PermissionExport" xml:space="preserve"><value>Kayıtları Excel'e aktarır</value></data>
+  <data name="NotAllowed" xml:space="preserve"><value>Bunun için yetkiniz yok.</value></data>
 </root>

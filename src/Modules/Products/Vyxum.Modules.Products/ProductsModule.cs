@@ -10,6 +10,9 @@ public sealed class ProductsModule : IModule
     /// <summary>Capability this module provides.</summary>
     public const string CatalogCapability = "products.catalog";
 
+    /// <summary>Permission to add, change, deactivate and activate products.</summary>
+    public const string EditPermission = "products.edit";
+
     /// <inheritdoc />
     public ModuleManifest Manifest { get; } = new()
     {
@@ -18,6 +21,10 @@ public sealed class ProductsModule : IModule
         Version = new Version(1, 0),
         Provides = [CatalogCapability],
         Publishes = [typeof(ProductSaved)],
+        Permissions =
+        [
+            new() { Id = EditPermission, NameKey = ProductsStrings.KeyPrefix + ".PermissionEdit", DefaultRoles = [BuiltInRoles.Quality, BuiltInRoles.RecipeAuthor, BuiltInRoles.Planning] },
+        ],
     };
 
     /// <inheritdoc />
