@@ -1,11 +1,12 @@
-import type { ReactNode } from 'react';
-import { Navigate, Route, Routes } from 'react-router-dom';
+import { useEffect, type ReactNode } from 'react';
+import { Navigate, Route, Routes, useLocation, useNavigate } from 'react-router-dom';
+import { onSignInRequired } from './lib/api';
 import { I18nProvider } from './i18n/I18nProvider';
 import { ProductsPage } from './pages/ProductsPage';
 import { RecordsPage } from './pages/RecordsPage';
 import { WeighingPage } from './pages/WeighingPage';
 import type { ModuleImporter } from './shell/moduleLoader';
-import { ModuleScreen } from './shell/ModuleScreen';
+import { ModulePage, ModuleScreen } from './shell/ModuleScreen';
 import { ModuleUiProvider } from './shell/ModuleUiProvider';
 import { ModulesProvider, useModules } from './shell/ModulesProvider';
 import { routes } from './shell/navigation';
@@ -49,13 +50,33 @@ function RequireModule({ module, children }: { module: string; children: ReactNo
 export function App() {
   return (
     <SetupGate>
+      <SignInRedirect />
       <Routes>
         <Route path={routes.setup} element={<SetupWizard />} />
         <Route path={routes.setupTurkish} element={<Navigate to={routes.setup} replace />} />
-        <Route path="*" element={<MainScreens />} />
+        <Route path="*" element={<ModulePage fallback={<MainScreens />} />} />
       </Routes>
     </SetupGate>
   );
+}
+
+/**
+ * Sends the user to the sign-in screen a users module names when the server answers 401 with `signInPath`, and back
+ * afterwards (`returnTo`). Without such a module nothing ever answers that way.
+ */
+function SignInRedirect() {
+  const navigate = useNavigate();
+  const location = useLocation();
+  useEffect(
+    () =>
+      onSignInRequired((signInPath) => {
+        if (location.pathname === signInPath) return;
+        const returnTo = location.pathname + location.search;
+        navigate(`${signInPath}?returnTo=${encodeURIComponent(returnTo)}`, { replace: true });
+      }),
+    [navigate, location.pathname, location.search],
+  );
+  return null;
 }
 
 /** Screens inside the shell with the menu. */
