@@ -1,0 +1,23 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <!--
+    The real Vyxum host on a real port for the end-to-end screen check (tests/e2e). Test-only: it trusts a signing key
+    generated at start-up and never shipped, and it hands out license files signed with it. Never part of a release.
+  -->
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <IsPackable>false</IsPackable>
+    <IsTestProject>false</IsTestProject>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.Mvc.Testing" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\Host\Vyxum.Host\Vyxum.Host.csproj" />
+    <ProjectReference Include="..\..\src\Devices\Vyxum.Devices.Simulator\Vyxum.Devices.Simulator.csproj" />
+    <ProjectReference Include="..\SampleModules\Vyxum.Samples.Paid\Vyxum.Samples.Paid.csproj" />
+  </ItemGroup>
+
+</Project>
