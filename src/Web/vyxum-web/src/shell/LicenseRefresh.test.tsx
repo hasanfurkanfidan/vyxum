@@ -39,6 +39,8 @@ describe('license state refresh', () => {
     });
     renderApp();
     expect(await screen.findByText(graceText)).toBeInTheDocument();
+    // The records screen loads its list on its own; wait for it so that the check below sees only the refresh.
+    await waitFor(() => expect(screen.queryByText('Yükleniyor')).not.toBeInTheDocument());
 
     status = 'readOnly';
     const before = callsTo(fetchMock, 'GET /api/ui/modules');
