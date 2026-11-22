@@ -66,6 +66,7 @@ public static class PlatformServiceCollectionExtensions
         // nobody signs in and everything is allowed (decision V-03). The permission catalog is always the platform's.
         services.RemoveAll<IPermissionCatalog>();
         services.AddSingleton<IPermissionCatalog, PermissionCatalog>();
+        services.AddSingleton<IReportCatalog, ReportCatalog>();
         services.TryAddScoped<ICurrentActor, NoUsersCurrentActor>();
         services.TryAddScoped<IAuthorization, NoUsersAuthorization>();
         services.TryAddScoped<ISupervisorApproval, NoUsersSupervisorApproval>();
