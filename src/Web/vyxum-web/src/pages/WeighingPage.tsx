@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
+import type { WeighingPanelProps } from '../sdk/slots';
 import { Link } from 'react-router-dom';
 import { TargetGauge } from '../components/weighing/TargetGauge';
 import { useCulture, useT } from '../i18n/I18nProvider';
@@ -38,6 +39,7 @@ import {
   withScale,
   type Decimal,
 } from '../lib/weights';
+import { ModuleSlot } from '../shell/ModuleSlot';
 import { routes } from '../shell/navigation';
 import { PageHeader } from '../shell/PageHeader';
 import '../styles/weighing.css';
@@ -364,6 +366,8 @@ export function WeighingPage() {
   const [notice, setNotice] = useState<Notice | null>(null);
   const [saving, setSaving] = useState(false);
   const [zeroing, setZeroing] = useState(false);
+  // The last record saved on this screen, for the modules' weighing panel.
+  const [lastSaved, setLastSaved] = useState<WeighingPanelProps['lastRecord']>(null);
   const savingRef = useRef(false);
   const noticeTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
 
@@ -395,7 +399,7 @@ export function WeighingPage() {
     setStationTare({ value: decimalToString(shown.gross), unit: weight.unit });
   };
 
-  const save = async () => {
+  const save = async (printLabel = false) => {
     if (savingRef.current || !deviceId) return;
     savingRef.current = true;
     setSaving(true);
@@ -406,6 +410,7 @@ export function WeighingPage() {
       lot: lot.trim() === '' ? null : lot.trim(),
       tare: stationTare && stationTare.unit === weight?.unit ? stationTare.value : null,
       reading: weight && weight.value !== null ? { value: weight.value, unit: weight.unit, receivedAt: weight.receivedAt } : null,
+      ...(printLabel ? { printLabel: true } : {}),
     };
     showNotice({ tone: 'info', key: 'weighing.Saving' });
 
@@ -416,6 +421,7 @@ export function WeighingPage() {
         if (!mounted.current) break;
         setRecent((list) => [record, ...(list ?? []).filter((r) => r.id !== record.id)].slice(0, recentTake));
         setStationTare(null);
+        setLastSaved({ id: record.id, number: record.number, deviceId: record.deviceId, productId: record.productId, printLabel });
         showNotice({ tone: 'positive', key: 'weighing.Saved', prefix: record.number }, savedNoticeMs);
         break;
       } catch (error) {
@@ -600,12 +606,21 @@ export function WeighingPage() {
   }
 
   const hasDevice = deviceId !== null;
+  const panelProps: WeighingPanelProps = {
+    deviceId,
+    productId: product?.id ?? null,
+    lot: lot.trim() === '' ? null : lot.trim(),
+    weight: weight ? { value: weight.value, unit: weight.unit, state: weight.state } : null,
+    saving,
+    lastRecord: lastSaved && lastSaved.deviceId === deviceId ? lastSaved : null,
+  };
   return (
     <div className="page weighing">
       <PageHeader title={product?.name ?? t('weighing.Title')} eyebrow={eyebrowParts.join(' / ')} actions={actions} />
 
       <div className="weighing__body">
         <section className="section weighing__live" aria-label={t('weighing.LiveWeight')}>
+          <ModuleSlot<WeighingPanelProps> name="weighing.panel" className="weighing__slot" props={panelProps} />
           {liveBody}
 
           <div className="weighing__buttons">
@@ -618,7 +633,7 @@ export function WeighingPage() {
               {t('weighing.SaveRecord')}
             </button>
             {settings.canPrintLabel ? (
-              <button type="button" className="button button--operator" disabled>
+              <button type="button" className="button button--operator" disabled={!hasDevice || saving} onClick={() => void save(true)}>
                 {t('weighing.SaveAndPrint')}
               </button>
             ) : null}

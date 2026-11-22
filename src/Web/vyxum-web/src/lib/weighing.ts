@@ -100,6 +100,8 @@ export interface CreateRecordInput {
    * so a retried save never records the next load.
    */
   reading: ObservedReading | null;
+  /** Ask for the record's label (a labels module prints it); only sent when true. */
+  printLabel?: boolean;
 }
 
 /** A reading as the screen showed it, sent with a save. */

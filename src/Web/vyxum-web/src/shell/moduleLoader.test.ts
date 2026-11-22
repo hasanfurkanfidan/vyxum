@@ -39,6 +39,32 @@ describe('moduleLoader', () => {
     expect(result.nav).toEqual([{ labelKey: 'x.Title', path: '/m/samples.paid', module: 'samples.paid', group: 'modules' }]);
   });
 
+  it('registers the slot components of known slots and leaves out unknown ones (SDK 3)', async () => {
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
+    const Panel = () => null;
+    const importer = vi.fn<ModuleImporter>(async () =>
+      entry(() => ({
+        slots: [
+          { slot: 'weighing.panel', component: Panel, capability: 'labels.print' },
+          { slot: 'records.toolbar', component: Panel },
+        ],
+      })),
+    );
+
+    const [result] = await loadModuleUis([module('labels', 'licensed', 3)], importer);
+
+    expect(result?.status).toBe('loaded');
+    if (result?.status !== 'loaded') return;
+    expect(result.slots).toEqual([{ slot: 'weighing.panel', component: Panel, capability: 'labels.print' }]);
+    expect(warn).toHaveBeenCalledWith(expect.stringContaining("unknown slot 'records.toolbar'"));
+  });
+
+  it('fails a module whose slot entry has no component', async () => {
+    vi.spyOn(console, 'error').mockImplementation(() => {});
+    const [result] = await loadModuleUis([module('labels', 'licensed', 3)], async () => entry(() => ({ slots: [{ slot: 'weighing.panel' }] })));
+    expect(result?.status).toBe('failed');
+  });
+
   it('passes the host with the license state and the base path', async () => {
     const register = vi.fn((_host: ModuleHost) => ({}));
     await loadModuleUis([module('samples.paid', 'readOnly')], async () => entry(register));

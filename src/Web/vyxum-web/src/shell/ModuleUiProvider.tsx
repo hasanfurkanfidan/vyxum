@@ -10,6 +10,16 @@ export interface ModuleUiContextValue {
   navItems: readonly ModuleNavItem[];
   /** Components the loaded, not locked modules show in the menu (SDK 2). */
   sidebarItems: readonly { moduleId: string; component: ComponentType }[];
+  /** Components the loaded, not locked modules show in the slots of the application's screens (SDK 3). */
+  slotItems: readonly ModuleSlotItem[];
+}
+
+/** A module's component for a slot. */
+export interface ModuleSlotItem {
+  moduleId: string;
+  slot: string;
+  component: ComponentType<any>;
+  capability?: string;
 }
 
 const ModuleUiContext = createContext<ModuleUiContextValue | null>(null);
@@ -46,7 +56,10 @@ export function ModuleUiProvider({ children, importer = browserImporter }: { chi
     const sidebarItems = [...loaded.values()]
       .filter((result) => visible.has(result.id))
       .flatMap((result) => (result.status === 'loaded' && result.sidebar ? [{ moduleId: result.id, component: result.sidebar }] : []));
-    return { get: (moduleId) => loaded.get(moduleId), navItems, sidebarItems };
+    const slotItems = [...loaded.values()]
+      .filter((result) => visible.has(result.id))
+      .flatMap((result) => (result.status === 'loaded' ? result.slots.map((item) => ({ moduleId: result.id, ...item })) : []));
+    return { get: (moduleId) => loaded.get(moduleId), navItems, sidebarItems, slotItems };
   }, [loaded, modules]);
 
   return <ModuleUiContext.Provider value={value}>{children}</ModuleUiContext.Provider>;

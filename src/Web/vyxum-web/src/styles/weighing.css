@@ -368,3 +368,10 @@
     transition: none;
   }
 }
+
+/* Modules' weighing panel (SDK 3 slot `weighing.panel`): above the live weight, column wide. */
+.weighing__slot {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
