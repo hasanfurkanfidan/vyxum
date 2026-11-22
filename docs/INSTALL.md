@@ -98,6 +98,6 @@ All data is in the folder `C:\ProgramData\Vyxum`:
 - `vyxum.json`: the settings written by the setup. You do not need to edit this file;
 - `backups`: the automatic backups.
 
-Do not delete this folder unless you want to remove all data.
+Only administrators can open this folder, because it holds your records and the database password. Do not delete this folder unless you want to remove all data.
 
 **"Windows protected your PC" appears again.** This is normal until the setup file is digitally signed. See section 2.

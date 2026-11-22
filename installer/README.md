@@ -29,10 +29,11 @@ The script builds the web UI (`npm ci`, `npm run build`), publishes Host, Agent 
 ## What the installer does
 
 - Installs to `Program Files\Vyxum` (`Web\`, `Agent\`, `Vyxum.exe`); needs administrator rights; Turkish and English (chosen from the Windows language).
-- Creates `%ProgramData%\Vyxum\vyxum.json` only if it does not exist (default address `http://localhost:5000`).
-- Registers the Windows services **Vyxum Web** and **Vyxum Agent** (automatic start). Failure recovery: restart after 5 seconds, three times; also applied when the process exits with an error code on its own (the web host does this on purpose after the database is changed in the setup wizard).
+- Creates `%ProgramData%\Vyxum\vyxum.json` only if it does not exist (default address `http://localhost:5000`), then runs `Vyxum.Host.exe --ensure-agent-key`, which adds a random agent key for the web application and the agent unless one is set.
+- Registers the Windows services **Vyxum Web** and **Vyxum Agent** (automatic start), each running as its own virtual account (`NT SERVICE\Vyxum Web`, `NT SERVICE\Vyxum Agent`) instead of LocalSystem.
+- Limits `%ProgramData%\Vyxum` to SYSTEM, administrators, the web service (change) and the agent service (read); it no longer inherits the ProgramData rights that let every user read it. Failure recovery: restart after 5 seconds, three times; also applied when the process exits with an error code on its own (the web host does this on purpose after the database is changed in the setup wizard).
 - Creates desktop and start-menu shortcuts and offers to open Vyxum at the end.
-- **Update:** run the newer setup. It stops both services, copies `vyxum.db` (and `-wal`/`-shm`) to `%ProgramData%\Vyxum\backups\vyxum-<date>-before-setup-<old version>.db`, replaces the files and starts the services. `vyxum.json` is never changed.
+- **Update:** run the newer setup. It stops both services, copies `vyxum.db` (and `-wal`/`-shm`) to `%ProgramData%\Vyxum\backups\vyxum-<date>-before-setup-<old version>.db`, replaces the files and starts the services. Existing settings in `vyxum.json` are never changed; only a missing agent key is added.
 - **Uninstall:** stops and deletes the services and removes the program files. Data in `%ProgramData%\Vyxum` is kept unless the user answers "Yes" to the question asked at the end (default "No").
 
 ## Files

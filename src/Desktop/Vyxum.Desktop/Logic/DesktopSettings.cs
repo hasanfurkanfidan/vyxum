@@ -63,6 +63,8 @@ public sealed partial record DesktopSettings(Uri Url, bool FullScreen)
             }
         }
 
+        // The settings file is readable only by administrators and the services, so a shortcut can also ask for full screen.
+        fullScreen |= args.Any(a => string.Equals(a, "--full-screen", StringComparison.OrdinalIgnoreCase));
         var url = ParseUrls(GetArgument(args, "--url")) ?? ParseUrls(urls) ?? new Uri(DefaultUrl);
         return new DesktopSettings(url, fullScreen);
     }

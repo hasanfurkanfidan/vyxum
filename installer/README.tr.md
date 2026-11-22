@@ -29,10 +29,11 @@ Betik web arayüzünü derler (`npm ci`, `npm run build`), Host, Agent ve Deskto
 ## Kurulum dosyası ne yapar
 
 - `Program Files\Vyxum` içine kurar (`Web\`, `Agent\`, `Vyxum.exe`); yönetici hakkı ister; Türkçe ve İngilizce (Windows diline göre seçilir).
-- `%ProgramData%\Vyxum\vyxum.json` dosyasını yalnızca yoksa oluşturur (varsayılan adres `http://localhost:5000`).
-- **Vyxum Web** ve **Vyxum Agent** Windows servislerini kaydeder (otomatik başlar). Kurtarma: 5 saniye sonra yeniden başlat, üç kez; süreç kendi isteğiyle hata koduyla çıksa da uygulanır (Web, sihirbazda veritabanı değişince bunu bilerek yapar).
+- `%ProgramData%\Vyxum\vyxum.json` dosyasını yalnızca yoksa oluşturur (varsayılan adres `http://localhost:5000`), sonra `Vyxum.Host.exe --ensure-agent-key` çalıştırır; bu, anahtar yoksa web uygulaması ve agent için rastgele bir agent anahtarı ekler.
+- **Vyxum Web** ve **Vyxum Agent** Windows servislerini kaydeder (otomatik başlar); her biri LocalSystem yerine kendi sanal hesabıyla çalışır (`NT SERVICE\Vyxum Web`, `NT SERVICE\Vyxum Agent`).
+- `%ProgramData%\Vyxum` klasörüne yalnızca SYSTEM, yöneticiler, web servisi (değiştirme) ve agent servisi (okuma) erişebilir; klasör artık her kullanıcıya okuma veren ProgramData haklarını devralmaz. Kurtarma: 5 saniye sonra yeniden başlat, üç kez; süreç kendi isteğiyle hata koduyla çıksa da uygulanır (Web, sihirbazda veritabanı değişince bunu bilerek yapar).
 - Masaüstü ve başlat menüsü kısayolları oluşturur, sonunda Vyxum'u açmayı önerir.
-- **Güncelleme:** yeni kurulum dosyası çalıştırılır. İki servisi durdurur, `vyxum.db` dosyasını (ve `-wal`/`-shm`) `%ProgramData%\Vyxum\backups\vyxum-<tarih>-before-setup-<eski sürüm>.db` olarak yedekler, dosyaları değiştirir, servisleri başlatır. `vyxum.json` hiç değişmez.
+- **Güncelleme:** yeni kurulum dosyası çalıştırılır. İki servisi durdurur, `vyxum.db` dosyasını (ve `-wal`/`-shm`) `%ProgramData%\Vyxum\backups\vyxum-<tarih>-before-setup-<eski sürüm>.db` olarak yedekler, dosyaları değiştirir, servisleri başlatır. `vyxum.json` içindeki mevcut ayarlar hiç değişmez; yalnızca eksik agent anahtarı eklenir.
 - **Kaldırma:** servisleri durdurup siler, program dosyalarını kaldırır. `%ProgramData%\Vyxum` içindeki veriler, sonda sorulan soruya "Evet" denmedikçe kalır (varsayılan "Hayır").
 
 ## Dosyalar
