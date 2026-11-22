@@ -207,7 +207,8 @@ Anahtarlar sırasıyla programın yanındaki `appsettings.json`, veri klasörün
 | `Vyxum:Outbox:PollingInterval` | `00:00:00.5` | Outbox'ların ne sıklıkla kontrol edileceği |
 | `Vyxum:Outbox:BatchSize` | `100` | Her kontrolde bir outbox'tan okunacak en çok ileti sayısı |
 | `Vyxum:Outbox:RetryBaseDelay` | `00:00:01` | İlk yeniden denemeden önceki bekleme; her hatada iki katına çıkar |
-| `Vyxum:Outbox:RetryMaxDelay` | `00:05:00` | Yeniden deneme beklemesinin üst sınırı |
+| `Vyxum:Agents:Key` | kurulum yazar | Her agent'ın göndermesi gereken anahtar. Kurulum, web uygulaması ve aynı bilgisayardaki agent için rastgele bir anahtar yazar; başka bilgisayardaki bir agent aynı değere `Vyxum:Agent:Key` olarak ihtiyaç duyar. Anahtar yoksa yalnızca bu bilgisayardan gelen bağlantılar kabul edilir. Web tarayıcısından gelen bağlantılar her zaman reddedilir. |
+| `Vyxum:AllowedHosts` | boş | Web uygulamasına ulaşılan ek ana bilgisayar adları, `;` ile ayrılır. IP adresleri, `localhost` ve bu bilgisayarın adı her zaman çalışır; diğer adlar reddedilir (DNS rebinding koruması). |
 
 Süre değerleri .NET `TimeSpan` biçimindedir (`hh:mm:ss` ya da `d.hh:mm:ss`).
 

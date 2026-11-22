@@ -30,6 +30,19 @@ public class AgentConnectionGateTests
     }
 
     [Theory]
+    [InlineData(null)]
+    [InlineData("secret")]
+    public void A_request_from_a_web_page_is_refused_even_from_this_computer_with_the_key(string? key)
+    {
+        var context = Request("127.0.0.1", header: key);
+        context.Request.Headers.Origin = "https://evil.example";
+
+        Gate(key).Check(context).ShouldBe(AgentConnectionDecision.BrowserNotAllowed);
+        Gate(key).Admit(context).ShouldBeFalse();
+        context.Response.StatusCode.ShouldBe(StatusCodes.Status403Forbidden);
+    }
+
+    [Theory]
     [InlineData("127.0.0.1", AgentConnectionDecision.Allowed)]
     [InlineData("127.10.0.1", AgentConnectionDecision.Allowed)]
     [InlineData("::1", AgentConnectionDecision.Allowed)]

@@ -207,10 +207,21 @@ begin
   RunSc('failureflag "' + Name + '" 1');
 end;
 
+{ Gives the installation its own agent key in vyxum.json (web and agent) unless it has one. Without a key, any
+  program on this computer, a web page in the browser included, could report weights. An existing key is kept. }
+procedure EnsureAgentKey;
+var
+  ResultCode: Integer;
+begin
+  if not Exec(ExpandConstant('{app}\Web\Vyxum.Host.exe'), '--ensure-agent-key', ExpandConstant('{app}\Web'), SW_HIDE, ewWaitUntilTerminated, ResultCode) or (ResultCode <> 0) then
+    Log('Writing the agent key failed with code ' + IntToStr(ResultCode) + '.');
+end;
+
 procedure CurStepChanged(CurStep: TSetupStep);
 begin
   if CurStep = ssPostInstall then
   begin
+    EnsureAgentKey;
     ConfigureService(WebServiceName, ExpandConstant('{app}\Web\Vyxum.Host.exe'), ExpandConstant('{cm:ServiceWebDescription}'));
     ConfigureService(AgentServiceName, ExpandConstant('{app}\Agent\Vyxum.Agent.exe'), ExpandConstant('{cm:ServiceAgentDescription}'));
     RunSc('start "' + WebServiceName + '"');

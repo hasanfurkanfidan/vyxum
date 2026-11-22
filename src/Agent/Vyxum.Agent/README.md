@@ -59,7 +59,7 @@ a message that names the setting.
 | Setting | Meaning | Default |
 |---|---|---|
 | `ServerUrl` | Address of the Vyxum web application | `http://localhost:5000` |
-| `Key` | Agent key, needed only when the web application has one (`Vyxum:Agents:Key`). Never logged. | empty |
+| `Key` | Agent key, needed when the web application has one (`Vyxum:Agents:Key`). The installer writes the same random key for both on the computer it installs; copy it from `vyxum.json` there for an agent on another computer. Never logged. | empty (written by the installer) |
 | `AgentName` | Name shown in the web application | computer name |
 | `HeartbeatInterval` | The latest reading is sent again this often when it does not change | `00:00:01` |
 | `ReconnectDelay` | First wait before reconnecting to a scale or to the server; doubles after each failure | `00:00:01` |

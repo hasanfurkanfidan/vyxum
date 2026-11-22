@@ -58,7 +58,7 @@ hangi ayarın hatalı olduğunu yazar.
 | Ayar | Anlamı | Varsayılan |
 |---|---|---|
 | `ServerUrl` | Vyxum web uygulamasının adresi | `http://localhost:5000` |
-| `Key` | Agent anahtarı; yalnızca web uygulamasında anahtar ayarlıysa gerekir (`Vyxum:Agents:Key`). Günlüğe yazılmaz. | boş |
+| `Key` | Agent anahtarı; web uygulamasında anahtar ayarlıysa gerekir (`Vyxum:Agents:Key`). Kurulum, kurduğu bilgisayarda ikisine de aynı rastgele anahtarı yazar; başka bilgisayardaki bir agent için anahtarı oradaki `vyxum.json` dosyasından kopyalayın. Günlüğe yazılmaz. | boş (kurulum yazar) |
 | `AgentName` | Web uygulamasında görünen ad | bilgisayar adı |
 | `HeartbeatInterval` | Değişmese de son okuma bu aralıkla yeniden gönderilir | `00:00:01` |
 | `ReconnectDelay` | Teraziye ya da sunucuya yeniden bağlanmadan önceki ilk bekleme; her başarısızlıkta iki katına çıkar | `00:00:01` |
