@@ -19,6 +19,12 @@ public class LicenseGateTests
     [InlineData(ModuleLicenseState.Locked, "POST", "license_required")]
     public void Deny_follows_the_module_state_and_the_method(ModuleLicenseState state, string method, string? expected) =>
         LicenseGate.Deny(state, method).ShouldBe(expected);
+
+    [Theory]
+    [InlineData(ModuleLicenseState.ReadOnly, null)]
+    [InlineData(ModuleLicenseState.Locked, "license_required")]
+    public void An_endpoint_allowed_while_read_only_takes_writes_only_in_read_only(ModuleLicenseState state, string? expected) =>
+        LicenseGate.Deny(state, "POST", allowedWhileReadOnly: true).ShouldBe(expected);
 }
 
 public class LicenseStationsTests

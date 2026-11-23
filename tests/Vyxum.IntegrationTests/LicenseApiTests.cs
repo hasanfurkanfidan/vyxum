@@ -202,6 +202,7 @@ public sealed class LicenseApiTests : IDisposable
         license.GetProperty("graceDaysLeft").ValueKind.ShouldBe(JsonValueKind.Null);
         (await app.SendAsync(HttpMethod.Get, Entries)).Status.ShouldBe(200);
         ShouldBeProblem(await PostEntryAsync(app), 403, "license_read_only");
+        (await app.SendAsync(HttpMethod.Post, "/api/samples-paid/ping", "{}")).Status.ShouldBe(204);
 
         // Read-only also holds incoming events, so the module creates no new data.
         await PlaceOrderAsync(app);
