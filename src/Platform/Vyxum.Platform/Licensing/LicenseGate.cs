@@ -15,8 +15,8 @@ namespace Vyxum.Platform;
 /// The gate wraps the request delegate of every endpoint created through the module's route group, so it covers
 /// minimal API handlers, plain <see cref="RequestDelegate"/> endpoints and nested groups, and runs before any endpoint
 /// filter of the module. Locked (no license, an invalid file, the module not in the license, or the license not started
-/// yet): 403 <c>license_required</c>. Read-only (grace period over): only <c>GET</c> and <c>HEAD</c> pass, everything
-/// else is 403 <c>license_read_only</c>. Licensed or in grace: the request passes. Middleware a module might add is not
+/// yet): 403 <c>license_required</c>. Read-only (grace period over): only <c>GET</c> and <c>HEAD</c> pass, and endpoints
+/// marked <see cref="AllowedWhileReadOnly"/>; everything else is 403 <c>license_read_only</c>. Licensed or in grace: the request passes. Middleware a module might add is not
 /// covered (modules only map endpoints).
 /// </para>
 /// <para>
@@ -58,7 +58,8 @@ internal static class LicenseGate
             builder.RequestDelegate = async context =>
             {
                 var state = context.RequestServices.GetRequiredService<LicenseManager>().GetModuleStatus(moduleId);
-                if (Deny(state, context.Request.Method) is { } code)
+                var allowed = context.GetEndpoint()?.Metadata.GetMetadata<AllowedWhileReadOnly>() is not null;
+                if (Deny(state, context.Request.Method, allowed) is { } code)
                 {
                     await LicenseProblems.Create(StatusCodes.Status403Forbidden, code).ExecuteAsync(context);
                     return;
@@ -69,11 +70,14 @@ internal static class LicenseGate
         });
     }
 
-    /// <summary>The error code that denies <paramref name="method"/> in <paramref name="state"/>, or null to let it pass.</summary>
-    public static string? Deny(ModuleLicenseState state, string method) => state switch
+    /// <summary>
+    /// The error code that denies <paramref name="method"/> in <paramref name="state"/>, or null to let it pass.
+    /// <paramref name="allowedWhileReadOnly"/> is true for an endpoint marked <see cref="AllowedWhileReadOnly"/>.
+    /// </summary>
+    public static string? Deny(ModuleLicenseState state, string method, bool allowedWhileReadOnly = false) => state switch
     {
         ModuleLicenseState.Free or ModuleLicenseState.Licensed or ModuleLicenseState.Grace => null,
-        ModuleLicenseState.ReadOnly when HttpMethods.IsGet(method) || HttpMethods.IsHead(method) => null,
+        ModuleLicenseState.ReadOnly when allowedWhileReadOnly || HttpMethods.IsGet(method) || HttpMethods.IsHead(method) => null,
         ModuleLicenseState.ReadOnly => LicenseReadOnly,
         _ => LicenseRequired,
     };

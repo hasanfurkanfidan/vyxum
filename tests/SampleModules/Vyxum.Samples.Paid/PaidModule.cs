@@ -58,6 +58,9 @@ public sealed class PaidModule : IModule
             await db.SaveChangesAsync(ct);
             return Results.Created();
         });
+
+        // A write that stays open in read-only mode, like signing in (AllowedWhileReadOnly).
+        group.MapPost("/ping", () => Results.NoContent()).AllowWhileReadOnly();
         group.MapGet("/stations/{deviceId}", (string deviceId, ILicenseState license) =>
             Results.Ok(new { licensed = license.IsStationLicensed(deviceId), licensee = license.LicenseeName }));
 
