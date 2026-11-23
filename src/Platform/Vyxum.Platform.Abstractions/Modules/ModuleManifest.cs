@@ -44,6 +44,13 @@ public sealed class ModuleManifest
     /// </summary>
     public IReadOnlyList<PermissionDefinition> Permissions { get; init; } = [];
 
+    /// <summary>
+    /// Reports this module offers, for a reports module's catalog (<see cref="IReportCatalog"/>). Ids are unique across
+    /// modules; each name and description key must be in a string set the module registers. Declaring a report changes
+    /// nothing else: the report stays on the module's own page.
+    /// </summary>
+    public IReadOnlyList<ReportDefinition> Reports { get; init; } = [];
+
     /// <summary>The module's screens, embedded in its assembly, or null when the module has none.</summary>
     public ModuleUi? Ui { get; init; }
 

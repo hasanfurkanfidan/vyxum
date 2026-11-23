@@ -105,4 +105,6 @@
   <data name="PermissionCancel" xml:space="preserve"><value>Cancel any weighing record</value></data>
   <data name="PermissionExport" xml:space="preserve"><value>Export records to Excel</value></data>
   <data name="NotAllowed" xml:space="preserve"><value>You do not have permission for this.</value></data>
+  <data name="ReportRecords" xml:space="preserve"><value>Weighing records</value></data>
+  <data name="ReportRecordsDescription" xml:space="preserve"><value>The day's records with totals and cancels; exported to Excel from the Records screen.</value></data>
 </root>

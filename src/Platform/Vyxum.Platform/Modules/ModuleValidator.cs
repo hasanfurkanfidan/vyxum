@@ -33,6 +33,7 @@ public static partial class ModuleValidator
         CheckUi(modules, problems);
         CheckPreview(modules, problems);
         CheckPermissions(modules, problems);
+        CheckReports(modules, problems);
         return problems;
     }
 
@@ -97,6 +98,68 @@ public static partial class ModuleValidator
                          string.Join(", ", group.Select(p => $"'{p.Module}'")) + ".");
         }
     }
+
+    private static void CheckReports(IReadOnlyList<ModuleDescriptor> modules, List<string> problems)
+    {
+        foreach (var module in modules)
+        {
+            foreach (var report in module.Manifest.Reports)
+            {
+                if (report is null)
+                {
+                    problems.Add($"Module '{module.Manifest.Id}' declares a null report.");
+                    continue;
+                }
+
+                var name = $"Report '{report.Id}' of module '{module.Manifest.Id}'";
+                if (!IsValidId(report.Id))
+                {
+                    problems.Add($"Module '{module.Manifest.Id}' declares an invalid report id '{report.Id}'.");
+                }
+
+                if (string.IsNullOrWhiteSpace(report.NameKey) || string.IsNullOrWhiteSpace(report.DescriptionKey))
+                {
+                    problems.Add($"{name} needs a name key and a description key.");
+                }
+
+                if (report.Audience == ReportAudience.None || (report.Audience & ~AllAudiences) != 0)
+                {
+                    problems.Add($"{name} has no valid audience.");
+                }
+
+                if (report.Outputs == ReportOutputs.None || (report.Outputs & ~AllOutputs) != 0)
+                {
+                    problems.Add($"{name} has no valid output.");
+                }
+
+                // An address inside the web application only: "/x", never "//host" or "http://…".
+                if (report.Link is null || !report.Link.StartsWith('/') || report.Link.StartsWith("//", StringComparison.Ordinal)
+                    || report.Link.Contains(':', StringComparison.Ordinal) || report.Link.Contains('\\', StringComparison.Ordinal))
+                {
+                    problems.Add($"{name} has an invalid link '{report.Link}'; use a path inside the application, e.g. '/records'.");
+                }
+
+                if (report.Permission is { } permission && !IsValidId(permission.Id))
+                {
+                    problems.Add($"{name} names an invalid permission id '{permission}'.");
+                }
+            }
+        }
+
+        var duplicates = modules
+            .SelectMany(m => m.Manifest.Reports.Where(r => r is not null && r.Id is not null).Select(r => (r.Id, Module: m.Manifest.Id)))
+            .GroupBy(r => r.Id, StringComparer.Ordinal)
+            .Where(g => g.Count() > 1);
+        foreach (var group in duplicates)
+        {
+            problems.Add($"Report '{group.Key}' is declared more than once: " + string.Join(", ", group.Select(r => $"'{r.Module}'")) + ".");
+        }
+    }
+
+    private const ReportAudience AllAudiences =
+        ReportAudience.Owner | ReportAudience.Production | ReportAudience.Quality | ReportAudience.Accounting | ReportAudience.Auditor;
+
+    private const ReportOutputs AllOutputs = ReportOutputs.Screen | ReportOutputs.Pdf | ReportOutputs.Excel;
 
     private static void CheckCapabilities(IReadOnlyList<ModuleDescriptor> modules, List<string> problems)
     {

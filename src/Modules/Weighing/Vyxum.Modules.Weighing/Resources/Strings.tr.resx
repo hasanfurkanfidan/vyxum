@@ -105,4 +105,6 @@
   <data name="PermissionCancel" xml:space="preserve"><value>Herhangi bir tartımı iptal eder</value></data>
   <data name="PermissionExport" xml:space="preserve"><value>Kayıtları Excel'e aktarır</value></data>
   <data name="NotAllowed" xml:space="preserve"><value>Bunun için yetkiniz yok.</value></data>
+  <data name="ReportRecords" xml:space="preserve"><value>Tartım kayıtları</value></data>
+  <data name="ReportRecordsDescription" xml:space="preserve"><value>Günün kayıtları, toplamı ve iptalleri; Kayıtlar ekranından Excel'e aktarılır.</value></data>
 </root>

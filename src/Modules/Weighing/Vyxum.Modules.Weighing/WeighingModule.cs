@@ -43,13 +43,26 @@ public sealed class WeighingModule : IModule
         Version = new Version(1, 0),
         Provides = [RecordsCapability],
         Optional = [ProductsCapability, LabelsCapability, UsersCapability],
-        Publishes = [typeof(WeighingRecorded), typeof(WeighingCancelled)],
+        Publishes = [typeof(WeighingRecorded), typeof(WeighingCancelled), typeof(WeighingHistoryPage)],
         Permissions =
         [
             new() { Id = WeighingPermissions.Record, NameKey = WeighingStrings.KeyPrefix + ".PermissionRecord", DefaultRoles = [BuiltInRoles.Operator, BuiltInRoles.ShiftSupervisor] },
             new() { Id = WeighingPermissions.CancelOwn, NameKey = WeighingStrings.KeyPrefix + ".PermissionCancelOwn", DefaultRoles = [BuiltInRoles.Operator, BuiltInRoles.ShiftSupervisor] },
             new() { Id = WeighingPermissions.Cancel, NameKey = WeighingStrings.KeyPrefix + ".PermissionCancel", DefaultRoles = [BuiltInRoles.ShiftSupervisor, BuiltInRoles.Quality] },
             new() { Id = WeighingPermissions.Export, NameKey = WeighingStrings.KeyPrefix + ".PermissionExport", DefaultRoles = [BuiltInRoles.ShiftSupervisor, BuiltInRoles.Quality, BuiltInRoles.Planning] },
+        ],
+        Reports =
+        [
+            new()
+            {
+                Id = "weighing.records",
+                NameKey = WeighingStrings.KeyPrefix + ".ReportRecords",
+                DescriptionKey = WeighingStrings.KeyPrefix + ".ReportRecordsDescription",
+                Audience = ReportAudience.Owner | ReportAudience.Production | ReportAudience.Accounting,
+                Outputs = ReportOutputs.Screen | ReportOutputs.Excel,
+                Link = "/records",
+                Permission = WeighingPermissions.Export,
+            },
         ],
     };
 
@@ -60,6 +73,7 @@ public sealed class WeighingModule : IModule
 
         context.AddDbContext<WeighingDbContext>();
         context.AddEventHandler<ProductSaved, ProductSavedHandler>();
+        context.AddEventHandler<WeighingHistoryRequested, WeighingHistoryRequestedHandler>();
         services.AddOptions<WeighingOptions>()
             .Bind(context.Configuration.GetSection(WeighingOptions.SectionName))
             .Validate(o => o.MinimumNet >= 0, "Vyxum:Weighing:MinimumNet cannot be negative.")

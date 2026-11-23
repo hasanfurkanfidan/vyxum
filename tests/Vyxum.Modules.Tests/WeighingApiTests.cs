@@ -925,7 +925,8 @@ public class WeighingApiTests
         manifest.Id.ShouldBe("weighing");
         manifest.Provides.ShouldBe([(Capability)"weighing.records"]);
         manifest.Optional.ShouldBe([(Capability)"products.catalog", (Capability)"labels.print", (Capability)"identity.users"]);
-        manifest.Publishes.ShouldBe([typeof(WeighingRecorded), typeof(WeighingCancelled)]);
+        manifest.Publishes.ShouldBe([typeof(WeighingRecorded), typeof(WeighingCancelled), typeof(WeighingHistoryPage)]);
+        IntegrationEventAttribute.Find(typeof(WeighingHistoryPage))!.ToString().ShouldBe("weighing.history-page v1");
         IntegrationEventAttribute.Find(typeof(WeighingRecorded))!.ToString().ShouldBe("weighing.recorded v1");
         IntegrationEventAttribute.Find(typeof(WeighingCancelled))!.ToString().ShouldBe("weighing.cancelled v1");
         IntegrationEventAttribute.Find(typeof(ProductSaved))!.ToString().ShouldBe("products.product-saved v1");
