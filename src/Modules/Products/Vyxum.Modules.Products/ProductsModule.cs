@@ -31,6 +31,8 @@ public sealed class ProductsModule : IModule
     public void ConfigureServices(IServiceCollection services, ModuleContext context)
     {
         context.AddDbContext<ProductsDbContext>();
+        context.AddEventHandler<ProductReceived, ProductReceivedHandler>();
+        context.AddEventHandler<CatalogRequested, CatalogRequestedHandler>();
         services.AddScoped<ProductService>();
         services.AddUiStrings(ProductsStrings.KeyPrefix, ProductsStrings.ResourceManager);
     }

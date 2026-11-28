@@ -41,6 +41,8 @@ internal sealed class ProductsTestApp : IAsyncDisposable
         var builder = WebApplication.CreateBuilder();
         builder.WebHost.UseTestServer();
         builder.Configuration.AddInMemoryCollection(database.Settings);
+        // The tests dispatch the outbox themselves; the background dispatcher would race them.
+        builder.Configuration.AddInMemoryCollection(new Dictionary<string, string?> { ["Vyxum:Outbox:PollingInterval"] = "01:00:00" });
         builder.Services.AddVyxumPlatform(builder.Configuration, [new ProductsModule()]);
 
         var app = builder.Build();
@@ -63,6 +65,21 @@ internal sealed class ProductsTestApp : IAsyncDisposable
 
     public Task<List<OutboxMessage>> OutboxAsync() =>
         WithDbAsync(db => db.OutboxMessages.OrderBy(m => m.OccurredAt).ToListAsync(TestContext.Current.CancellationToken));
+
+    public Task<int> DispatchAsync() =>
+        _app.Services.GetRequiredService<OutboxDispatcher>().DispatchPendingAsync(TestContext.Current.CancellationToken);
+
+    /// <summary>Puts an event in the module's outbox as another module's would arrive, and delivers it.</summary>
+    public async Task SendEventAsync(IIntegrationEvent integrationEvent)
+    {
+        await WithDbAsync(async db =>
+        {
+            db.Publish(integrationEvent);
+            await db.SaveChangesAsync(TestContext.Current.CancellationToken);
+            return 0;
+        });
+        await DispatchAsync();
+    }
 
     public async Task<(HttpResponseMessage Response, JsonElement Body)> SendAsync(HttpMethod method, string url, object? body = null)
     {

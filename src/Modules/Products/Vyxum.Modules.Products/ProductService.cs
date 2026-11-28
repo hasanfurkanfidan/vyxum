@@ -89,6 +89,25 @@ public sealed class ProductResult
     internal static ProductResult Invalid(Dictionary<string, string[]> errors) => new() { Errors = errors };
 }
 
+/// <summary>What <see cref="ProductService.ReceiveAsync"/> did with a material card from an ERP.</summary>
+public enum ReceiveOutcome
+{
+    /// <summary>A new product card was made.</summary>
+    Created,
+
+    /// <summary>The existing product card changed.</summary>
+    Updated,
+
+    /// <summary>The product exists and already has these values.</summary>
+    Unchanged,
+
+    /// <summary>The product exists and the sender said to leave it.</summary>
+    Left,
+
+    /// <summary>The card cannot be a product (no usable code), so nothing was done.</summary>
+    Skipped,
+}
+
 /// <summary>Reads and changes products. Every change publishes <see cref="ProductSaved"/> in the same transaction.</summary>
 public sealed class ProductService(ProductsDbContext db)
 {
@@ -159,6 +178,88 @@ public sealed class ProductService(ProductsDbContext db)
         return await SaveAsync(product, cancellationToken);
     }
 
+    /// <summary>
+    /// Applies a material card an ERP connector brought in, by product code (compared ignoring case). A missing product is
+    /// made; an existing one is changed only when the card says <c>Update</c>, and then only its name, sale unit and
+    /// active state: prices, tolerances, labels and everything a person entered stay. Nothing is ever deleted. Does
+    /// not throw for card data it cannot use: such a card is <see cref="ReceiveOutcome.Skipped"/>.
+    /// </summary>
+    public async Task<ReceiveOutcome> ReceiveAsync(ProductReceived received, CancellationToken cancellationToken = default)
+    {
+        ArgumentNullException.ThrowIfNull(received);
+
+        var code = received.Code?.Trim() ?? string.Empty;
+        if (code.Length == 0 || code.Length > ProductLimits.CodeMaxLength)
+        {
+            return ReceiveOutcome.Skipped;
+        }
+
+        var name = received.Name?.Trim();
+        if (string.IsNullOrEmpty(name))
+        {
+            name = code;
+        }
+        else if (name.Length > ProductLimits.NameMaxLength)
+        {
+            name = name[..ProductLimits.NameMaxLength];
+        }
+
+        var lower = code.ToLowerInvariant();
+        var product = await db.Products.SingleOrDefaultAsync(p => p.Code.ToLower() == lower, cancellationToken);
+        var now = DateTime.UtcNow;
+        if (product is null)
+        {
+            // Sold by weight: a piece needs the weight of one piece, which a material card does not give.
+            product = new Product { Id = Guid.NewGuid(), Code = code, Name = name, IsActive = received.Active, SaleUnit = SaleUnit.Kg, CreatedAtUtc = now, UpdatedAtUtc = now };
+            db.Products.Add(product);
+            return await SaveReceivedAsync(product, ReceiveOutcome.Created, cancellationToken);
+        }
+
+        if (!string.Equals(received.IfExists, "Update", StringComparison.Ordinal))
+        {
+            return ReceiveOutcome.Left;
+        }
+
+        var changed = product.Name != name || product.IsActive != received.Active;
+        product.Name = name;
+        product.IsActive = received.Active;
+        if (SaleUnitOf(received.Unit, product.TargetWeight) is { } saleUnit && saleUnit != product.SaleUnit)
+        {
+            product.SaleUnit = saleUnit;
+            changed = true;
+        }
+
+        if (!changed)
+        {
+            return ReceiveOutcome.Unchanged;
+        }
+
+        product.UpdatedAtUtc = now;
+        return await SaveReceivedAsync(product, ReceiveOutcome.Updated, cancellationToken);
+    }
+
+    private async Task<ReceiveOutcome> SaveReceivedAsync(Product product, ReceiveOutcome outcome, CancellationToken cancellationToken)
+    {
+        var saved = await SaveAsync(product, cancellationToken);
+        // Another request took the code first: fail, so the message is handled again and then finds that product.
+        return saved.Succeeded ? outcome : throw new InvalidOperationException("The product code was taken by another request; the message is handled again.");
+    }
+
+    /// <summary>
+    /// The sale unit an ERP inventory unit stands for, or null when the unit is unknown (the product keeps what it has).
+    /// A piece unit counts only for a product that has a target weight, the weight of one piece.
+    /// </summary>
+    private static SaleUnit? SaleUnitOf(string? unit, decimal? targetWeight)
+    {
+        var text = unit?.Trim().TrimEnd('.').ToLowerInvariant();
+        return text switch
+        {
+            "kg" or "kgm" or "kilo" or "kilogram" or "kilogramm" => SaleUnit.Kg,
+            "ad" or "adet" or "pcs" or "pc" or "piece" or "pieces" or "ea" or "each" or "unit" or "nos" when targetWeight is > 0 => SaleUnit.Piece,
+            _ => null,
+        };
+    }
+
     /// <summary>Marks a product inactive. Products are never deleted.</summary>
     public Task<ProductResult> DeactivateAsync(Guid id, CancellationToken cancellationToken = default) =>
         SetActiveAsync(id, false, cancellationToken);
@@ -180,13 +281,36 @@ public sealed class ProductService(ProductsDbContext db)
         return await SaveAsync(product, cancellationToken);
     }
 
+    private static ProductSaved ToSaved(Product product) => new(
+        product.Id, product.Code, product.Name, product.UnitPrice, product.PackageTare,
+        product.ShelfLifeDays, product.BarcodePrefix, product.IsActive,
+        product.TargetWeight, product.LowerTolerance, product.UpperTolerance, product.Ingredients,
+        product.SaleUnit.ToString(), product.UnitCost);
+
+    /// <summary>
+    /// Publishes <see cref="ProductSaved"/> for every product, a page at a time, through the outbox. Used when another
+    /// module asks for the whole catalog (<see cref="CatalogRequested"/>); nothing in the catalog changes. Returns how many were published.
+    /// </summary>
+    public async Task<int> PublishCatalogAsync(CancellationToken cancellationToken)
+    {
+        var published = 0;
+        while (true)
+        {
+            // Ordered by code, which is unique, so the pages do not overlap.
+            var page = await db.Products.AsNoTracking().OrderBy(p => p.Code).Skip(published).Take(CatalogPageSize).ToListAsync(cancellationToken);
+            if (page.Count == 0) return published;
+            foreach (var product in page) db.Publish(ToSaved(product));
+            await db.SaveChangesAsync(cancellationToken);
+            published += page.Count;
+        }
+    }
+
+    /// <summary>How many products one page of a catalog publication holds.</summary>
+    public const int CatalogPageSize = 200;
+
     private async Task<ProductResult> SaveAsync(Product product, CancellationToken cancellationToken)
     {
-        db.Publish(new ProductSaved(
-            product.Id, product.Code, product.Name, product.UnitPrice, product.PackageTare,
-            product.ShelfLifeDays, product.BarcodePrefix, product.IsActive,
-            product.TargetWeight, product.LowerTolerance, product.UpperTolerance, product.Ingredients,
-            product.SaleUnit.ToString(), product.UnitCost));
+        db.Publish(ToSaved(product));
         try
         {
             await db.SaveChangesAsync(cancellationToken);
