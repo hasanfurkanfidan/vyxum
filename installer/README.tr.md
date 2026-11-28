@@ -23,8 +23,12 @@ Seçenekler:
 | `-Version 1.2.3` | Ürün sürümü. Varsayılan: `Directory.Build.props` içindeki `<Version>` (tek sürüm kaynağı). |
 | `-OutputDir <yol>` | Kurulum dosyasının yazılacağı klasör. |
 | `-SkipCompile` | Yalnızca uygulamaları `artifacts/publish` içine yayımlar; Inno Setup çalıştırmaz. |
+| `-ModulesRepo <yol>` | Ek modül reposunun klasörü. Varsayılan: bu reponun yanındaki `../vyxum-pro`, varsa. |
+| `-CoreOnly` | `../vyxum-pro` olsa bile yalnızca açık çekirdekle kurulum dosyası üretir. |
 
 Betik web arayüzünü derler (`npm ci`, `npm run build`), Host, Agent ve Desktop'ı yayımlar (Release, win-x64, self-contained, klasör olarak) ve `artifacts/publish/{web,agent,desktop}` içine koyar, sonucu denetler (`wwwroot/index.html`, `WebView2Loader.dll`) ve `ISCC` çalıştırır.
+
+Ek modüller: modül reposundaki her `src/*/Vyxum.Modules.*/Vyxum.Modules.*.csproj` `web/modules/<ad>` içine yayımlanır. Sunucuda zaten bulunan dosyalar modül klasörüne konmaz. Sunucu açılırken her `modules/<ad>/<ad>.dll` dosyasını, ortak derlemeleri sunucudan alan ayrı bir yükleme bağlamında yükler; ayar gerekmez. Lisans isteyen modül, lisans yüklenene kadar kilitli kalır. Modül reposunda `THIRD-PARTY-NOTICES.txt` bulunmalıdır; kurulum dosyasında çekirdeğin bildirimlerinin sonuna eklenir.
 
 ## Kurulum dosyası ne yapar
 

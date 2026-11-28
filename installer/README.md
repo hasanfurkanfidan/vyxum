@@ -23,8 +23,12 @@ Options:
 | `-Version 1.2.3` | Product version. Default: `<Version>` in `Directory.Build.props` (single version source). |
 | `-OutputDir <path>` | Where the setup program is written. |
 | `-SkipCompile` | Only publish the applications into `artifacts/publish`; do not run Inno Setup. |
+| `-ModulesRepo <path>` | A checkout of an add-on modules repository. Default: `../vyxum-pro` next to this repository, when it exists. |
+| `-CoreOnly` | Build the setup program with the open core only, even when `../vyxum-pro` exists. |
 
 The script builds the web UI (`npm ci`, `npm run build`), publishes Host, Agent and Desktop (Release, win-x64, self-contained, folder publish) into `artifacts/publish/{web,agent,desktop}`, checks the result (`wwwroot/index.html`, `WebView2Loader.dll`) and runs `ISCC`.
+
+Add-on modules: every `src/*/Vyxum.Modules.*/Vyxum.Modules.*.csproj` of the modules repository is published into `web/modules/<name>`. Files the host already ships are left out of the module folder. The host loads every `modules/<name>/<name>.dll` at start, each in its own load context that takes shared assemblies from the host, so no setting is needed. A module that needs a license stays locked until one is loaded. The modules repository must have a `THIRD-PARTY-NOTICES.txt`; it is appended to the core's notices in the setup program.
 
 ## What the installer does
 

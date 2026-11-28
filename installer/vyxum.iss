@@ -93,7 +93,8 @@ Source: "{#PublishDir}\web\*"; DestDir: "{app}\Web"; Flags: ignoreversion recurs
 Source: "{#PublishDir}\agent\*"; DestDir: "{app}\Agent"; Flags: ignoreversion recursesubdirs createallsubdirs
 Source: "{#PublishDir}\desktop\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
 Source: "{#RepoDir}\LICENSE"; DestDir: "{app}"; DestName: "LICENSE.txt"; Flags: ignoreversion
-Source: "{#SourcePath}\THIRD-PARTY-NOTICES.txt"; DestDir: "{app}"; Flags: ignoreversion
+; Written by build-installer.ps1: the core's notices plus the paid modules' when they are included.
+Source: "{#PublishDir}\THIRD-PARTY-NOTICES.txt"; DestDir: "{app}"; Flags: ignoreversion
 ; Shared settings file: written once, never overwritten on update and never removed by the uninstaller.
 Source: "{#SourcePath}\vyxum.default.json"; DestDir: "{commonappdata}\Vyxum"; DestName: "vyxum.json"; Flags: onlyifdoesntexist uninsneveruninstall
 

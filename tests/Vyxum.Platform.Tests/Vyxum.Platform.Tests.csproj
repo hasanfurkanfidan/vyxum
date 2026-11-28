@@ -12,6 +12,16 @@
   <ItemGroup>
     <ProjectReference Include="..\..\src\Platform\Vyxum.Platform\Vyxum.Platform.csproj" />
     <ProjectReference Include="..\..\src\Platform\Vyxum.Platform.Testing\Vyxum.Platform.Testing.csproj" />
+    <!-- Built but not referenced: ModuleFolderTests loads it from a modules folder, as the host loads a paid module. -->
+    <ProjectReference Include="..\SampleModules\Vyxum.Samples.Paid\Vyxum.Samples.Paid.csproj" ReferenceOutputAssembly="false" />
   </ItemGroup>
+
+  <!-- Copies the sample module's build output to <output>/module-folder/Vyxum.Samples.Paid for ModuleFolderTests. -->
+  <Target Name="CopySampleModuleFolder" AfterTargets="Build">
+    <ItemGroup>
+      <SampleModuleFile Include="..\SampleModules\Vyxum.Samples.Paid\bin\$(Configuration)\$(TargetFramework)\**\*" />
+    </ItemGroup>
+    <Copy SourceFiles="@(SampleModuleFile)" DestinationFolder="$(OutDir)module-folder\Vyxum.Samples.Paid\%(RecursiveDir)" SkipUnchangedFiles="true" />
+  </Target>
 
 </Project>
